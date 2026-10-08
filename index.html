@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Michael Wenzel | Curriculum Vitae</title>
+  <style>
+    :root {
+      --primary: #1e3a5f;
+      --accent: #2563eb;
+      --text: #2d3748;
+      --text-muted: #64748b;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 48px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 32px;
+      margin-bottom: 32px;
+    }
+
+    .profile-photo {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--border);
+      flex-shrink: 0;
+      background-color: #e2e8f0;
+    }
+
+    .header-content h1 {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .header-content .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .contact-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.95rem;
+    }
+
+    .contact-links a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .contact-links a:hover {
+      text-decoration: underline;
+    }
+
+    section {
+      margin-bottom: 36px;
+    }
+
+    section:last-child {
+      margin-bottom: 0;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+    }
+
+    .entry {
+      margin-bottom: 24px;
+    }
+
+    .entry:last-child {
+      margin-bottom: 0;
+    }
+
+    .entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+
+    .role-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .organization {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .date-badge {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    ul.bullet-list {
+      margin-top: 6px;
+      padding-left: 20px;
+    }
+
+    ul.bullet-list li {
+      margin-bottom: 4px;
+      font-size: 0.95rem;
+    }
+
+    .skills-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .skill-tag {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+
+    .resources-placeholder {
+      background: #f1f5f9;
+      border-radius: 6px;
+      padding: 16px;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 650px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+      }
+      .container {
+        padding: 24px;
+      }
+      .entry-header {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header Section -->
+    <header>
+      <!-- Replace 'profile.jpg' with your photo filename -->
+      <img src="profile.jpg" alt="Michael Wenzel" class="profile-photo">
+      <div class="header-content">
+        <h1>Michael Wenzel</h1>
+        <div class="subtitle">English Language Teacher & Educational Technology Specialist</div>
+        <div class="contact-links">
+          <span>Email: <a href="mailto:mrwenzel@yahoo.com">mrwenzel@yahoo.com</a></span>
+          <span>Phone: <a href="tel:+85284816251">+852 84816251</a></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Professional Summary -->
+    <section>
+      <h2>Professional Summary</h2>
+      <p>
+        English Language Teacher with advanced postgraduate qualifications in Education, Technology-Enhanced Learning, and English Language Teaching. Experienced in integrating AI tools to support language learning and student engagement. Committed to evidence-based teaching and developing communicative competence in EAL learners.
+      </p>
+    </section>
+
+    <!-- Education -->
+    <section>
+      <h2>Education</h2>
+      <div class="entry">
+        <div class="entry-header">
+          <span class="role-title">MA Technology Enhanced Learning</span>
+          <span class="date-badge">Expected June 2027</span>
+        </div>
+        <div class="organization">University of Keele (In Progress)</div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-header">
+          <span class="role-title">MA English Language Teaching</span>
+          <span class="date-badge">Expected June 2027</span>
+        </div>
+        <div class="organization">University of East London (In Progress)</div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-header">
+          <span class="role-title">MA Education (Merit)</span>
+          <span class="date-badge">2026</span>
+        </div>
+        <div class="organization">University of Sunderland</div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-header">
+          <span class="role-title">BA (Hons) Business Administration (First Class)</span>
+          <span class="date-badge">2022</span>
+        </div>
+        <div class="organization">Birmingham City University</div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-header">
+          <span class="role-title">AS Business Administration (GPA 3.46)</span>
+          <span class="date-badge">2021</span>
+        </div>
+        <div class="organization">Foothill College</div>
+      </div>
+    </section>
+
+    <!-- Licences & Certifications -->
+    <section>
+      <h2>Licenses & Certifications</h2>
+      <div class="entry">
+        <div class="entry-header">
+          <span class="role-title">Post Graduate Certificate in Education (PGCE)</span>
+          <span class="date-badge">2024</span>
+        </div>
+        <div class="organization">University of Sunderland</div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-header">
+          <span class="role-title">CELTA (Certificate in Teaching English to Speakers of Other Languages)</span>
+          <span class="date-badge">2023</span>
+        </div>
+        <div class="organization">Cambridge English</div>
+      </div>
+    </section>
+
+    <!-- Career History -->
+    <section>
+      <h2>Career History</h2>
+
+      <div class="entry">
+        <div class="entry-header">
+          <span class="role-title">School-Based Native English Teacher</span>
+          <span class="date-badge">Sep 2026 – Present</span>
+        </div>
+        <div class="organization">Alliance Primary School THT</div>
+        <ul class="bullet-list">
+          <li>Co-class teacher for Primary 1.</li>
+          <li>General English teacher instructing the Space Town program to P1 and P3.</li>
+          <li>Native English teacher for upper primary classes (P4–P6).</li>
+          <li>Collaborated with school faculty to coach choral speaking.</li>
+          <li>Developed interactive learning materials for the school's Virtual Reality CAVE (Cave Automatic Virtual Environment).</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="entry-header">
+          <span class="role-title">School-Based Native English Teacher</span>
+          <span class="date-badge">Sep 2024 – Aug 2026</span>
+        </div>
+        <div class="organization">C.C.C. Chuen Yuen First Primary School</div>
+        <ul class="bullet-list">
+          <li>Instructed Primary 1–3 English and delivered Read Write Inc. (RWI) phonics.</li>
+          <li>Integrated cross-curricular learning including Python programming, puppetry, and storytelling.</li>
+          <li>Co-developed the Primary 1 & 3 Reading Across the Curriculum program.</li>
+          <li>Co-planned and co-taught collaboratively with local teachers.</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="entry-header">
+          <span class="role-title">Itinerant Tutor</span>
+          <span class="date-badge">Dec 2023 – Aug 2024</span>
+        </div>
+        <div class="organization">Creative Power</div>
+        <ul class="bullet-list">
+          <li>Taught KS1 students reading, writing, oral English, and RWI phonics.</li>
+          <li>Led extracurricular enrichment programs: drama, puppetry, stop-motion animation, and school interview preparation workshops.</li>
+          <li>Contributed to the design of P1 and P6 Reading Across the Curriculum curricula.</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="entry-header">
+          <span class="role-title">School-Based NET</span>
+          <span class="date-badge">Sep 2023 – Dec 2023</span>
+        </div>
+        <div class="organization">Sham Tseng Catholic Primary School</div>
+        <ul class="bullet-list">
+          <li>Taught reading and speaking to upper primary students with scaffolded support for learner diversity.</li>
+          <li>Led activity-based English workshops and interview preparation.</li>
+          <li>Applied business administration expertise to guide student model business projects.</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="entry-header">
+          <span class="role-title">Contract Native English Teacher</span>
+          <span class="date-badge">Feb 2023 – Jun 2023</span>
+        </div>
+        <div class="organization">Buddhist Wong Cheuk Um Primary School</div>
+        <ul class="bullet-list">
+          <li>Taught KS2 English curriculum and activity modules (cooking, puppetry, arts & crafts).</li>
+          <li>Supported the implementation of the Reading Across the Curriculum initiative.</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="entry-header">
+          <span class="role-title">Native-speaking English Teacher</span>
+          <span class="date-badge">Jul 2022 – Jan 2023</span>
+        </div>
+        <div class="organization">Jolly Kingdom</div>
+        <ul class="bullet-list">
+          <li>Delivered oral English, phonics, grammar, and reading instruction to learners aged 2–12.</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="entry-header">
+          <span class="role-title">English Language Teaching Assistant</span>
+          <span class="date-badge">Apr 2022 – Jul 2022</span>
+        </div>
+        <div class="organization">Jordan Valley St. Joseph's Catholic Primary School</div>
+        <ul class="bullet-list">
+          <li>Assisted in developing multimedia English learning content and guided P4 literature studies.</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="entry-header">
+          <span class="role-title">Native-speaking English Teacher</span>
+          <span class="date-badge">Nov 2020 – Mar 2022</span>
+        </div>
+        <div class="organization">I SQUARE EDUCATION</div>
+        <ul class="bullet-list">
+          <li>Instructed students aged 3–12 in phonics decoding/encoding, reading fluency, grammar, and writing.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Key Skills & Areas of Expertise -->
+    <section>
+      <h2>Key Skills & Expertise</h2>
+      <div class="skills-grid">
+        <span class="skill-tag">EAL / ELT Pedagogy</span>
+        <span class="skill-tag">Communicative Language Teaching (CLT)</span>
+        <span class="skill-tag">Task-Based Learning (TBLT)</span>
+        <span class="skill-tag">Second Language Acquisition (SLA)</span>
+        <span class="skill-tag">Technology-Enhanced Learning (TEL)</span>
+        <span class="skill-tag">Generative AI in Education</span>
+        <span class="skill-tag">RWI Phonics</span>
+        <span class="skill-tag">Curriculum Design</span>
+        <span class="skill-tag">Differentiated Instruction</span>
+        <span class="skill-tag">Python (Educational Apps)</span>
+        <span class="skill-tag">Virtual Reality (CAVE) Integration</span>
+        <span class="skill-tag">Academic Research & Methodology</span>
+      </div>
+    </section>
+
+    <!-- Future-Ready Module: Teaching Resources & Contact -->
+    <section id="resources">
+      <h2>Teaching Resources & Contact</h2>
+      <div class="resources-placeholder">
+        <p>Curated learning materials, worksheets, and educational projects will be published here. For professional academic inquiries or curriculum collaboration, please reach out via email at <a href="mailto:mrwenzel@yahoo.com" style="color: var(--accent);">mrwenzel@yahoo.com</a>.</p>
+      </div>
+    </section>
+  </div>
+
+</body>
+</html>
