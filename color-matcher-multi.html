@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Smartboard Color Battle - Head-to-Head</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Fredoka & Nunito for classroom typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
+    }
+
+    body {
+      font-family: 'Fredoka', 'Nunito', sans-serif;
+      background: radial-gradient(circle at 50% 20%, #fefce8 0%, #e0f2fe 50%, #dbeafe 100%);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Chunky, touch-friendly 3D card styling */
+    .color-card {
+      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease, border-color 0.2s ease;
+      cursor: pointer;
+      box-shadow: 0 8px 16px -3px rgba(15, 23, 42, 0.12), 0 3px 5px -2px rgba(15, 23, 42, 0.05);
+    }
+
+    .color-card:active {
+      transform: scale(0.92);
+    }
+
+    /* Glossy 3D color sphere */
+    .swatch-disc {
+      position: relative;
+      box-shadow: inset 0 -6px 12px rgba(0, 0, 0, 0.24), 0 6px 14px rgba(0, 0, 0, 0.12);
+      transition: transform 0.2s ease;
+    }
+
+    .swatch-disc::before {
+      content: '';
+      position: absolute;
+      top: 10%;
+      left: 14%;
+      width: 40%;
+      height: 24%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0) 100%);
+      border-radius: 9999px;
+      transform: rotate(-25deg);
+      pointer-events: none;
+    }
+
+    /* Animations: Shake on incorrect choice */
+    @keyframes wiggleWrong {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-12px) rotate(-3deg); }
+      40% { transform: translateX(10px) rotate(3deg); }
+      60% { transform: translateX(-6px) rotate(-2deg); }
+      80% { transform: translateX(5px) rotate(1deg); }
+    }
+
+    .animate-wrong {
+      animation: wiggleWrong 0.45s ease-in-out;
+      border-color: #ef4444 !important;
+      background-color: #fee2e2 !important;
+    }
+
+    /* Animations: Celebratory pop on winner */
+    @keyframes celebratePop {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.12) rotate(2deg); filter: drop-shadow(0 0 20px rgba(34, 197, 94, 0.8)); }
+      100% { transform: scale(1); }
+    }
+
+    .animate-correct {
+      animation: celebratePop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-color: #22c55e !important;
+      background-color: #dcfce7 !important;
+    }
+
+    /* Party Confetti */
+    .particle {
+      position: absolute;
+      pointer-events: none;
+      font-size: 2.2rem;
+      animation: flyUpAndFade 0.85s ease-out forwards;
+      z-index: 70;
+    }
+
+    @keyframes flyUpAndFade {
+      0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
+      100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.4); opacity: 0; }
+    }
+
+    /* 3x3 Grid for each player side */
+    .arena-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 0.6rem;
+      width: 100%;
+      height: 100%;
+      max-height: calc(100vh - 250px);
+      aspect-ratio: 1 / 1;
+    }
+
+    @media (min-height: 800px) {
+      .arena-grid {
+        gap: 0.85rem;
+        max-height: calc(100vh - 260px);
+      }
+    }
+
+    .custom-scroll::-webkit-scrollbar {
+      width: 8px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+
+<body class="flex flex-col items-center justify-between p-2 sm:p-4 select-none">
+
+  <!-- Header Navigation & Classroom Tools -->
+  <header class="w-full max-w-7xl flex items-center justify-between bg-white/95 backdrop-blur-md px-4 sm:px-6 py-2 rounded-2xl sm:rounded-3xl shadow-md border-2 border-amber-200">
+    <div class="flex items-center gap-2">
+      <span class="text-2xl sm:text-3xl">⚔️</span>
+      <div>
+        <h1 class="text-sm sm:text-base font-black text-slate-800 leading-tight">Head-to-Head Color Battle</h1>
+        <p class="text-[10px] sm:text-xs font-semibold text-slate-500">First team to touch the color wins the point!</p>
+      </div>
+    </div>
+
+    <!-- Match Target Goal Display -->
+    <div class="hidden md:flex items-center gap-2 bg-amber-50 border border-amber-200 px-3 py-1 rounded-xl text-amber-900 text-xs font-bold">
+      <span>🏆 Target:</span>
+      <span id="targetPointsDisplay" class="font-extrabold text-amber-700">First to 10</span>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex items-center gap-2">
+      <button id="speakBtn" title="Speak Target Color" class="w-11 h-11 rounded-2xl bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-lg font-bold flex items-center justify-center transition border-2 border-indigo-200 active:scale-95 shadow-sm">
+        🔊
+      </button>
+
+      <button id="soundToggleBtn" title="Toggle Sound" class="w-11 h-11 rounded-2xl bg-sky-100 hover:bg-sky-200 text-sky-700 text-lg font-bold flex items-center justify-center transition border-2 border-sky-200 active:scale-95 shadow-sm">
+        🔔
+      </button>
+
+      <button id="openSettingsBtn" title="Settings & Colors" class="w-11 h-11 rounded-2xl bg-purple-100 hover:bg-purple-200 text-purple-700 text-lg font-bold flex items-center justify-center transition border-2 border-purple-200 active:scale-95 shadow-sm">
+        ⚙️
+      </button>
+
+      <button id="fullscreenBtn" title="Toggle Fullscreen" class="w-11 h-11 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-800 text-lg font-bold flex items-center justify-center transition border-2 border-amber-200 active:scale-95 shadow-sm">
+        ⛶
+      </button>
+    </div>
+  </header>
+
+  <!-- Big Target Callout Prompt Banner (Centered above the two boards) -->
+  <section class="w-full max-w-4xl my-2 flex items-center justify-center relative">
+    <div class="bg-white px-6 sm:px-10 py-2 sm:py-3.5 rounded-3xl shadow-lg border-4 border-amber-300 flex items-center gap-3 sm:gap-4 z-20">
+      <span class="text-2xl sm:text-3xl animate-bounce">👉</span>
+      <span class="text-lg sm:text-2xl font-extrabold text-slate-600 uppercase tracking-wide">Touch the:</span>
+      <span id="targetNameDisplay" class="text-2xl sm:text-4xl font-black drop-shadow-sm tracking-wide capitalize" style="color: #2563eb;">
+        Loading...
+      </span>
+    </div>
+
+    <!-- Round Winner Notification Overlay -->
+    <div id="roundAnnouncement" class="absolute inset-0 bg-white/95 rounded-3xl shadow-xl border-4 border-green-400 flex items-center justify-center gap-3 z-30 transition-all duration-200 opacity-0 pointer-events-none scale-95">
+      <span id="announcementEmoji" class="text-3xl sm:text-4xl">🎉</span>
+      <span id="announcementText" class="text-xl sm:text-3xl font-black text-slate-800">Boys got the point!</span>
+    </div>
+  </section>
+
+  <!-- Main Head-to-Head Split Arena (Side-by-Side for Smartboards) -->
+  <main class="w-full max-w-7xl flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 items-center px-1">
+    
+    <!-- LEFT SIDE: TEAM 1 -->
+    <div class="h-full flex flex-col items-center justify-between bg-sky-50/80 rounded-3xl p-3 sm:p-4 border-4 border-sky-300 shadow-lg relative overflow-hidden">
+      <!-- Team 1 Banner Header -->
+      <div class="w-full flex items-center justify-between mb-2 px-2">
+        <div class="flex items-center gap-2 cursor-pointer group" id="team1NameContainer" title="Click to rename team">
+          <span class="text-2xl">👦</span>
+          <span id="team1NameText" class="text-xl sm:text-2xl font-black text-sky-800 group-hover:underline">Boys</span>
+          <span class="text-xs text-sky-500 font-bold opacity-60 group-hover:opacity-100">✏️</span>
+        </div>
+        <div class="flex items-center gap-2 bg-sky-200/80 px-3.5 py-1 rounded-2xl border-2 border-sky-300">
+          <span class="text-xs font-bold uppercase tracking-wider text-sky-700">Score</span>
+          <span id="team1ScoreDisplay" class="text-2xl sm:text-3xl font-black text-sky-900 leading-none">0</span>
+        </div>
+      </div>
+
+      <!-- Team 1 3x3 Card Grid -->
+      <div class="flex-1 flex items-center justify-center w-full">
+        <div id="team1Grid" class="arena-grid"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE: TEAM 2 -->
+    <div class="h-full flex flex-col items-center justify-between bg-pink-50/80 rounded-3xl p-3 sm:p-4 border-4 border-pink-300 shadow-lg relative overflow-hidden">
+      <!-- Team 2 Banner Header -->
+      <div class="w-full flex items-center justify-between mb-2 px-2">
+        <div class="flex items-center gap-2 cursor-pointer group" id="team2NameContainer" title="Click to rename team">
+          <span class="text-2xl">👧</span>
+          <span id="team2NameText" class="text-xl sm:text-2xl font-black text-pink-800 group-hover:underline">Girls</span>
+          <span class="text-xs text-pink-500 font-bold opacity-60 group-hover:opacity-100">✏️</span>
+        </div>
+        <div class="flex items-center gap-2 bg-pink-200/80 px-3.5 py-1 rounded-2xl border-2 border-pink-300">
+          <span class="text-xs font-bold uppercase tracking-wider text-pink-700">Score</span>
+          <span id="team2ScoreDisplay" class="text-2xl sm:text-3xl font-black text-pink-900 leading-none">0</span>
+        </div>
+      </div>
+
+      <!-- Team 2 3x3 Card Grid -->
+      <div class="flex-1 flex items-center justify-center w-full">
+        <div id="team2Grid" class="arena-grid"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer Actions -->
+  <footer class="w-full max-w-7xl py-1 flex items-center justify-between text-slate-500 text-xs sm:text-sm font-semibold px-2">
+    <span>💡 Tip: Tap team names to rename them anytime! Positions are scrambled on both boards.</span>
+    <div class="flex items-center gap-4">
+      <button id="resetMatchBtn" class="hover:text-red-600 underline font-bold transition">Reset Match (0 - 0)</button>
+    </div>
+  </footer>
+
+  <!-- Rename Team Inline Modal -->
+  <div id="renameModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl border-4 border-sky-300 p-6 flex flex-col gap-4">
+      <h3 class="text-lg font-black text-slate-800">Rename Team</h3>
+      <input type="text" id="renameInput" maxlength="20" class="w-full px-4 py-2 bg-slate-100 border-2 border-slate-300 rounded-2xl font-bold text-slate-800 text-lg focus:outline-none focus:border-sky-500" />
+      <div class="flex justify-end gap-2">
+        <button id="cancelRenameBtn" class="px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl">Cancel</button>
+        <button id="saveRenameBtn" class="px-5 py-2 text-sm font-bold bg-sky-500 hover:bg-sky-600 text-white rounded-xl shadow-md">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Match Win Celebration Modal -->
+  <div id="winnerModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl border-4 border-amber-400 p-6 sm:p-8 flex flex-col items-center text-center gap-4 animate-bounce">
+      <span class="text-6xl">🏆</span>
+      <h2 id="matchWinnerText" class="text-3xl font-black text-slate-800">Boys Win the Match!</h2>
+      <p id="matchFinalScoreText" class="text-sm font-bold text-slate-500">Final Score: 10 to 8</p>
+      <button id="playAgainBtn" class="px-8 py-3 bg-amber-500 hover:bg-amber-600 text-white font-black text-lg rounded-2xl shadow-lg transition active:scale-95">
+        Play Again!
+      </button>
+    </div>
+  </div>
+
+  <!-- Teacher Settings Modal -->
+  <div id="settingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl border-4 border-purple-300 overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <!-- Modal Header -->
+      <div class="bg-purple-50 px-6 py-4 border-b-2 border-purple-200 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">⚙️</span>
+          <div>
+            <h2 class="text-xl font-black text-purple-900 leading-tight">Match &amp; Color Settings</h2>
+            <p class="text-xs text-purple-600 font-semibold">Customize default teams, target points, labels, and color swatches.</p>
+          </div>
+        </div>
+        <button id="closeSettingsBtn" class="text-slate-400 hover:text-slate-700 text-2xl font-bold p-2 active:scale-90 leading-none">✕</button>
+      </div>
+
+      <!-- Top Settings Bar -->
+      <div class="px-6 py-3 bg-amber-50 border-b border-amber-200 text-amber-900 text-xs flex flex-wrap gap-4 items-center justify-between">
+        <div class="flex items-center gap-3">
+          <label class="font-bold">Race Goal:</label>
+          <select id="targetScoreSelect" class="bg-white border border-amber-300 rounded-lg px-2 py-1 font-bold">
+            <option value="5">First to 5</option>
+            <option value="10" selected>First to 10</option>
+            <option value="15">First to 15</option>
+            <option value="20">First to 20</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <label class="flex items-center gap-1.5 cursor-pointer font-bold select-none">
+            <input type="checkbox" id="showLabelsToggle" class="w-4 h-4 text-purple-600 rounded">
+            <span>Show color names on cards</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer font-bold select-none">
+            <input type="checkbox" id="autoSpeakToggle" class="w-4 h-4 text-purple-600 rounded">
+            <span>Auto-speak color</span>
+          </label>
+        </div>
+
+        <button id="addColorBtn" class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl text-xs flex items-center gap-1 shadow-sm transition">
+          ➕ Add Color
+        </button>
+      </div>
+
+      <!-- Color Table Editor List -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-3 custom-scroll" id="colorEditorList"></div>
+
+      <!-- Modal Footer -->
+      <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <button id="resetDefaultsBtn" class="px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition border border-red-200">
+          🔄 Restore 11 Default Colors
+        </button>
+        <button id="saveAndCloseBtn" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-2xl text-sm shadow-md transition active:scale-95">
+          Save &amp; Restart Game
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /*
+      ==================================================================
+      DEFAULT CONFIGURATION (11 COLORS + HEAD-TO-HEAD SETTINGS)
+      ==================================================================
+    */
+    const DEFAULT_COLORS = [
+      { id: 'red', name: 'Red', hex: '#ef4444', border: '#b91c1c' },
+      { id: 'yellow', name: 'Yellow', hex: '#facc15', border: '#ca8a04' },
+      { id: 'pink', name: 'Pink', hex: '#ec4899', border: '#be185d' },
+      { id: 'green', name: 'Green', hex: '#22c55e', border: '#15803d' },
+      { id: 'orange', name: 'Orange', hex: '#f97316', border: '#c2410c' },
+      { id: 'purple', name: 'Purple', hex: '#a855f7', border: '#7e22ce' },
+      { id: 'blue', name: 'Blue', hex: '#3b82f6', border: '#1d4ed8' },
+      { id: 'black', name: 'Black', hex: '#1e293b', border: '#0f172a' },
+      { id: 'white', name: 'White', hex: '#ffffff', border: '#cbd5e1' },
+      { id: 'brown', name: 'Brown', hex: '#78350f', border: '#451a03' },
+      { id: 'gray', name: 'Gray', hex: '#6b7280', border: '#374151' }
+    ];
+
+    const STORAGE_KEY_COLORS = 'smartboard_battle_colors_v1';
+    const STORAGE_KEY_CONFIG = 'smartboard_battle_config_v1';
+
+    function loadColors() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY_COLORS);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length >= 9) return parsed;
+        }
+      } catch (e) {
+        console.warn(e);
+      }
+      return JSON.parse(JSON.stringify(DEFAULT_COLORS));
+    }
+
+    function saveColors(colors) {
+      try {
+        localStorage.setItem(STORAGE_KEY_COLORS, JSON.stringify(colors));
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    function loadConfig() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY_CONFIG);
+        if (saved) return JSON.parse(saved);
+      } catch (e) {
+        console.warn(e);
+      }
+      return {
+        team1Name: 'Boys',
+        team2Name: 'Girls',
+        targetScore: 10,
+        showLabels: false,
+        autoSpeak: true
+      };
+    }
+
+    function saveConfig(cfg) {
+      try {
+        localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(cfg));
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    let colorPool = loadColors();
+    let config = loadConfig();
+
+    let team1Score = 0;
+    let team2Score = 0;
+    let targetColor = null;
+    let isRoundLocked = false;
+    let isSoundEnabled = true;
+
+    // Separate grid items so children can't cheat by glancing across at coordinates
+    let team1Cards = [];
+    let team2Cards = [];
+
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    // Happy victory tone for point scored
+    function playPointSound() {
+      if (!isSoundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const startTime = ctx.currentTime + (idx * 0.07);
+          const duration = 0.22;
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, startTime);
+
+          gain.gain.setValueAtTime(0.2, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(startTime);
+          osc.stop(startTime + duration);
+        });
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    // Buzz tone for incorrect tap
+    function playBuzzSound() {
+      if (!isSoundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const notes = [220, 164.81];
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const startTime = ctx.currentTime + (idx * 0.1);
+          const duration = 0.2;
+
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, startTime);
+
+          gain.gain.setValueAtTime(0.15, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(startTime);
+          osc.stop(startTime + duration);
+        });
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    // Grand fanfare when a team reaches the target score
+    function playMatchWinFanfare() {
+      if (!isSoundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const fanfare = [
+          { f: 523.25, d: 0.15, t: 0 },
+          { f: 523.25, d: 0.15, t: 0.16 },
+          { f: 523.25, d: 0.15, t: 0.32 },
+          { f: 659.25, d: 0.35, t: 0.48 },
+          { f: 783.99, d: 0.35, t: 0.85 },
+          { f: 1046.50, d: 0.7, t: 1.2 }
+        ];
+        fanfare.forEach(item => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const startTime = ctx.currentTime + item.t;
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(item.f, startTime);
+
+          gain.gain.setValueAtTime(0.25, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, startTime + item.d);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(startTime);
+          osc.stop(startTime + item.d);
+        });
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    // Text to Speech
+    function speakTargetColor() {
+      if (!targetColor || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(targetColor.name);
+      utterance.rate = 0.85;
+      utterance.pitch = 1.1;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function spawnConfetti(x, y) {
+      const symbols = ['⭐', '🎉', '✨', '🎈', '🌟', '🍭', '🥳', '🎨', '💖'];
+      for (let i = 0; i < 16; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 70 + Math.random() * 120;
+        const dx = Math.cos(angle) * dist + 'px';
+        const dy = Math.sin(angle) * dist + 'px';
+
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+        particle.style.setProperty('--dx', dx);
+        particle.style.setProperty('--dy', dy);
+
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 900);
+      }
+    }
+
+    const team1GridEl = document.getElementById('team1Grid');
+    const team2GridEl = document.getElementById('team2Grid');
+    const targetNameDisplayEl = document.getElementById('targetNameDisplay');
+    const team1ScoreDisplayEl = document.getElementById('team1ScoreDisplay');
+    const team2ScoreDisplayEl = document.getElementById('team2ScoreDisplay');
+    const team1NameTextEl = document.getElementById('team1NameText');
+    const team2NameTextEl = document.getElementById('team2NameText');
+    const targetPointsDisplayEl = document.getElementById('targetPointsDisplay');
+    const roundAnnouncementEl = document.getElementById('roundAnnouncement');
+    const announcementTextEl = document.getElementById('announcementText');
+    const announcementEmojiEl = document.getElementById('announcementEmoji');
+
+    function createCardElement(colorItem, teamIndex) {
+      const card = document.createElement('button');
+      card.className = `color-card relative flex flex-col items-center justify-center p-2 bg-white rounded-2xl sm:rounded-3xl border-3 sm:border-4 border-slate-200 hover:border-amber-400 active:border-amber-500 overflow-hidden w-full h-full`;
+      card.setAttribute('data-color-id', colorItem.id);
+      card.setAttribute('aria-label', colorItem.name);
+
+      const isWhite = colorItem.hex.toLowerCase() === '#ffffff' || colorItem.hex.toLowerCase() === '#fff';
+      const showLabel = config.showLabels;
+
+      card.innerHTML = `
+        <div class="w-full h-full flex flex-col items-center justify-center pointer-events-none gap-1 sm:gap-2">
+          <div 
+            class="swatch-disc w-14 h-14 sm:w-20 sm:h-20 md:w-20 lg:w-24 lg:h-24 rounded-full border-3 sm:border-4" 
+            style="background-color: ${colorItem.hex}; border-color: ${colorItem.border || (isWhite ? '#cbd5e1' : colorItem.hex)};"
+          ></div>
+          ${showLabel ? `
+            <span class="text-xs sm:text-sm font-black text-slate-700 capitalize tracking-wide">
+              ${colorItem.name}
+            </span>
+          ` : ''}
+        </div>
+      `;
+
+      card.addEventListener('pointerdown', (e) => handleCardTap(colorItem, card, teamIndex, e));
+      return card;
+    }
+
+    function renderBoards() {
+      team1GridEl.innerHTML = '';
+      team2GridEl.innerHTML = '';
+
+      team1Cards.forEach(col => {
+        team1GridEl.appendChild(createCardElement(col, 1));
+      });
+
+      team2Cards.forEach(col => {
+        team2GridEl.appendChild(createCardElement(col, 2));
+      });
+    }
+
+    function handleCardTap(selectedColor, cardEl, teamIndex, event) {
+      if (isRoundLocked) return;
+      getAudioContext();
+
+      const teamName = teamIndex === 1 ? config.team1Name : config.team2Name;
+
+      if (selectedColor.id === targetColor.id) {
+        // Point winner!
+        isRoundLocked = true;
+        playPointSound();
+
+        cardEl.classList.add('animate-correct');
+        const rect = cardEl.getBoundingClientRect();
+        spawnConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+        if (teamIndex === 1) {
+          team1Score += 1;
+          team1ScoreDisplayEl.textContent = team1Score;
+        } else {
+          team2Score += 1;
+          team2ScoreDisplayEl.textContent = team2Score;
+        }
+
+        // Show banner announcement
+        announcementEmojiEl.textContent = teamIndex === 1 ? '👦' : '👧';
+        announcementTextEl.textContent = `${teamName} scored!`;
+        roundAnnouncementEl.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+        roundAnnouncementEl.classList.add('opacity-100', 'scale-100');
+
+        // Check if game won
+        if (team1Score >= config.targetScore || team2Score >= config.targetScore) {
+          setTimeout(() => {
+            showMatchWinner(teamIndex === 1 ? config.team1Name : config.team2Name);
+          }, 800);
+          return;
+        }
+
+        setTimeout(() => {
+          roundAnnouncementEl.classList.remove('opacity-100', 'scale-100');
+          roundAnnouncementEl.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+          startNextRound();
+        }, 1100);
+
+      } else {
+        // Incorrect card clicked on this specific team's side
+        playBuzzSound();
+        cardEl.classList.add('animate-wrong');
+        setTimeout(() => {
+          cardEl.classList.remove('animate-wrong');
+        }, 450);
+      }
+    }
+
+    function startNextRound() {
+      isRoundLocked = false;
+
+      // Pick target color from pool
+      targetColor = colorPool[Math.floor(Math.random() * colorPool.length)];
+
+      // Construct a 9-color set for Team 1 containing targetColor
+      const remainingForT1 = colorPool.filter(c => c.id !== targetColor.id);
+      team1Cards = shuffle([targetColor, ...shuffle(remainingForT1).slice(0, 8)]);
+
+      // Construct an independently scrambled 9-color set for Team 2 containing targetColor
+      const remainingForT2 = colorPool.filter(c => c.id !== targetColor.id);
+      team2Cards = shuffle([targetColor, ...shuffle(remainingForT2).slice(0, 8)]);
+
+      renderBoards();
+
+      // Update Callout Banner
+      targetNameDisplayEl.textContent = targetColor.name;
+      const isLightColor = targetColor.hex.toLowerCase() === '#ffffff' || targetColor.name.toLowerCase() === 'white' || targetColor.hex.toLowerCase() === '#facc15';
+      targetNameDisplayEl.style.color = isLightColor ? '#ca8a04' : targetColor.hex;
+      targetNameDisplayEl.style.textShadow = isLightColor ? '0 1px 2px rgba(0,0,0,0.1)' : 'none';
+
+      // Auto-speak if enabled
+      if (config.autoSpeak) {
+        setTimeout(() => speakTargetColor(), 200);
+      }
+    }
+
+    function showMatchWinner(winnerName) {
+      playMatchWinFanfare();
+      document.getElementById('matchWinnerText').textContent = `🏆 ${winnerName} Wins the Match!`;
+      document.getElementById('matchFinalScoreText').textContent = `Final Score: ${config.team1Name} ${team1Score} - ${team2Score} ${config.team2Name}`;
+      document.getElementById('winnerModal').classList.remove('hidden');
+    }
+
+    document.getElementById('playAgainBtn').addEventListener('click', () => {
+      document.getElementById('winnerModal').classList.add('hidden');
+      resetScores();
+      startNextRound();
+    });
+
+    function resetScores() {
+      team1Score = 0;
+      team2Score = 0;
+      team1ScoreDisplayEl.textContent = '0';
+      team2ScoreDisplayEl.textContent = '0';
+    }
+
+    document.getElementById('resetMatchBtn').addEventListener('click', () => {
+      resetScores();
+      startNextRound();
+    });
+
+    // Inline Team Renaming
+    const renameModal = document.getElementById('renameModal');
+    const renameInput = document.getElementById('renameInput');
+    let currentRenamingTeam = 1;
+
+    document.getElementById('team1NameContainer').addEventListener('click', () => {
+      currentRenamingTeam = 1;
+      renameInput.value = config.team1Name;
+      renameModal.classList.remove('hidden');
+      renameInput.focus();
+    });
+
+    document.getElementById('team2NameContainer').addEventListener('click', () => {
+      currentRenamingTeam = 2;
+      renameInput.value = config.team2Name;
+      renameModal.classList.remove('hidden');
+      renameInput.focus();
+    });
+
+    document.getElementById('cancelRenameBtn').addEventListener('click', () => {
+      renameModal.classList.add('hidden');
+    });
+
+    document.getElementById('saveRenameBtn').addEventListener('click', () => {
+      const val = renameInput.value.trim();
+      if (val) {
+        if (currentRenamingTeam === 1) {
+          config.team1Name = val;
+          team1NameTextEl.textContent = val;
+        } else {
+          config.team2Name = val;
+          team2NameTextEl.textContent = val;
+        }
+        saveConfig(config);
+      }
+      renameModal.classList.add('hidden');
+    });
+
+    // Teacher Settings Panel
+    const settingsModal = document.getElementById('settingsModal');
+    const openSettingsBtn = document.getElementById('openSettingsBtn');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    const colorEditorList = document.getElementById('colorEditorList');
+    const addColorBtn = document.getElementById('addColorBtn');
+    const resetDefaultsBtn = document.getElementById('resetDefaultsBtn');
+    const saveAndCloseBtn = document.getElementById('saveAndCloseBtn');
+    const targetScoreSelect = document.getElementById('targetScoreSelect');
+    const showLabelsToggle = document.getElementById('showLabelsToggle');
+    const autoSpeakToggle = document.getElementById('autoSpeakToggle');
+
+    let workingColorsList = [];
+
+    function renderEditorRows() {
+      colorEditorList.innerHTML = '';
+      workingColorsList.forEach((colorItem, index) => {
+        const row = document.createElement('div');
+        row.className = "flex items-center gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-200";
+        row.innerHTML = `
+          <span class="text-xs font-black text-slate-400 w-5 text-center">${index + 1}</span>
+          
+          <div class="flex-1 flex flex-col sm:flex-row gap-2">
+            <div class="flex-1">
+              <label class="block text-[10px] font-bold uppercase text-slate-400">Color Name</label>
+              <input 
+                type="text" 
+                value="${colorItem.name}" 
+                class="color-name-input w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-sm font-semibold focus:outline-none focus:border-purple-500" 
+                data-index="${index}"
+              />
+            </div>
+            
+            <div class="w-full sm:w-44 flex items-end gap-2">
+              <div class="flex-1">
+                <label class="block text-[10px] font-bold uppercase text-slate-400">Color Swatch</label>
+                <div class="flex items-center gap-1.5 bg-white border border-slate-300 rounded-xl px-2 py-1">
+                  <input 
+                    type="color" 
+                    value="${colorItem.hex}" 
+                    class="color-picker-input w-7 h-7 rounded cursor-pointer border-0 bg-transparent" 
+                    data-index="${index}"
+                  />
+                  <input 
+                    type="text" 
+                    value="${colorItem.hex}" 
+                    class="color-hex-text w-full text-xs font-mono text-slate-700 bg-transparent focus:outline-none uppercase" 
+                    data-index="${index}"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button 
+            class="delete-color-btn text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-xl text-lg font-bold transition ${workingColorsList.length <= 9 ? 'opacity-30 cursor-not-allowed' : ''}" 
+            data-index="${index}"
+            title="${workingColorsList.length <= 9 ? 'Minimum 9 colors required for 3x3 grids' : 'Delete this color'}"
+          >
+            🗑️
+          </button>
+        `;
+        colorEditorList.appendChild(row);
+      });
+
+      document.querySelectorAll('.color-name-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const idx = parseInt(e.target.dataset.index);
+          workingColorsList[idx].name = e.target.value;
+          workingColorsList[idx].id = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        });
+      });
+
+      document.querySelectorAll('.color-picker-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const idx = parseInt(e.target.dataset.index);
+          const val = e.target.value;
+          workingColorsList[idx].hex = val;
+          workingColorsList[idx].border = val;
+          const row = e.target.closest('div');
+          const hexText = row.querySelector('.color-hex-text');
+          if (hexText) hexText.value = val;
+        });
+      });
+
+      document.querySelectorAll('.color-hex-text').forEach(input => {
+        input.addEventListener('change', (e) => {
+          const idx = parseInt(e.target.dataset.index);
+          let val = e.target.value.trim();
+          if (!val.startsWith('#')) val = '#' + val;
+          if (/^#[0-9A-F]{6}$/i.test(val) || /^#[0-9A-F]{3}$/i.test(val)) {
+            workingColorsList[idx].hex = val;
+            workingColorsList[idx].border = val;
+            const row = e.target.closest('div');
+            const picker = row.querySelector('.color-picker-input');
+            if (picker) picker.value = val;
+          }
+        });
+      });
+
+      document.querySelectorAll('.delete-color-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          if (workingColorsList.length <= 9) return;
+          const idx = parseInt(btn.dataset.index);
+          workingColorsList.splice(idx, 1);
+          renderEditorRows();
+        });
+      });
+    }
+
+    openSettingsBtn.addEventListener('click', () => {
+      workingColorsList = JSON.parse(JSON.stringify(colorPool));
+      targetScoreSelect.value = config.targetScore.toString();
+      showLabelsToggle.checked = !!config.showLabels;
+      autoSpeakToggle.checked = !!config.autoSpeak;
+      renderEditorRows();
+      settingsModal.classList.remove('hidden');
+    });
+
+    closeSettingsBtn.addEventListener('click', () => {
+      settingsModal.classList.add('hidden');
+    });
+
+    addColorBtn.addEventListener('click', () => {
+      const presets = ['#14b8a6', '#06b6d4', '#6366f1', '#d946ef', '#f43f5e', '#84cc16', '#0284c7'];
+      const randomHex = presets[Math.floor(Math.random() * presets.length)];
+      workingColorsList.push({
+        id: 'color-' + Date.now(),
+        name: 'New Color',
+        hex: randomHex,
+        border: randomHex
+      });
+      renderEditorRows();
+      colorEditorList.scrollTop = colorEditorList.scrollHeight;
+    });
+
+    resetDefaultsBtn.addEventListener('click', () => {
+      workingColorsList = JSON.parse(JSON.stringify(DEFAULT_COLORS));
+      renderEditorRows();
+    });
+
+    saveAndCloseBtn.addEventListener('click', () => {
+      const valid = workingColorsList.every(c => c.name.trim().length > 0 && c.hex.trim().length > 0);
+      if (!valid) return;
+
+      colorPool = JSON.parse(JSON.stringify(workingColorsList));
+      saveColors(colorPool);
+
+      config.targetScore = parseInt(targetScoreSelect.value, 10);
+      config.showLabels = showLabelsToggle.checked;
+      config.autoSpeak = autoSpeakToggle.checked;
+      saveConfig(config);
+
+      targetPointsDisplayEl.textContent = `First to ${config.targetScore}`;
+      settingsModal.classList.add('hidden');
+      resetScores();
+      startNextRound();
+    });
+
+    document.getElementById('speakBtn').addEventListener('click', () => {
+      getAudioContext();
+      speakTargetColor();
+    });
+
+    const soundToggleBtn = document.getElementById('soundToggleBtn');
+    soundToggleBtn.addEventListener('click', () => {
+      isSoundEnabled = !isSoundEnabled;
+      soundToggleBtn.textContent = isSoundEnabled ? '🔔' : '🔕';
+      soundToggleBtn.classList.toggle('opacity-60', !isSoundEnabled);
+    });
+
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    fullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(e => console.warn(e));
+        fullscreenBtn.textContent = '✕';
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+          fullscreenBtn.textContent = '⛶';
+        }
+      }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+      fullscreenBtn.textContent = document.fullscreenElement ? '✕' : '⛶';
+    });
+
+    // Initialize display with stored settings
+    team1NameTextEl.textContent = config.team1Name;
+    team2NameTextEl.textContent = config.team2Name;
+    targetPointsDisplayEl.textContent = `First to ${config.targetScore}`;
+
+    window.onload = function() {
+      startNextRound();
+    };
+  </script>
+</body>
+</html>
