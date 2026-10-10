@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>English Learning Games | Michael Wenzel</title>
+  <style>
+    :root {
+      --primary: #1e3a5f;
+      --accent: #2563eb;
+      --text: #2d3748;
+      --text-muted: #64748b;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 48px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    nav {
+      margin-bottom: 24px;
+    }
+
+    nav a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    header {
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+    }
+
+    .curriculum-banner {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-bottom: 32px;
+      font-size: 0.95rem;
+      color: #1e40af;
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .game-card {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 20px;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .game-card h3 {
+      font-size: 1.1rem;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    .game-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .game-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .game-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <nav>
+      <a href="index.html">&larr; Back to Home</a>
+    </nav>
+
+    <header>
+      <h1>English Learning Games</h1>
+      <p>Interactive web applications designed to support primary English language acquisition.</p>
+    </header>
+
+    <div class="curriculum-banner">
+      <strong>Curriculum Alignment:</strong> All activities on this platform are specifically tailored to reinforce the <strong>Read Write Inc. (RWI) Phonics</strong> program and Hong Kong's <strong>Space Town Literacy Curriculum</strong>.
+    </div>
+
+    <!-- Active Games Section (Unified Collection) -->
+    <section>
+      <h2>Active Interactive Games</h2>
+      <div class="game-grid">
+        <div class="game-card">
+          <div>
+            <h3>Color Matcher</h3>
+            <p>Single-player color and vocabulary matching activity for early learners.</p>
+          </div>
+          <a href="color-matcher.html" class="game-link">Play Game &rarr;</a>
+        </div>
+
+        <div class="game-card">
+          <div>
+            <h3>Color Matcher (Speed Run)</h3>
+            <p>Timed high-speed variation focused on rapid word recognition and recall.</p>
+          </div>
+          <a href="color-matcher-timed.html" class="game-link">Play Game &rarr;</a>
+        </div>
+
+        <div class="game-card">
+          <div>
+            <h3>Color Matcher (Multiplayer)</h3>
+            <p>Turn-based interactive match game designed for collaborative paired play.</p>
+          </div>
+          <a href="color-matcher-multi.html" class="game-link">Play Game &rarr;</a>
+        </div>
+      </div>
+    </section>
+
+    <!--
+    =============================================================================
+    FUTURE ARCHITECTURE: RWI & SPACE TOWN CURRICULUM SECTIONS
+    =============================================================================
+    HOW TO ACTIVATE:
+    1. Remove the opening and closing HTML comment tags (<!-- and - ->) surrounding the sections below.
+    2. Add your specific game URLs into the href attributes.
+    3. Update or remove the unified "Active Interactive Games" section above when you are ready to segment your library.
+    =============================================================================
+    -->
+
+    <!--
+    <section id="space-town-games" style="margin-top: 48px;">
+      <h2>Space Town Games</h2>
+      <p style="color: var(--text-muted); margin-bottom: 20px;">Unit-by-unit reading and vocabulary games supporting the Space Town primary curriculum.</p>
+
+      <div style="margin-bottom: 24px;">
+        <h3 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 12px;">Unit 1: Self & School</h3>
+        <div class="game-grid">
+          <div class="game-card">
+            <h4>Unit 1 Vocabulary Hunt</h4>
+            <p>High-frequency word reinforcement.</p>
+            <a href="games/spacetown/u1-vocab.html" class="game-link">Play &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 24px;">
+        <h3 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 12px;">Unit 2: Family & Friends</h3>
+        <div class="game-grid">
+          <div class="game-card">
+            <h4>Unit 2 Sentence Builder</h4>
+            <p>Simple sentence structure matching.</p>
+            <a href="games/spacetown/u2-sentences.html" class="game-link">Play &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 24px;">
+        <h3 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 12px;">Unit 3: Community & Nature</h3>
+        <div class="game-grid">
+          <div class="game-card">
+            <h4>Unit 3 Word Sort</h4>
+            <p>Categorization and decoding game.</p>
+            <a href="games/spacetown/u3-wordsort.html" class="game-link">Play &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="rwi-games" style="margin-top: 48px;">
+      <h2>Read Write Inc. (RWI) Games</h2>
+      <p style="color: var(--text-muted); margin-bottom: 20px;">Systematic phonics decoding and leveled book games.</p>
+
+      <div style="margin-bottom: 28px;">
+        <h3 style="font-size: 1.15rem; color: var(--primary); margin-bottom: 12px;">Sound Levels</h3>
+        <div class="game-grid">
+          <div class="game-card">
+            <h4>Set 1 Speed Sounds</h4>
+            <p>Letter-sound recognition (m, a, s, d, t...).</p>
+            <a href="games/rwi/set1-sounds.html" class="game-link">Practice &rarr;</a>
+          </div>
+          <div class="game-card">
+            <h4>Set 2 Special Friends</h4>
+            <p>Digraph matching (sh, th, ch, qu, ng, nk).</p>
+            <a href="games/rwi/set2-sounds.html" class="game-link">Practice &rarr;</a>
+          </div>
+          <div class="game-card">
+            <h4>Set 3 Alternative Spellings</h4>
+            <p>Advanced vowel sound patterns (ea, oi, a-e, i-e...).</p>
+            <a href="games/rwi/set3-sounds.html" class="game-link">Practice &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="font-size: 1.15rem; color: var(--primary); margin-bottom: 12px;">Book Levels (Ditty to Grey)</h3>
+        <div class="game-grid">
+          <div class="game-card">
+            <h4>Ditty Books</h4>
+            <p>Blending speed and initial ditty reading practice.</p>
+            <a href="games/rwi/ditty.html" class="game-link">Open Games &rarr;</a>
+          </div>
+          <div class="game-card">
+            <h4>Green / Purple Level</h4>
+            <p>Short vowel decodables and red word challenges.</p>
+            <a href="games/rwi/green-purple.html" class="game-link">Open Games &rarr;</a>
+          </div>
+          <div class="game-card">
+            <h4>Pink / Orange Level</h4>
+            <p>Consolidated reading fluency and compound words.</p>
+            <a href="games/rwi/pink-orange.html" class="game-link">Open Games &rarr;</a>
+          </div>
+          <div class="game-card">
+            <h4>Yellow / Blue / Grey Level</h4>
+            <p>Extended decodable stories and multi-syllable vocabulary.</p>
+            <a href="games/rwi/advanced-levels.html" class="game-link">Open Games &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    -->
+
+  </div>
+
+</body>
+</html>
