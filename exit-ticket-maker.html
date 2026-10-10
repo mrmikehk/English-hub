@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exit Ticket & Worksheet Generator</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
+  }
+
+  * {
+    box-sizing: border-box;
+    font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", "Segoe UI", cursive, sans-serif;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: #eef2f6;
+    color: #1e293b;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Control Panel UI (hidden on print) */
+  .no-print {
+    max-width: 760px;
+    margin: 20px auto;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .control-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .full-width {
+    grid-column: span 2;
+  }
+
+  label {
+    display: block;
+    font-size: 10.5pt;
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #334155;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid #94a3b8;
+    border-radius: 6px;
+    font-size: 10.5pt;
+    font-family: inherit;
+    background: #f8fafc;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: #2563eb;
+    background: #fff;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  button {
+    flex: 1;
+    font-size: 12pt;
+    font-weight: bold;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+  }
+
+  .btn-generate {
+    background: #2563eb;
+    color: #ffffff;
+  }
+
+  .btn-generate:hover {
+    background: #1d4ed8;
+  }
+
+  .btn-print {
+    background: #059669;
+    color: #ffffff;
+  }
+
+  .btn-print:hover {
+    background: #047857;
+  }
+
+  /* Base Page Styling */
+  .page {
+    width: 194mm;
+    height: 281mm;
+    margin: 0 auto 24px auto;
+    background: #ffffff;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    position: relative;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  /* Layout 1: 2 per A4 (Half-Page / A5 landscape style cards on portrait sheet) */
+  .layout-2 {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6mm 0;
+  }
+
+  .layout-2 .card-container {
+    width: 182mm;
+    height: 130mm;
+    border: 2.2px solid #222;
+    border-radius: 7px;
+    padding: 7mm 8mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #ffffff;
+  }
+
+  .layout-2 .cut-guide {
+    width: 182mm;
+    height: 0;
+    border-top: 1.5px dashed #94a3b8;
+    position: relative;
+    text-align: center;
+  }
+
+  .layout-2 .cut-guide::after {
+    content: "✂ CUT HERE";
+    position: absolute;
+    top: -9px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ffffff;
+    padding: 0 8px;
+    font-size: 8pt;
+    font-weight: bold;
+    color: #64748b;
+    letter-spacing: 2px;
+  }
+
+  /* Layout 2: 4 per A4 (Quarter-Page / A6 turned 90° - 2x2 grid) */
+  .layout-4 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 8mm;
+    padding: 5mm;
+  }
+
+  .layout-4 .card-container {
+    width: 88mm;
+    height: 131mm;
+    border: 1.8px solid #222;
+    border-radius: 6px;
+    padding: 5mm 6mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #ffffff;
+  }
+
+  /* Cross cut-guides for 4-up mode */
+  .layout-4 .cut-guide-h {
+    position: absolute;
+    top: 50%;
+    left: 4mm;
+    right: 4mm;
+    height: 0;
+    border-top: 1px dashed #94a3b8;
+    z-index: 10;
+  }
+
+  .layout-4 .cut-guide-v {
+    position: absolute;
+    left: 50%;
+    top: 4mm;
+    bottom: 4mm;
+    width: 0;
+    border-left: 1px dashed #94a3b8;
+    z-index: 10;
+  }
+
+  /* Card Inner Content */
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 2px solid #222;
+    padding-bottom: 3px;
+    margin-bottom: 3px;
+    gap: 6px;
+  }
+
+  .worksheet-title {
+    font-weight: bold;
+    letter-spacing: 0.3px;
+    line-height: 1.1;
+    color: #0f172a;
+  }
+
+  .layout-2 .worksheet-title { font-size: 15pt; }
+  .layout-4 .worksheet-title { font-size: 11pt; }
+
+  .student-fields {
+    font-weight: bold;
+    white-space: nowrap;
+    color: #334155;
+  }
+
+  .layout-2 .student-fields { font-size: 10.5pt; }
+  .layout-4 .student-fields { font-size: 8.5pt; }
+
+  .questions-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    flex-grow: 1;
+    margin-top: 4px;
+    gap: 4px;
+  }
+
+  .question-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .question-prompt {
+    font-weight: bold;
+    line-height: 1.25;
+    margin-bottom: 2px;
+    color: #0f172a;
+  }
+
+  .layout-2 .question-prompt { font-size: 11pt; }
+  .layout-4 .question-prompt { font-size: 9.5pt; }
+
+  /* Writing lines */
+  .lines-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .layout-2 .lines-container { gap: 6.5mm; margin-top: 3.5mm; }
+  .layout-4 .lines-container { gap: 5mm; margin-top: 2.5mm; }
+
+  .writing-line {
+    width: 100%;
+    height: 1px;
+    background-color: #475569;
+  }
+
+  .writing-line.dashed {
+    background: none;
+    border-top: 1px dashed #64748b;
+  }
+
+  .primary-line-row {
+    position: relative;
+    width: 100%;
+    border-bottom: 1.5px solid #334155;
+    border-top: 1px solid #94a3b8;
+  }
+
+  .layout-2 .primary-line-row { height: 7.5mm; }
+  .layout-4 .primary-line-row { height: 6mm; }
+
+  .primary-line-mid {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    border-top: 1px dashed #94a3b8;
+  }
+
+  .writing-box {
+    width: 100%;
+    border: 1.5px dashed #94a3b8;
+    border-radius: 4px;
+    background: #fafafa;
+    margin-top: 3px;
+  }
+
+  @media print {
+    body {
+      background: none;
+      padding: 0;
+    }
+    .no-print {
+      display: none !important;
+    }
+    .page {
+      margin: 0 !important;
+      box-shadow: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="no-print">
+  <h2 style="margin: 0 0 14px 0; font-size: 19pt; text-align: center; color: #1e293b;">
+    🎟️ Exit Ticket & Worksheet Maker
+  </h2>
+
+  <div class="control-grid">
+    <div>
+      <label for="wsTitle">Worksheet / Ticket Title:</label>
+      <input type="text" id="wsTitle" value="Exit Ticket: Quick Check">
+    </div>
+
+    <div>
+      <label for="pageLayout">Sheet Layout:</label>
+      <select id="pageLayout" onchange="updateSlipStep()">
+        <option value="2">2 on an A4 sheet (Half-Page / Standard)</option>
+        <option value="4" selected>4 on an A4 sheet (Quarter-Page / A6 rotated 90°)</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="qCount">Number of Questions:</label>
+      <select id="qCount" onchange="toggleQuestionInputs()">
+        <option value="1">1 Question (Extended Response)</option>
+        <option value="2">2 Questions</option>
+        <option value="3" selected>3 Questions</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="headerType">Student Info Fields:</label>
+      <select id="headerType">
+        <option value="name-date">Name: ____________ Date: ____________</option>
+        <option value="name-date-score">Name: ________ Date: ____ Score: ____</option>
+        <option value="name-only">Name: ____________________________</option>
+        <option value="none">None</option>
+      </select>
+    </div>
+
+    <!-- Dynamic Question Inputs -->
+    <div class="full-width" id="qGroup1">
+      <label for="q1">Question 1:</label>
+      <input type="text" id="q1" value="1. What was the most important concept you learned today?">
+    </div>
+
+    <div class="full-width" id="qGroup2">
+      <label for="q2">Question 2:</label>
+      <input type="text" id="q2" value="2. Solve or explain: How would you apply this in a real problem?">
+    </div>
+
+    <div class="full-width" id="qGroup3">
+      <label for="q3">Question 3:</label>
+      <input type="text" id="q3" value="3. What is one question you still have before tomorrow?">
+    </div>
+
+    <div>
+      <label for="lineStyle">Answer Writing Space Style:</label>
+      <select id="lineStyle">
+        <option value="solid">Solid Writing Lines</option>
+        <option value="dashed">Dashed Writing Lines</option>
+        <option value="primary">Primary Lined (with dashed midline)</option>
+        <option value="box">Blank Response Box</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="slipCount">Total Slips to Generate:</label>
+      <input type="number" id="slipCount" value="8" min="1" max="80" step="4">
+    </div>
+  </div>
+
+  <div class="btn-group">
+    <button class="btn-generate" onclick="generateWorksheets()">⚡ Generate & Preview</button>
+    <button class="btn-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
+  </div>
+</div>
+
+<div id="output"></div>
+
+<script>
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function updateSlipStep() {
+  const layout = parseInt(document.getElementById('pageLayout').value, 10);
+  const slipInput = document.getElementById('slipCount');
+  slipInput.step = layout;
+  if (parseInt(slipInput.value, 10) % layout !== 0) {
+    slipInput.value = Math.ceil(parseInt(slipInput.value, 10) / layout) * layout;
+  }
+}
+
+function toggleQuestionInputs() {
+  const count = parseInt(document.getElementById('qCount').value, 10);
+  document.getElementById('qGroup1').style.display = count >= 1 ? 'block' : 'none';
+  document.getElementById('qGroup2').style.display = count >= 2 ? 'block' : 'none';
+  document.getElementById('qGroup3').style.display = count >= 3 ? 'block' : 'none';
+}
+
+function renderLines(style, qCount, layout) {
+  // Compute how much writing space to allocate based on question density
+  if (style === 'box') {
+    let boxHeight = '18mm';
+    if (layout === 2) {
+      boxHeight = qCount === 1 ? '60mm' : (qCount === 2 ? '28mm' : '18mm');
+    } else {
+      boxHeight = qCount === 1 ? '55mm' : (qCount === 2 ? '24mm' : '14mm');
+    }
+    return `<div class="writing-box" style="height: ${boxHeight};"></div>`;
+  }
+
+  if (style === 'primary') {
+    let rows = 2;
+    if (layout === 2) {
+      rows = qCount === 1 ? 5 : (qCount === 2 ? 3 : 2);
+    } else {
+      rows = qCount === 1 ? 5 : (qCount === 2 ? 2 : 1);
+    }
+    let html = `<div style="display: flex; flex-direction: column; gap: 3.5mm; margin-top: 2.5mm;">`;
+    for (let r = 0; r < rows; r++) {
+      html += `<div class="primary-line-row"><div class="primary-line-mid"></div></div>`;
+    }
+    html += `</div>`;
+    return html;
+  }
+
+  // Solid or dashed lines
+  let lineCount = 3;
+  if (layout === 2) {
+    lineCount = qCount === 1 ? 7 : (qCount === 2 ? 4 : 3);
+  } else {
+    lineCount = qCount === 1 ? 6 : (qCount === 2 ? 3 : 2);
+  }
+
+  const isDashed = style === 'dashed';
+  let lines = `<div class="lines-container">`;
+  for (let i = 0; i < lineCount; i++) {
+    lines += `<div class="writing-line ${isDashed ? 'dashed' : ''}"></div>`;
+  }
+  lines += `</div>`;
+  return lines;
+}
+
+function generateWorksheets() {
+  const title = document.getElementById('wsTitle').value.trim() || 'Exit Ticket';
+  const layout = parseInt(document.getElementById('pageLayout').value, 10);
+  const qCount = parseInt(document.getElementById('qCount').value, 10);
+  const headerOption = document.getElementById('headerType').value;
+  const lineStyle = document.getElementById('lineStyle').value;
+  let numSlips = parseInt(document.getElementById('slipCount').value, 10);
+
+  if (isNaN(numSlips) || numSlips < 1) {
+    numSlips = layout;
+  }
+
+  const questions = [];
+  if (qCount >= 1) questions.push(document.getElementById('q1').value.trim() || '1. Question 1');
+  if (qCount >= 2) questions.push(document.getElementById('q2').value.trim() || '2. Question 2');
+  if (qCount >= 3) questions.push(document.getElementById('q3').value.trim() || '3. Question 3');
+
+  let headerHtml = '';
+  if (headerOption === 'name-date') {
+    headerHtml = layout === 4 ? 'Name: _______ Date: _____' : 'Name: ____________ Date: ____________';
+  } else if (headerOption === 'name-date-score') {
+    headerHtml = layout === 4 ? 'Name: _____ Date: ___ Pt: ___' : 'Name: ________ Date: ____ Score: ____';
+  } else if (headerOption === 'name-only') {
+    headerHtml = layout === 4 ? 'Name: _______________' : 'Name: ____________________________';
+  }
+
+  const output = document.getElementById('output');
+  output.innerHTML = '';
+
+  const totalPages = Math.ceil(numSlips / layout);
+
+  for (let p = 0; p < totalPages; p++) {
+    const page = document.createElement('div');
+    page.className = `page layout-${layout}`;
+
+    // Add 4-way cross cut lines if layout is 4
+    if (layout === 4) {
+      const cutH = document.createElement('div');
+      cutH.className = 'cut-guide-h';
+      const cutV = document.createElement('div');
+      cutV.className = 'cut-guide-v';
+      page.appendChild(cutH);
+      page.appendChild(cutV);
+    }
+
+    for (let c = 0; c < layout; c++) {
+      const slipNum = p * layout + c + 1;
+      if (slipNum > numSlips) break;
+
+      // Add center cut-guide for 2-up layout
+      if (layout === 2 && c === 1) {
+        const cutGuide = document.createElement('div');
+        cutGuide.className = 'cut-guide';
+        page.appendChild(cutGuide);
+      }
+
+      const card = document.createElement('div');
+      card.className = 'card-container';
+
+      let cardContent = `
+        <div class="card-header">
+          <div class="worksheet-title">${escapeHtml(title)}</div>
+          ${headerHtml ? `<div class="student-fields">${escapeHtml(headerHtml)}</div>` : ''}
+        </div>
+        <div class="questions-container">
+      `;
+
+      questions.forEach((qText) => {
+        cardContent += `
+          <div class="question-item">
+            <div class="question-prompt">${escapeHtml(qText)}</div>
+            ${renderLines(lineStyle, qCount, layout)}
+          </div>
+        `;
+      });
+
+      cardContent += `</div>`;
+      card.innerHTML = cardContent;
+      page.appendChild(card);
+    }
+
+    output.appendChild(page);
+  }
+}
+
+// Initialize on page load
+window.addEventListener('DOMContentLoaded', () => {
+  toggleQuestionInputs();
+  generateWorksheets();
+});
+</script>
+</body>
+</html>
