@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Printable Bingo Card Generator</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+  
+  :root {
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
+    --bg-color: #f1f5f9;
+    --panel-bg: #ffffff;
+    --border-color: #e2e8f0;
+    --text-color: #1e293b;
+    --text-muted: #64748b;
+  }
+
+  * {
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-color);
+    color: var(--text-color);
+  }
+
+  /* ---- WEB UI CONTROL PANEL ---- */
+  .no-print {
+    max-width: 820px;
+    margin: 24px auto;
+    padding: 24px 28px;
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .header-title {
+    margin-top: 0;
+    margin-bottom: 6px;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .header-subtitle {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .form-group input, 
+  .form-group select, 
+  .form-group textarea {
+    padding: 9px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .form-group input:focus, 
+  .form-group select:focus, 
+  .form-group textarea:focus {
+    border-color: var(--primary-color);
+  }
+
+  .counter-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: #e2e8f0;
+    color: #475569;
+  }
+  .counter-badge.valid {
+    background: #dcfce7;
+    color: #15803d;
+  }
+  .counter-badge.invalid {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+
+  .preset-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .btn-chip {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    cursor: pointer;
+  }
+  .btn-chip:hover {
+    background: #e2e8f0;
+  }
+
+  .quick-counts {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .btn-quick {
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+  }
+  .btn-quick:hover {
+    background: #e2e8f0;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+    margin-top: 8px;
+  }
+
+  .checkbox-label input {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+  }
+
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 18px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: var(--primary-color);
+    color: #ffffff;
+    flex: 1;
+  }
+  .btn-primary:hover {
+    background: var(--primary-hover);
+  }
+
+  .btn-secondary {
+    background: #0f172a;
+    color: #ffffff;
+  }
+  .btn-secondary:hover {
+    background: #1e293b;
+  }
+
+  /* ---- PRINT / A4 PAGE FORMATTING ---- */
+  .page {
+    width: 190mm;
+    height: 277mm;
+    margin: 0 auto 24px auto;
+    background: white;
+    padding: 6mm 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    page-break-after: always;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .card-container {
+    width: 175mm;
+    height: 128mm;
+    border: 3px solid #1e293b;
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+  }
+
+  .card-title {
+    text-align: center;
+    font-size: 24pt;
+    font-weight: 800;
+    margin-bottom: 6px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif;
+  }
+
+  .grid {
+    display: grid;
+    gap: 5px;
+    flex-grow: 1;
+    height: 100%;
+  }
+
+  /* Grid layouts */
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+  }
+  .grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+  }
+  .grid-5 {
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+  }
+
+  .cell {
+    border: 2px solid #334155;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4px;
+    font-weight: 700;
+    word-break: break-word;
+    line-height: 1.2;
+    background: #ffffff;
+    font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif;
+  }
+
+  /* Dynamic typography per grid size */
+  .grid-3 .cell { font-size: 18pt; }
+  .grid-4 .cell { font-size: 13pt; }
+  .grid-5 .cell { font-size: 10.5pt; }
+
+  .cell.free-space {
+    background: #f8fafc;
+    color: #0f172a;
+    font-style: italic;
+    border-style: dashed;
+  }
+
+  @media print {
+    body {
+      background: none;
+    }
+    .no-print {
+      display: none !important;
+    }
+    .page {
+      margin: 0 auto;
+      box-shadow: none;
+      page-break-after: always;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+    .action-bar {
+      flex-direction: column;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="no-print">
+  <h2 class="header-title">Printable Bingo Generator</h2>
+  <p class="header-subtitle">Create custom 3×3, 4×4, or 5×5 printable cards formatted perfectly for A4 (2 cards per sheet).</p>
+
+  <div class="form-grid">
+    <!-- Left Column: Setup options -->
+    <div>
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label for="cardTitle">Card Title</label>
+        <input type="text" id="cardTitle" value="BINGO" maxlength="30" placeholder="e.g. BINGO, SIGHT WORDS">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label for="gridSize">Grid Size</label>
+        <select id="gridSize" onchange="handleGridChange()">
+          <option value="3">3 × 3 (9 squares)</option>
+          <option value="4" selected>4 × 4 (16 squares)</option>
+          <option value="5">5 × 5 (25 squares)</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label for="cardCount">Number of Cards</label>
+        <input type="number" id="cardCount" value="10" min="1" max="100" step="1">
+        <div class="quick-counts">
+          <button type="button" class="btn-quick" onclick="setCount(2)">2</button>
+          <button type="button" class="btn-quick" onclick="setCount(4)">4</button>
+          <button type="button" class="btn-quick" onclick="setCount(10)">10</button>
+          <button type="button" class="btn-quick" onclick="setCount(20)">20</button>
+          <button type="button" class="btn-quick" onclick="setCount(30)">30</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label" id="freeSpaceContainer">
+          <input type="checkbox" id="includeFree" onchange="updateCounter()">
+          <span>Include Center "FREE" Space</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Right Column: Words -->
+    <div>
+      <div class="form-group">
+        <label for="words">
+          <span>Word Pool (one per line)</span>
+          <span id="counter" class="counter-badge">0 words</span>
+        </label>
+        <textarea id="words" rows="8" oninput="updateCounter()" placeholder="Type or paste your words here..."></textarea>
+      </div>
+      <div class="preset-buttons">
+        <span style="font-size: 11px; align-self: center; color: var(--text-muted);">Presets:</span>
+        <button type="button" class="btn-chip" onclick="loadPreset('sight')">Sight Words</button>
+        <button type="button" class="btn-chip" onclick="loadPreset('numbers')">Numbers (1-30)</button>
+        <button type="button" class="btn-chip" onclick="loadPreset('animals')">Animals</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button type="button" class="btn btn-primary" onclick="generateBingo()">Generate & Preview</button>
+    <button type="button" class="btn btn-secondary" onclick="window.print()">Print / Save PDF</button>
+  </div>
+</div>
+
+<div id="output"></div>
+
+<script>
+const presets = {
+  sight: ["the", "of", "and", "a", "to", "in", "is", "you", "that", "it", "he", "was", "for", "on", "are", "as", "with", "his", "they", "I", "at", "be", "this", "have", "from", "or", "one", "had", "by", "word"],
+  numbers: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30"],
+  animals: ["Lion", "Tiger", "Bear", "Elephant", "Giraffe", "Zebra", "Monkey", "Kangaroo", "Panda", "Penguin", "Dolphin", "Whale", "Cheetah", "Fox", "Wolf", "Rabbit", "Koala", "Hippo", "Rhino", "Otter", "Camel", "Leopard", "Eagle", "Owl", "Flamingo"]
+};
+
+function setCount(num) {
+  document.getElementById('cardCount').value = num;
+}
+
+function loadPreset(type) {
+  if (presets[type]) {
+    document.getElementById('words').value = presets[type].join('\n');
+    updateCounter();
+  }
+}
+
+function getRequiredWords() {
+  const size = parseInt(document.getElementById('gridSize').value, 10);
+  const isOdd = size % 2 !== 0;
+  const hasFree = isOdd && document.getElementById('includeFree').checked;
+  const totalCells = size * size;
+  return hasFree ? totalCells - 1 : totalCells;
+}
+
+function handleGridChange() {
+  const size = parseInt(document.getElementById('gridSize').value, 10);
+  const freeSpaceContainer = document.getElementById('freeSpaceContainer');
+  const includeFree = document.getElementById('includeFree');
+
+  // Even grids like 4x4 do not have an exact single center square
+  if (size % 2 === 0) {
+    freeSpaceContainer.style.display = 'none';
+    includeFree.checked = false;
+  } else {
+    freeSpaceContainer.style.display = 'flex';
+  }
+
+  updateCounter();
+}
+
+function updateCounter() {
+  const text = document.getElementById('words').value.trim();
+  const rawWords = text ? text.split('\n').map(w => w.trim()).filter(w => w.length > 0) : [];
+  const required = getRequiredWords();
+  const badge = document.getElementById('counter');
+
+  badge.textContent = `${rawWords.length} / ${required} required`;
+
+  if (rawWords.length >= required) {
+    badge.className = 'counter-badge valid';
+  } else {
+    badge.className = 'counter-badge invalid';
+  }
+}
+
+function shuffle(array) {
+  let m = array.length, t, i;
+  while (m) {
+    i = Math.floor(Math.random() * m--);
+    t = array[m];
+    array[m] = array[i];
+    array[i] = t;
+  }
+  return array;
+}
+
+function generateBingo() {
+  const text = document.getElementById('words').value.trim();
+  const rawWords = text.split('\n').map(w => w.trim()).filter(w => w.length > 0);
+  const requiredWords = getRequiredWords();
+
+  if (rawWords.length < requiredWords) {
+    alert(`Please provide at least ${requiredWords} words for this grid setup! Currently entered: ${rawWords.length}`);
+    return;
+  }
+
+  const size = parseInt(document.getElementById('gridSize').value, 10);
+  const numCards = parseInt(document.getElementById('cardCount').value, 10) || 2;
+  const titleText = document.getElementById('cardTitle').value.trim() || 'BINGO';
+  const hasFree = (size % 2 !== 0) && document.getElementById('includeFree').checked;
+  const centerIndex = Math.floor((size * size) / 2);
+
+  const output = document.getElementById('output');
+  output.innerHTML = '';
+
+  const totalPages = Math.ceil(numCards / 2);
+
+  for (let p = 0; p < totalPages; p++) {
+    const page = document.createElement('div');
+    page.className = 'page';
+
+    // 2 cards per page
+    for (let c = 0; c < 2; c++) {
+      const cardNum = p * 2 + c + 1;
+      if (cardNum > numCards) break;
+
+      const card = document.createElement('div');
+      card.className = 'card-container';
+
+      const title = document.createElement('div');
+      title.className = 'card-title';
+      title.textContent = titleText;
+      card.appendChild(title);
+
+      const grid = document.createElement('div');
+      grid.className = `grid grid-${size}`;
+
+      const cardWords = shuffle([...rawWords]).slice(0, requiredWords);
+      let wordIdx = 0;
+
+      for (let i = 0; i < size * size; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+
+        if (hasFree && i === centerIndex) {
+          cell.classList.add('free-space');
+          cell.textContent = 'FREE';
+        } else {
+          cell.textContent = cardWords[wordIdx];
+          wordIdx++;
+        }
+
+        grid.appendChild(cell);
+      }
+
+      card.appendChild(grid);
+      page.appendChild(card);
+    }
+
+    output.appendChild(page);
+  }
+}
+
+// Initial setup with sight words preset
+loadPreset('sight');
+handleGridChange();
+generateBingo();
+</script>
+</body>
+</html>
