@@ -49,20 +49,36 @@
       100% { transform: scale(1.04); box-shadow: 0 0 14px rgba(244, 63, 94, 0.8); }
     }
 
-    /* Board Container Ratio preservation */
+    /* Responsive Board Container */
     .board-wrapper {
       position: relative;
       width: 100%;
-      max-width: 650px;
+      max-width: 620px;
       aspect-ratio: 1 / 1;
       margin: 0 auto;
     }
 
+    /* Fullscreen classroom presentation mode adjustments */
+    body.is-fullscreen {
+      padding: 4px sm:p-2 !important;
+      justify-content: center !important;
+      overflow: hidden;
+    }
+    body.is-fullscreen #topHeader {
+      display: none !important;
+    }
+    body.is-fullscreen .board-wrapper {
+      max-width: min(84vh, 760px);
+    }
+    body.is-fullscreen #fullscreenExitFloatingBtn {
+      display: flex !important;
+    }
+
     /* 3D Rolling Die Styling */
     .dice-scene {
-      width: 68px;
-      height: 68px;
-      perspective: 400px;
+      width: 66px;
+      height: 66px;
+      perspective: 420px;
       cursor: pointer;
     }
     .dice-cube {
@@ -74,16 +90,16 @@
     }
     .dice-face {
       position: absolute;
-      width: 68px;
-      height: 68px;
+      width: 66px;
+      height: 66px;
       background: #ffffff;
-      border: 3px solid #e2e8f0;
+      border: 3px solid #cbd5e1;
       border-radius: 14px;
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.06);
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.08);
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(3, 1fr);
-      padding: 7px;
+      padding: 6px;
       box-sizing: border-box;
     }
 
@@ -99,15 +115,15 @@
       background-color: #1e293b;
     }
 
-    /* Dice 3D Positions */
-    .face-1 { transform: rotateY(0deg) translateZ(34px); }
-    .face-6 { transform: rotateY(180deg) translateZ(34px); }
-    .face-2 { transform: rotateY(90deg) translateZ(34px); }
-    .face-5 { transform: rotateY(-90deg) translateZ(34px); }
-    .face-3 { transform: rotateX(90deg) translateZ(34px); }
-    .face-4 { transform: rotateX(-90deg) translateZ(34px); }
+    /* Dice 3D positions */
+    .face-1 { transform: rotateY(0deg) translateZ(33px); }
+    .face-6 { transform: rotateY(180deg) translateZ(33px); }
+    .face-2 { transform: rotateY(90deg) translateZ(33px); }
+    .face-5 { transform: rotateY(-90deg) translateZ(33px); }
+    .face-3 { transform: rotateX(90deg) translateZ(33px); }
+    .face-4 { transform: rotateX(-90deg) translateZ(33px); }
 
-    /* Animated dice rolling keyframes */
+    /* Animated dice rolling */
     @keyframes tumble {
       0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(0.9); }
       25% { transform: rotateX(360deg) rotateY(180deg) rotateZ(90deg) scale(1.1); }
@@ -158,11 +174,16 @@
   </style>
 </head>
 
-<body class="bg-gradient-to-br from-amber-50 via-rose-50 to-sky-50 min-h-screen text-slate-800 flex flex-col items-center justify-between p-2 sm:p-4">
+<body id="gameBody" class="bg-gradient-to-br from-amber-50 via-rose-50 to-sky-50 min-h-screen text-slate-800 flex flex-col items-center justify-between p-2 sm:p-4">
   <canvas id="confettiCanvas"></canvas>
 
-  <!-- Top Navigation & Player Selection Bar -->
-  <header class="w-full max-w-2xl bg-white/95 backdrop-blur rounded-2xl shadow-md border-2 border-rose-200 p-2.5 sm:p-3 mb-2 flex flex-wrap items-center justify-between gap-2">
+  <!-- Floating Exit Fullscreen Button (Shown only in Fullscreen Mode) -->
+  <button id="fullscreenExitFloatingBtn" onclick="toggleFullscreen()" class="hidden fixed top-3 right-3 z-50 bg-slate-800/85 hover:bg-slate-900 text-white text-xs sm:text-sm font-black px-3.5 py-2 rounded-xl shadow-xl backdrop-blur items-center gap-1.5 border border-white/20 transition active:scale-95">
+    <span>✕</span> Exit Full Screen
+  </button>
+
+  <!-- Top Navigation & Player Selection Bar (Hidden in Full Screen) -->
+  <header id="topHeader" class="w-full max-w-3xl bg-white/95 backdrop-blur rounded-2xl shadow-md border-2 border-rose-200 p-2.5 sm:p-3 mb-2 flex flex-wrap items-center justify-between gap-2 transition-all">
     <div>
       <h1 class="text-xl sm:text-2xl font-black text-rose-500 tracking-wide flex items-center gap-1.5">
         <span>🐍</span> Sight Words Ladders <span>🪜</span>
@@ -179,25 +200,28 @@
       <button onclick="setPlayerCount(4)" id="btn-p4" class="player-btn px-2.5 py-1 text-xs sm:text-sm font-bold rounded-lg transition bg-white text-slate-700 hover:bg-rose-100">4</button>
     </div>
 
-    <!-- Quick Actions -->
+    <!-- Controls: Full Screen, Shuffle, Restart -->
     <div class="flex items-center gap-1.5">
-      <button onclick="shuffleAndReset()" title="Shuffle Words & Restart" class="px-2.5 py-1 text-xs font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg border border-amber-300 flex items-center gap-1 transition">
+      <button onclick="toggleFullscreen()" id="fullscreenBtn" title="Classroom Full Screen" class="px-2.5 py-1.5 text-xs font-black bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg border border-indigo-200 flex items-center gap-1 transition shadow-sm active:scale-95">
+        <span id="fullscreenIcon">🖥️</span> <span id="fullscreenLabel">Full Screen</span>
+      </button>
+      <button onclick="shuffleAndReset()" title="Shuffle Words & Restart" class="px-2.5 py-1.5 text-xs font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg border border-amber-300 flex items-center gap-1 transition">
         <span>🔀</span> Shuffle
       </button>
-      <button onclick="resetGame()" title="Reset Token Positions" class="px-2.5 py-1 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-300 transition">
+      <button onclick="resetGame()" title="Reset Token Positions" class="px-2.5 py-1.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-300 transition">
         Restart
       </button>
     </div>
   </header>
 
-  <!-- Current Turn Banner & Repeat-After-Me Prompter -->
-  <div class="w-full max-w-2xl bg-white/90 rounded-xl shadow-sm border border-slate-200 p-2 mb-2">
+  <!-- Turn Banner & Repeat-After-Me Prompter -->
+  <div class="w-full max-w-3xl bg-white/90 rounded-xl shadow-sm border border-slate-200 p-2 mb-1.5">
     <div class="flex items-center justify-between text-sm sm:text-base font-bold">
       <div id="turnIndicator" class="flex items-center gap-2 text-rose-600">
         <span id="turnTokenEmoji" class="text-2xl animate-bounce">🚗</span>
         <span>Player 1's Turn (<span id="turnToyName">Toy Car</span>)</span>
       </div>
-      <div id="statusMessage" class="text-xs sm:text-sm font-semibold text-slate-500 truncate max-w-[210px] sm:max-w-xs text-right">
+      <div id="statusMessage" class="text-xs sm:text-sm font-semibold text-slate-500 truncate max-w-[210px] sm:max-w-md text-right">
         Tap the die to roll!
       </div>
     </div>
@@ -208,14 +232,14 @@
         <span class="text-lg">📢</span>
         <span class="text-xs sm:text-sm font-extrabold text-slate-700">Say out loud: <strong id="promptWordHighlight" class="text-rose-600 text-base uppercase">...</strong></span>
       </div>
-      <div class="w-32 sm:w-44 bg-slate-200 h-2.5 rounded-full overflow-hidden">
+      <div class="w-32 sm:w-52 bg-slate-200 h-2.5 rounded-full overflow-hidden">
         <div id="repeatProgress" class="bg-gradient-to-r from-amber-400 to-rose-500 h-full rounded-full w-full"></div>
       </div>
     </div>
   </div>
 
   <!-- Main 8x8 Board Container -->
-  <main class="w-full max-w-2xl flex items-center justify-center relative">
+  <main class="w-full max-w-3xl flex items-center justify-center relative flex-1 my-0.5">
     <div id="boardWrapper" class="board-wrapper shadow-2xl rounded-2xl overflow-hidden border-4 border-amber-200 bg-white">
       
       <!-- 8x8 Grid of 64 tiles -->
@@ -235,16 +259,16 @@
     </div>
   </main>
 
-  <!-- Bottom Control Bar with 3D Die, Audio Info, and Rolling Trigger -->
-  <footer class="w-full max-w-2xl mt-2 bg-white/95 backdrop-blur rounded-2xl shadow-lg border-2 border-rose-200 p-2.5 sm:p-3 flex items-center justify-between gap-3">
+  <!-- Bottom Control Bar with Expanded Player Cards and 3D Die -->
+  <footer class="w-full max-w-3xl mt-1.5 bg-white/95 backdrop-blur rounded-2xl shadow-lg border-2 border-rose-200 p-2.5 sm:p-3 flex flex-col md:flex-row items-center justify-between gap-3">
     
-    <!-- Player Legend Indicators -->
-    <div id="playerLegend" class="flex items-center gap-2 overflow-x-auto py-1">
-      <!-- Generated via JS -->
+    <!-- Expanded Player Status Cards (No scrolling, ample space for 2-digit tile numbers) -->
+    <div id="playerLegend" class="w-full md:w-auto flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2 items-stretch">
+      <!-- Generated via JS with comfortable min-width & no clipping -->
     </div>
 
-    <!-- Interactive Rolling Die -->
-    <div class="flex items-center gap-3">
+    <!-- Interactive Rolling Die & Action Button -->
+    <div class="flex items-center justify-end gap-3 w-full md:w-auto shrink-0 border-t md:border-t-0 pt-2 md:pt-0 border-slate-100">
       <div class="text-right hidden sm:block">
         <span class="block text-xs font-black uppercase tracking-wider text-rose-500">Tap to Roll</span>
         <span id="lastRolledText" class="text-xs font-bold text-slate-400">Ready</span>
@@ -285,7 +309,7 @@
         </div>
       </div>
 
-      <button id="rollButton" onclick="rollDice()" class="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 active:scale-95 text-white font-extrabold px-4 sm:px-6 py-2.5 rounded-xl shadow-md border-b-4 border-rose-700 text-sm sm:text-base transition">
+      <button id="rollButton" onclick="rollDice()" class="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 active:scale-95 text-white font-extrabold px-5 sm:px-6 py-2.5 rounded-xl shadow-md border-b-4 border-rose-700 text-sm sm:text-base transition">
         ROLL 🎲
       </button>
     </div>
@@ -470,7 +494,7 @@
 
     /**
      * Pronounces a word using custom MP3 if defined, or SpeechSynthesis as fallback.
-     * Returns a Promise that resolves only AFTER the audio finishes AND the repeat-pause completes!
+     * Waits for repetition delay so students have time to repeat aloud.
      */
     function playWordAudioWithRepetition(word) {
       return new Promise((resolve) => {
@@ -480,7 +504,6 @@
         // Show student repetition countdown prompt
         triggerRepeatPrompt(cleanWord);
 
-        // Helper to perform the speech synthesis fallback
         const speakViaSynthesis = () => {
           if (!window.speechSynthesis) {
             setTimeout(resolve, STUDENT_REPEAT_DELAY_MS);
@@ -488,11 +511,10 @@
           }
           window.speechSynthesis.cancel();
           const utterance = new SpeechSynthesisUtterance(cleanWord);
-          utterance.rate = SPEECH_SYNTHESIS_RATE; // Slow, articulate speech
+          utterance.rate = SPEECH_SYNTHESIS_RATE;
           utterance.pitch = 1.05;
 
           utterance.onend = () => {
-            // Once speech finishes, wait for students to repeat the word
             setTimeout(resolve, STUDENT_REPEAT_DELAY_MS);
           };
 
@@ -504,14 +526,11 @@
         };
 
         if (customUrl) {
-          // Attempt playing custom MP3 audio
           const audio = new Audio(customUrl);
           audio.onended = () => {
-            // Finished playing MP3, now give students time to repeat!
             setTimeout(resolve, STUDENT_REPEAT_DELAY_MS);
           };
           audio.onerror = () => {
-            // MP3 not found or failed, seamlessly fall back to SpeechSynthesis
             console.warn(`Could not load ${customUrl}, falling back to Web Speech Synthesis.`);
             speakViaSynthesis();
           };
@@ -519,7 +538,6 @@
             speakViaSynthesis();
           });
         } else {
-          // No MP3 declared for this word, default to SpeechSynthesis
           speakViaSynthesis();
         }
       });
@@ -534,9 +552,8 @@
       highlight.textContent = word;
       bar.classList.remove("hidden");
 
-      // Reset and trigger countdown animation
       progress.classList.remove("animate-progress");
-      void progress.offsetWidth; // Force DOM reflow
+      void progress.offsetWidth; // Force reflow
       progress.style.animationDuration = `${STUDENT_REPEAT_DELAY_MS + 900}ms`;
       progress.classList.add("animate-progress");
     }
@@ -554,6 +571,49 @@
         toast.classList.add("hidden");
       }, STUDENT_REPEAT_DELAY_MS + 800);
     }
+
+    function toggleFullscreen() {
+      const body = document.getElementById("gameBody");
+      const isCurrentlyFs = !!(document.fullscreenElement || document.webkitFullscreenElement || body.classList.contains("is-fullscreen"));
+
+      if (!isCurrentlyFs) {
+        // Enter Full Screen
+        const docEl = document.documentElement;
+        if (docEl.requestFullscreen) {
+          docEl.requestFullscreen().catch(() => {});
+        } else if (docEl.webkitRequestFullscreen) {
+          docEl.webkitRequestFullscreen();
+        }
+        body.classList.add("is-fullscreen");
+        document.getElementById("fullscreenLabel").textContent = "Exit Full Screen";
+        document.getElementById("fullscreenIcon").textContent = "✕";
+      } else {
+        // Exit Full Screen
+        if (document.exitFullscreen && document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen && document.webkitFullscreenElement) {
+          document.webkitExitFullscreen();
+        }
+        body.classList.remove("is-fullscreen");
+        document.getElementById("fullscreenLabel").textContent = "Full Screen";
+        document.getElementById("fullscreenIcon").textContent = "🖥️";
+      }
+
+      setTimeout(() => {
+        renderTokens();
+      }, 150);
+    }
+
+    // Sync fullscreen state if user presses ESC key
+    document.addEventListener("fullscreenchange", () => {
+      const body = document.getElementById("gameBody");
+      if (!document.fullscreenElement) {
+        body.classList.remove("is-fullscreen");
+        document.getElementById("fullscreenLabel").textContent = "Full Screen";
+        document.getElementById("fullscreenIcon").textContent = "🖥️";
+        setTimeout(renderTokens, 150);
+      }
+    });
 
     function getTileRowCol(tileNum) {
       const zeroIndex = tileNum - 1;
@@ -652,7 +712,7 @@
           tileEl.appendChild(wordDiv);
           tileEl.appendChild(footerDiv);
 
-          // Tile click enables young learners to click any tile anytime to listen and practice!
+          // Click to listen and practice anytime
           tileEl.addEventListener("click", () => {
             initAudio();
             let wordToSpeak = tileNum === 1 ? "Start" : (tileNum === 64 ? "Finish" : tileWordMap[tileNum]);
@@ -908,18 +968,38 @@
         }
       }
 
+      // Render wide, comfortably readable player status cards (no scrolling for 2 digits)
       const legend = document.getElementById("playerLegend");
       legend.innerHTML = "";
+      
+      // Auto-adjust grid columns based on player count so cards expand nicely
+      let gridColsClass = "grid-cols-1";
+      if (totalPlayers === 2) gridColsClass = "grid-cols-2";
+      else if (totalPlayers === 3) gridColsClass = "grid-cols-3";
+      else if (totalPlayers >= 4) gridColsClass = "grid-cols-2 sm:grid-cols-4";
+      legend.className = `w-full md:w-auto flex-1 grid ${gridColsClass} gap-2 items-stretch`;
+
       for (let i = 0; i < totalPlayers; i++) {
         const p = PLAYERS_CONFIG[i];
         const isCurrent = i === currentPlayerIndex;
+        const pos = playerPositions[i];
         const item = document.createElement("div");
-        item.className = `flex items-center gap-1 px-2 py-1 rounded-xl border text-xs font-bold transition ${
+        
+        item.className = `flex items-center justify-between px-2.5 sm:px-3 py-2 rounded-xl border text-xs sm:text-sm font-bold transition shadow-sm ${
           isCurrent 
-            ? `bg-${p.color}-100 border-${p.color}-400 text-${p.color}-800 ring-2 ring-${p.color}-300 scale-105` 
-            : `bg-slate-50 border-slate-200 text-slate-500`
+            ? `bg-${p.color}-100 border-${p.color}-500 text-${p.color}-900 ring-2 ring-${p.color}-400 shadow-md scale-[1.02]` 
+            : `bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100`
         }`;
-        item.innerHTML = `<span>${p.emoji}</span><span>Tile ${playerPositions[i]}</span>`;
+
+        item.innerHTML = `
+          <div class="flex items-center gap-1.5 truncate">
+            <span class="text-lg sm:text-xl shrink-0">${p.emoji}</span>
+            <span class="truncate font-black text-xs sm:text-sm">${p.name}</span>
+          </div>
+          <div class="shrink-0 ml-1 px-2 py-0.5 rounded-lg bg-white/90 border border-slate-200 font-black text-xs sm:text-sm text-slate-700 whitespace-nowrap shadow-xs">
+            Tile ${pos}
+          </div>
+        `;
         legend.appendChild(item);
       }
     }
@@ -980,9 +1060,10 @@
 
       const tokenEl = document.getElementById(`token-p${currentPlayerIndex}`);
 
-      // Step-by-step movement: speak each word and wait so students can repeat aloud!
+      // Step-by-step movement: speak each word and wait so students can repeat aloud
       for (let next = currentPos + 1; next <= targetPos; next++) {
         playerPositions[currentPlayerIndex] = next;
+        updateTurnUI();
         playSound('step');
         highlightTile(next);
 
@@ -1029,6 +1110,7 @@
         playSound('ladder');
         highlightTile(ladderTop);
         playerPositions[currentPlayerIndex] = ladderTop;
+        updateTurnUI();
         renderTokens();
 
         const ladderWord = tileWordMap[ladderTop];
@@ -1043,6 +1125,7 @@
         playSound('snake');
         highlightTile(snakeTail);
         playerPositions[currentPlayerIndex] = snakeTail;
+        updateTurnUI();
         renderTokens();
 
         const snakeWord = tileWordMap[snakeTail];
@@ -1055,7 +1138,7 @@
 
       hideRepeatPrompt();
 
-      // Next player's turn
+      // Advance to next player
       currentPlayerIndex = (currentPlayerIndex + 1) % totalPlayers;
       updateTurnUI();
       renderTokens();
