@@ -163,16 +163,16 @@
 
   <script>
     const NUMBER_ITEMS = [
-      { num: 1, word: 'one', color: 'text-rose-500' },
-      { num: 2, word: 'two', color: 'text-orange-500' },
-      { num: 3, word: 'three', color: 'text-amber-500' },
-      { num: 4, word: 'four', color: 'text-emerald-500' },
-      { num: 5, word: 'five', color: 'text-teal-500' },
-      { num: 6, word: 'six', color: 'text-sky-500' },
-      { num: 7, word: 'seven', color: 'text-blue-500' },
-      { num: 8, word: 'eight', color: 'text-indigo-500' },
-      { num: 9, word: 'nine', color: 'text-violet-500' },
-      { num: 10, word: 'ten', color: 'text-fuchsia-500' }
+      { num: 1, word: 'one' },
+      { num: 2, word: 'two' },
+      { num: 3, word: 'three' },
+      { num: 4, word: 'four' },
+      { num: 5, word: 'five' },
+      { num: 6, word: 'six' },
+      { num: 7, word: 'seven' },
+      { num: 8, word: 'eight' },
+      { num: 9, word: 'nine' },
+      { num: 10, word: 'ten' }
     ];
 
     let currentGridItems = [];
@@ -267,7 +267,7 @@
         card.setAttribute('data-num', item.num);
 
         card.innerHTML = `
-          <span class="text-3xl sm:text-5xl font-black capitalize tracking-wide text-slate-700 pointer-events-none drop-shadow-sm">
+          <span class="text-3xl sm:text-5xl font-black lowercase tracking-wide text-slate-700 pointer-events-none drop-shadow-sm">
             ${item.word}
           </span>
         `;
@@ -311,13 +311,11 @@
     }
 
     function startNextRound() {
-      // Pick 9 unique numbers out of 10
       const shuffledPool = shuffle(NUMBER_ITEMS);
       currentGridItems = shuffledPool.slice(0, 9);
       currentGridItems = shuffle(currentGridItems);
       renderGrid();
 
-      // Pick target from the 9 visible
       const randomIndex = Math.floor(Math.random() * currentGridItems.length);
       targetItem = currentGridItems[randomIndex];
       targetNumberDisplayEl.textContent = targetItem.num;
