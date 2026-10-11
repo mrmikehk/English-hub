@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Smartboard Number Duel: Head-to-Head</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts for playful, legible classroom typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@800;900&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
+    }
+
+    body {
+      font-family: 'Fredoka', 'Nunito', sans-serif;
+      background: radial-gradient(circle at 50% 20%, #ecfdf5 0%, #e2e8f0 60%, #cbd5e1 100%);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    .word-card {
+      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.12s ease, border-color 0.2s ease;
+      cursor: pointer;
+      box-shadow: 0 8px 16px -3px rgba(15, 23, 42, 0.12), 0 3px 5px -2px rgba(15, 23, 42, 0.05);
+    }
+
+    .word-card:active {
+      transform: scale(0.92);
+    }
+
+    @keyframes wiggleWrong {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-10px) rotate(-2deg); }
+      40% { transform: translateX(9px) rotate(2deg); }
+      60% { transform: translateX(-6px) rotate(-1deg); }
+      80% { transform: translateX(4px) rotate(1deg); }
+    }
+
+    .animate-wrong {
+      animation: wiggleWrong 0.45s ease-in-out;
+      border-color: #ef4444 !important;
+      background-color: #fee2e2 !important;
+      color: #b91c1c !important;
+    }
+
+    @keyframes celebrateWin {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.12) rotate(2deg); filter: drop-shadow(0 0 25px rgba(34, 197, 94, 0.9)); }
+      100% { transform: scale(1); }
+    }
+
+    .animate-winner {
+      animation: celebrateWin 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-color: #22c55e !important;
+      background-color: #dcfce7 !important;
+      color: #15803d !important;
+    }
+
+    .particle {
+      position: absolute;
+      pointer-events: none;
+      font-size: 2.3rem;
+      animation: flyUpAndFade 0.85s ease-out forwards;
+      z-index: 60;
+    }
+
+    @keyframes flyUpAndFade {
+      0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
+      100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.4); opacity: 0; }
+    }
+
+    .grid-board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 0.6rem;
+      aspect-ratio: 1 / 1;
+      height: 100%;
+      max-height: calc(100vh - 200px);
+      max-width: 100%;
+    }
+
+    @media (min-height: 820px) {
+      .grid-board {
+        gap: 0.85rem;
+        max-height: calc(100vh - 225px);
+      }
+    }
+  </style>
+</head>
+
+<body class="flex flex-col items-center justify-between p-2 sm:p-4 select-none">
+
+  <!-- Header Navigation & Live Scoreboard -->
+  <header class="w-full max-w-7xl flex items-center justify-between bg-white/95 backdrop-blur-md px-4 sm:px-6 py-2.5 rounded-3xl shadow-md border-2 border-slate-200">
+    
+    <!-- Team 1 (Blue) -->
+    <div class="flex items-center gap-3">
+      <div class="flex flex-col items-start">
+        <div class="flex items-center gap-1.5">
+          <input 
+            type="text" 
+            id="team1NameInput" 
+            value="Boys" 
+            class="text-base sm:text-2xl font-black text-blue-600 bg-transparent border-b-2 border-transparent hover:border-blue-400 focus:border-blue-600 focus:outline-none w-28 sm:w-36 transition"
+            title="Tap to change team name"
+          />
+          <span class="text-xs text-blue-400 font-bold hidden sm:inline">✏️</span>
+        </div>
+        <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Team Blue</span>
+      </div>
+      <div id="team1Score" class="text-3xl sm:text-4xl font-black text-blue-600 bg-blue-50 border-2 border-blue-200 px-3.5 py-0.5 rounded-2xl shadow-inner min-w-[52px] text-center">
+        0
+      </div>
+    </div>
+
+    <!-- Match Status -->
+    <div class="flex flex-col items-center px-2">
+      <span class="text-[10px] sm:text-xs uppercase font-extrabold tracking-widest text-emerald-600">Numbers 1–10 Duel</span>
+      <div id="statusBanner" class="text-xs sm:text-sm font-bold text-slate-600 text-center">
+        First to tap the matching word scores!
+      </div>
+    </div>
+
+    <!-- Team 2 (Pink) & Tools -->
+    <div class="flex items-center gap-3">
+      <div id="team2Score" class="text-3xl sm:text-4xl font-black text-pink-600 bg-pink-50 border-2 border-pink-200 px-3.5 py-0.5 rounded-2xl shadow-inner min-w-[52px] text-center">
+        0
+      </div>
+      <div class="flex flex-col items-end">
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs text-pink-400 font-bold hidden sm:inline">✏️</span>
+          <input 
+            type="text" 
+            id="team2NameInput" 
+            value="Girls" 
+            class="text-base sm:text-2xl font-black text-pink-600 bg-transparent border-b-2 border-transparent hover:border-pink-400 focus:border-pink-600 focus:outline-none w-28 sm:w-36 text-right transition"
+            title="Tap to change team name"
+          />
+        </div>
+        <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Team Pink</span>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex items-center gap-1.5 pl-2 border-l-2 border-slate-200">
+        <button id="speakBtn" title="Speak Word Aloud" class="w-10 h-10 rounded-xl bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-base font-bold flex items-center justify-center transition border border-indigo-200 active:scale-95 shadow-sm">
+          🔊
+        </button>
+        <button id="soundToggleBtn" title="Toggle Sound" class="w-10 h-10 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-700 text-base font-bold flex items-center justify-center transition border border-sky-200 active:scale-95 shadow-sm">
+          🔔
+        </button>
+        <button id="fullscreenBtn" title="Fullscreen" class="w-10 h-10 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-base font-bold flex items-center justify-center transition border border-emerald-200 active:scale-95 shadow-sm">
+          ⛶
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Central Shared Target Banner -->
+  <section class="w-full max-w-4xl my-2 flex items-center justify-center">
+    <div class="bg-white px-8 sm:px-14 py-2 sm:py-3 rounded-3xl shadow-lg border-4 border-emerald-400 flex items-center gap-3 sm:gap-5">
+      <span class="text-2xl sm:text-3xl animate-bounce">👉</span>
+      <span class="text-lg sm:text-2xl font-black text-slate-600 uppercase tracking-wide">Touch:</span>
+      <span id="targetNumberDisplay" class="text-4xl sm:text-6xl font-black text-emerald-600 leading-none bg-emerald-50 px-4 py-0.5 rounded-2xl border-2 border-emerald-300 drop-shadow-sm">
+        ?
+      </span>
+    </div>
+  </section>
+
+  <!-- Dual Split Arenas -->
+  <main class="flex-1 w-full max-w-7xl grid grid-cols-2 gap-3 sm:gap-6 items-center justify-center">
+    
+    <!-- Left Board (Team 1) -->
+    <div class="h-full flex flex-col items-center justify-center bg-blue-50/70 p-2 sm:p-3 rounded-3xl border-4 border-blue-200 shadow-md">
+      <div id="team1Board" class="grid-board"></div>
+    </div>
+
+    <!-- Right Board (Team 2) -->
+    <div class="h-full flex flex-col items-center justify-center bg-pink-50/70 p-2 sm:p-3 rounded-3xl border-4 border-pink-200 shadow-md">
+      <div id="team2Board" class="grid-board"></div>
+    </div>
+
+  </main>
+
+  <!-- Footer Info Bar -->
+  <footer class="w-full max-w-7xl py-1 flex items-center justify-between text-slate-500 text-xs sm:text-sm font-semibold px-2">
+    <span>💡 Tip: Click team names to rename them anytime! Cards on each board are scrambled independently.</span>
+    <button id="resetScoreBtn" class="hover:text-red-600 underline font-bold transition">Reset Match Score</button>
+  </footer>
+
+  <script>
+    const NUMBER_ITEMS = [
+      { num: 1, word: 'one' },
+      { num: 2, word: 'two' },
+      { num: 3, word: 'three' },
+      { num: 4, word: 'four' },
+      { num: 5, word: 'five' },
+      { num: 6, word: 'six' },
+      { num: 7, word: 'seven' },
+      { num: 8, word: 'eight' },
+      { num: 9, word: 'nine' },
+      { num: 10, word: 'ten' }
+    ];
+
+    const TEAM_STORAGE_KEY = 'smartboard_number_duel_teams';
+
+    let currentRoundItems = [];
+    let targetItem = null;
+    let team1Score = 0;
+    let team2Score = 0;
+    let roundResolved = false;
+    let isSoundEnabled = true;
+
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function playTone(freq, type, duration, delay = 0) {
+      if (!isSoundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime + delay);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + delay);
+        osc.stop(ctx.currentTime + delay + duration);
+      } catch (e) {}
+    }
+
+    function playHappySound() {
+      playTone(523.25, 'triangle', 0.12, 0.0);
+      playTone(659.25, 'triangle', 0.12, 0.08);
+      playTone(783.99, 'triangle', 0.12, 0.16);
+      playTone(1046.50, 'triangle', 0.28, 0.24);
+    }
+
+    function playWrongSound() {
+      playTone(220, 'sawtooth', 0.18, 0.0);
+      playTone(165, 'sawtooth', 0.25, 0.12);
+    }
+
+    function speakCurrentNumber() {
+      if (!targetItem || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(targetItem.word);
+      utterance.rate = 0.85;
+      utterance.pitch = 1.05;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function spawnConfetti(x, y) {
+      const symbols = ['⭐', '🎉', '✨', '⚡', '🏆', '🎯', '🔢'];
+      for (let i = 0; i < 14; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 50 + Math.random() * 100;
+        p.style.left = `${x}px`;
+        p.style.top = `${y}px`;
+        p.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+        p.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 850);
+      }
+    }
+
+    const team1BoardEl = document.getElementById('team1Board');
+    const team2BoardEl = document.getElementById('team2Board');
+    const targetNumberDisplayEl = document.getElementById('targetNumberDisplay');
+    const team1ScoreEl = document.getElementById('team1Score');
+    const team2ScoreEl = document.getElementById('team2Score');
+    const team1NameInput = document.getElementById('team1NameInput');
+    const team2NameInput = document.getElementById('team2NameInput');
+    const statusBanner = document.getElementById('statusBanner');
+
+    function createWordCard(item, teamNumber) {
+      const card = document.createElement('button');
+      const borderHover = teamNumber === 1 ? 'hover:border-blue-400 active:border-blue-500' : 'hover:border-pink-400 active:border-pink-500';
+
+      card.className = `word-card relative flex items-center justify-center p-2 sm:p-3 bg-white rounded-2xl sm:rounded-3xl border-3 sm:border-4 border-slate-200 ${borderHover} overflow-hidden w-full h-full`;
+      card.setAttribute('data-num', item.num);
+
+      card.innerHTML = `
+        <span class="text-2xl sm:text-4xl font-black lowercase tracking-wide text-slate-700 pointer-events-none drop-shadow-sm">
+          ${item.word}
+        </span>
+      `;
+
+      card.addEventListener('pointerdown', (e) => handleCardTap(item, card, teamNumber, e));
+      return card;
+    }
+
+    function renderBoards() {
+      team1BoardEl.innerHTML = '';
+      team2BoardEl.innerHTML = '';
+
+      const team1Layout = shuffle(currentRoundItems);
+      team1Layout.forEach(item => team1BoardEl.appendChild(createWordCard(item, 1)));
+
+      const team2Layout = shuffle(currentRoundItems);
+      team2Layout.forEach(item => team2BoardEl.appendChild(createWordCard(item, 2)));
+    }
+
+    function handleCardTap(selectedItem, cardElement, teamNumber, event) {
+      if (roundResolved) return;
+      getAudioContext();
+
+      if (selectedItem.num === targetItem.num) {
+        roundResolved = true;
+
+        const winningTeamName = teamNumber === 1 ? team1NameInput.value.trim() || 'Boys' : team2NameInput.value.trim() || 'Girls';
+        const teamColorClass = teamNumber === 1 ? 'text-blue-600' : 'text-pink-600';
+
+        if (teamNumber === 1) {
+          team1Score++;
+          team1ScoreEl.textContent = team1Score;
+        } else {
+          team2Score++;
+          team2ScoreEl.textContent = team2Score;
+        }
+
+        playHappySound();
+        cardElement.classList.add('animate-winner');
+
+        const rect = cardElement.getBoundingClientRect();
+        spawnConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+        statusBanner.innerHTML = `⚡ <span class="${teamColorClass} font-black">${winningTeamName}</span> got it first!`;
+
+        setTimeout(() => {
+          cardElement.classList.remove('animate-winner');
+          startNextRound();
+        }, 1100);
+      } else {
+        playWrongSound();
+        cardElement.classList.add('animate-wrong');
+        setTimeout(() => cardElement.classList.remove('animate-wrong'), 500);
+      }
+    }
+
+    function startNextRound() {
+      roundResolved = false;
+      statusBanner.textContent = "First to tap wins the round!";
+
+      const shuffledPool = shuffle(NUMBER_ITEMS);
+      currentRoundItems = shuffledPool.slice(0, 9);
+
+      const randomIndex = Math.floor(Math.random() * currentRoundItems.length);
+      targetItem = currentRoundItems[randomIndex];
+      targetNumberDisplayEl.textContent = targetItem.num;
+
+      renderBoards();
+    }
+
+    function saveTeamNames() {
+      try {
+        localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify({
+          team1: team1NameInput.value,
+          team2: team2NameInput.value
+        }));
+      } catch (e) {}
+    }
+
+    function loadTeamNames() {
+      try {
+        const saved = localStorage.getItem(TEAM_STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.team1) team1NameInput.value = parsed.team1;
+          if (parsed.team2) team2NameInput.value = parsed.team2;
+        }
+      } catch (e) {}
+    }
+
+    team1NameInput.addEventListener('input', saveTeamNames);
+    team2NameInput.addEventListener('input', saveTeamNames);
+
+    document.getElementById('speakBtn').addEventListener('click', () => {
+      getAudioContext();
+      speakCurrentNumber();
+    });
+
+    const soundToggleBtn = document.getElementById('soundToggleBtn');
+    soundToggleBtn.addEventListener('click', () => {
+      isSoundEnabled = !isSoundEnabled;
+      soundToggleBtn.textContent = isSoundEnabled ? '🔔' : '🔕';
+      soundToggleBtn.classList.toggle('opacity-60', !isSoundEnabled);
+    });
+
+    document.getElementById('resetScoreBtn').addEventListener('click', () => {
+      team1Score = 0;
+      team2Score = 0;
+      team1ScoreEl.textContent = '0';
+      team2ScoreEl.textContent = '0';
+      statusBanner.textContent = "Scores reset! First to tap wins the round.";
+    });
+
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    fullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+        fullscreenBtn.textContent = '✕';
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        fullscreenBtn.textContent = '⛶';
+      }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+      fullscreenBtn.textContent = document.fullscreenElement ? '✕' : '⛶';
+    });
+
+    window.onload = function() {
+      loadTeamNames();
+      startNextRound();
+    };
+  </script>
+</body>
+</html>
