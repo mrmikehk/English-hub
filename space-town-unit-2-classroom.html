@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Space Town Unit 2 Classroom Items Matching Game</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts for playful, legible classroom typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
+    }
+
+    body {
+      font-family: 'Fredoka', 'Nunito', sans-serif;
+      background: radial-gradient(circle at 50% 15%, #fefce8 0%, #e0f2fe 55%, #bae6fd 100%);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Chunky, touch-friendly 3D card styling for interactive boards */
+    .item-card {
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease, border-color 0.2s ease;
+      cursor: pointer;
+      box-shadow: 0 10px 18px -4px rgba(15, 23, 42, 0.12), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
+    }
+
+    .item-card:active {
+      transform: scale(0.93);
+    }
+
+    /* Wrong tap shake */
+    @keyframes wiggleWrong {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-14px) rotate(-3deg); }
+      40% { transform: translateX(12px) rotate(3deg); }
+      60% { transform: translateX(-8px) rotate(-2deg); }
+      80% { transform: translateX(6px) rotate(1deg); }
+    }
+
+    .animate-wrong {
+      animation: wiggleWrong 0.5s ease-in-out;
+      border-color: #ef4444 !important;
+      background-color: #fee2e2 !important;
+    }
+
+    /* Correct tap bounce & celebratory burst */
+    @keyframes celebratePop {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.1) rotate(2deg); filter: drop-shadow(0 0 25px rgba(34, 197, 94, 0.8)); }
+      100% { transform: scale(1); }
+    }
+
+    .animate-correct {
+      animation: celebratePop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-color: #22c55e !important;
+      background-color: #dcfce7 !important;
+    }
+
+    /* Floating star particles */
+    .particle {
+      position: absolute;
+      pointer-events: none;
+      font-size: 2.5rem;
+      animation: flyUpAndFade 0.85s ease-out forwards;
+      z-index: 60;
+    }
+
+    @keyframes flyUpAndFade {
+      0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
+      100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.4); opacity: 0; }
+    }
+
+    /* 3x3 Responsive Grid */
+    .grid-board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 1.1rem;
+      aspect-ratio: 1 / 1;
+      max-height: calc(100vh - 210px);
+      max-width: calc(100vw - 40px);
+      width: 100%;
+    }
+
+    @media (min-height: 800px) {
+      .grid-board {
+        gap: 1.35rem;
+        max-height: calc(100vh - 235px);
+      }
+    }
+
+    /* Modal scroll styling */
+    .custom-scroll::-webkit-scrollbar {
+      width: 8px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+
+<body class="flex flex-col items-center justify-between p-3 sm:p-5 select-none">
+
+  <!-- Header Bar -->
+  <header class="w-full max-w-5xl flex items-center justify-between bg-white/90 backdrop-blur-md px-4 sm:px-6 py-2.5 rounded-3xl shadow-md border-2 border-amber-200">
+    <!-- Score & Streak -->
+    <div class="flex items-center gap-4 sm:gap-6">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl sm:text-3xl">⭐</span>
+        <div>
+          <div class="text-[11px] uppercase tracking-wider text-slate-500 font-bold">Score</div>
+          <div id="scoreDisplay" class="text-2xl sm:text-3xl font-black text-amber-500 leading-none">0</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 border-l-2 border-slate-200 pl-4">
+        <span class="text-2xl sm:text-3xl">🔥</span>
+        <div>
+          <div class="text-[11px] uppercase tracking-wider text-slate-500 font-bold">Streak</div>
+          <div id="streakDisplay" class="text-2xl sm:text-3xl font-black text-orange-500 leading-none">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Classroom Target Indicator -->
+    <div class="hidden md:flex flex-col items-center">
+      <span class="text-xs uppercase tracking-widest text-amber-600 font-extrabold">Classroom Challenge</span>
+      <span class="text-lg font-bold text-slate-700">Find the Classroom Item!</span>
+    </div>
+
+    <!-- Interactive Tools -->
+    <div class="flex items-center gap-2">
+      <!-- Voice Pronunciation Button -->
+      <button id="speakBtn" title="Speak Word Aloud" class="w-12 h-12 rounded-2xl bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-xl font-bold flex items-center justify-center transition border-2 border-indigo-200 active:scale-95 shadow-sm">
+        🔊
+      </button>
+
+      <!-- Audio Mute/Unmute Toggle -->
+      <button id="soundToggleBtn" title="Toggle Sound" class="w-12 h-12 rounded-2xl bg-sky-100 hover:bg-sky-200 text-sky-700 text-xl font-bold flex items-center justify-center transition border-2 border-sky-200 active:scale-95 shadow-sm">
+        🔔
+      </button>
+
+      <!-- Teacher Settings Modal Toggle -->
+      <button id="openSettingsBtn" title="Teacher Customization Panel" class="w-12 h-12 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-800 text-xl font-bold flex items-center justify-center transition border-2 border-amber-200 active:scale-95 shadow-sm">
+        ⚙️
+      </button>
+
+      <!-- Fullscreen Toggle -->
+      <button id="fullscreenBtn" title="Fullscreen (F11)" class="w-12 h-12 rounded-2xl bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xl font-bold flex items-center justify-center transition border-2 border-emerald-200 active:scale-95 shadow-sm">
+        ⛶
+      </button>
+    </div>
+  </header>
+
+  <!-- Target Prompt Callout Banner -->
+  <section class="w-full max-w-4xl my-2 flex items-center justify-center">
+    <div class="bg-white px-6 sm:px-10 py-3 sm:py-4 rounded-3xl shadow-lg border-4 border-amber-300 flex items-center gap-3 sm:gap-5">
+      <span class="text-2xl sm:text-4xl animate-bounce">👉</span>
+      <span class="text-xl sm:text-3xl font-extrabold text-slate-600 uppercase tracking-wide">Touch the:</span>
+      <span id="targetNameDisplay" class="text-2xl sm:text-5xl font-black text-amber-600 drop-shadow-sm tracking-wide capitalize">
+        Loading...
+      </span>
+    </div>
+  </section>
+
+  <!-- 3x3 Interactive Surface -->
+  <main class="flex-1 flex items-center justify-center w-full max-w-4xl">
+    <div id="itemGrid" class="grid-board">
+      <!-- Injected dynamically via JS -->
+    </div>
+  </main>
+
+  <!-- Footer Info Bar -->
+  <footer class="w-full max-w-4xl py-1 flex items-center justify-between text-slate-500 text-xs sm:text-sm font-semibold px-2">
+    <span>💡 Tip: Tap ⚙️ top right to add or rename items anytime!</span>
+    <button id="resetScoreBtn" class="hover:text-red-600 underline font-bold transition">Reset Score</button>
+  </footer>
+
+  <!-- Teacher Settings Modal -->
+  <div id="settingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl border-4 border-amber-300 overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <!-- Modal Header -->
+      <div class="bg-amber-50 px-6 py-4 border-b-2 border-amber-200 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">⚙️</span>
+          <div>
+            <h2 class="text-xl font-black text-amber-900 leading-tight">Classroom Items Customizer</h2>
+            <p class="text-xs text-amber-700 font-semibold">Change item names &amp; filenames. (Changes are saved automatically!)</p>
+          </div>
+        </div>
+        <button id="closeSettingsBtn" class="text-slate-400 hover:text-slate-700 text-2xl font-bold p-2 active:scale-90 leading-none">✕</button>
+      </div>
+
+      <!-- Instructions & Pool Counter -->
+      <div class="px-6 py-3 bg-sky-50 border-b border-sky-200 text-sky-900 text-xs flex justify-between items-center">
+        <span>📦 Current Item Pool: <strong id="poolCount">0</strong> items (9 are randomly picked for each board).</span>
+        <button id="addItemBtn" class="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl text-xs flex items-center gap-1 shadow-sm active:scale-95 transition">
+          ➕ Add New Item
+        </button>
+      </div>
+
+      <!-- Table Editor List -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-3 custom-scroll" id="itemEditorList">
+        <!-- Input rows generated by JS -->
+      </div>
+
+      <!-- Modal Footer Actions -->
+      <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <button id="resetDefaultsBtn" class="px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition border border-red-200">
+          🔄 Restore Default Items
+        </button>
+        <div class="flex items-center gap-2">
+          <button id="saveAndCloseBtn" class="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-2xl text-sm shadow-md transition active:scale-95">
+            Save &amp; Restart Game
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /*
+      ==================================================================
+      DEFAULT CLASSROOM ITEMS CONFIGURATION
+      ==================================================================
+      Pre-configured to match your files in the 'images' directory:
+      - images/bookshelf.jpg
+      - images/classroom-chair.jpg
+      - images/classroom-desk.jpg
+      - images/classroom-door.jpg
+      - images/classroom-fan.jpg
+      - images/classroom-window.jpg
+      - images/computer.jpg
+      - images/projector.jpg
+      - images/table.jpg
+      - images/tv-smartboard.jpg
+      - images/whiteboard.jpg
+    */
+    const DEFAULT_ITEMS = [
+      { id: 'bookshelf', name: 'Bookshelf', image: 'images/bookshelf.jpg', emoji: '📚' },
+      { id: 'classroom-chair', name: 'Chair', image: 'images/classroom-chair.jpg', emoji: '🪑' },
+      { id: 'classroom-desk', name: 'Desk', image: 'images/classroom-desk.jpg', emoji: '🏫' },
+      { id: 'classroom-door', name: 'Door', image: 'images/classroom-door.jpg', emoji: '🚪' },
+      { id: 'classroom-fan', name: 'Fan', image: 'images/classroom-fan.jpg', emoji: '🌀' },
+      { id: 'classroom-window', name: 'Window', image: 'images/classroom-window.jpg', emoji: '🪟' },
+      { id: 'computer', name: 'Computer', image: 'images/computer.jpg', emoji: '💻' },
+      { id: 'projector', name: 'Projector', image: 'images/projector.jpg', emoji: '📽️' },
+      { id: 'table', name: 'Table', image: 'images/table.jpg', emoji: '🪵' },
+      { id: 'tv-smartboard', name: 'Smartboard', image: 'images/tv-smartboard.jpg', emoji: '🖥️' },
+      { id: 'whiteboard', name: 'Whiteboard', image: 'images/whiteboard.jpg', emoji: '📋' }
+    ];
+
+    const STORAGE_KEY = 'smartboard_classroom_items_custom_list';
+
+    function loadItems() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length >= 9) {
+            return parsed;
+          }
+        }
+      } catch (err) {
+        console.warn("Could not read localStorage:", err);
+      }
+      return JSON.parse(JSON.stringify(DEFAULT_ITEMS));
+    }
+
+    function saveItems(items) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      } catch (err) {
+        console.warn("Could not save to localStorage:", err);
+      }
+    }
+
+    // Active Pool & Current Board State
+    let itemPool = loadItems();
+    let currentGridItems = [];
+    let targetItem = null;
+    let score = 0;
+    let streak = 0;
+    let isSoundEnabled = true;
+    let isProcessing = false;
+
+    /*
+      ==================================================================
+      AUDIO ENGINE (.OGG FILES WITH SYNTHESIS FALLBACK)
+      ==================================================================
+    */
+    const correctAudio = new Audio('sounds/correct.ogg');
+    const wrongAudio = new Audio('sounds/wrong.ogg');
+    correctAudio.preload = 'auto';
+    wrongAudio.preload = 'auto';
+
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playSynthesizedTone(freq, type, duration, delay = 0) {
+      if (!isSoundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+
+        gain.gain.setValueAtTime(0.18, ctx.currentTime + delay);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + duration);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(ctx.currentTime + delay);
+        osc.stop(ctx.currentTime + delay + duration);
+      } catch (e) {
+        console.warn("Audio synthesis error:", e);
+      }
+    }
+
+    function playHappySound() {
+      if (!isSoundEnabled) return;
+      correctAudio.currentTime = 0;
+      const playPromise = correctAudio.play();
+
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Fallback happy chime if sounds/correct.ogg isn't present
+          playSynthesizedTone(523.25, 'triangle', 0.15, 0.0); // C5
+          playSynthesizedTone(659.25, 'triangle', 0.15, 0.1); // E5
+          playSynthesizedTone(783.99, 'triangle', 0.15, 0.2); // G5
+          playSynthesizedTone(1046.50, 'triangle', 0.35, 0.3); // C6
+        });
+      }
+    }
+
+    function playWrongSound() {
+      if (!isSoundEnabled) return;
+      wrongAudio.currentTime = 0;
+      const playPromise = wrongAudio.play();
+
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Fallback low buzz if sounds/wrong.ogg isn't present
+          playSynthesizedTone(220, 'sawtooth', 0.2, 0.0);
+          playSynthesizedTone(165, 'sawtooth', 0.3, 0.15);
+        });
+      }
+    }
+
+    // Text-to-Speech Engine
+    function speakCurrentItem() {
+      if (!targetItem || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(targetItem.name);
+      utterance.rate = 0.85;
+      utterance.pitch = 1.05;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Modern Fisher-Yates shuffle
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function spawnConfetti(x, y) {
+      const symbols = ['⭐', '🎉', '✨', '🌟', '🏆', '🎯', '✏️'];
+      for (let i = 0; i < 14; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 60 + Math.random() * 110;
+        const dx = Math.cos(angle) * dist + 'px';
+        const dy = Math.sin(angle) * dist + 'px';
+
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+        particle.style.setProperty('--dx', dx);
+        particle.style.setProperty('--dy', dy);
+
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 900);
+      }
+    }
+
+    const itemGridEl = document.getElementById('itemGrid');
+    const targetNameDisplayEl = document.getElementById('targetNameDisplay');
+    const scoreDisplayEl = document.getElementById('scoreDisplay');
+    const streakDisplayEl = document.getElementById('streakDisplay');
+
+    function renderGrid() {
+      itemGridEl.innerHTML = '';
+
+      currentGridItems.forEach((item) => {
+        const card = document.createElement('button');
+        card.className = `item-card relative flex flex-col items-center justify-center p-3 sm:p-5 bg-white rounded-3xl border-4 border-slate-200 hover:border-amber-400 active:border-amber-500 overflow-hidden w-full h-full`;
+        card.setAttribute('data-item-id', item.id);
+        card.setAttribute('aria-label', item.name);
+
+        card.innerHTML = `
+          <div class="w-full h-full flex items-center justify-center pointer-events-none relative">
+            <img 
+              src="${item.image}" 
+              alt="${item.name}" 
+              class="max-w-full max-h-full object-contain filter drop-shadow-md z-10" 
+              onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"
+            />
+            <div class="hidden text-5xl sm:text-7xl flex items-center justify-center select-none">
+              ${item.emoji || '🏫'}
+            </div>
+          </div>
+        `;
+
+        card.addEventListener('pointerdown', (e) => handleItemClick(item, card, e));
+        itemGridEl.appendChild(card);
+      });
+    }
+
+    function handleItemClick(selectedItem, cardElement, event) {
+      if (isProcessing) return;
+      getAudioContext();
+
+      if (selectedItem.id === targetItem.id) {
+        // Correct Choice
+        isProcessing = true;
+        score += 1;
+        streak += 1;
+        scoreDisplayEl.textContent = score;
+        streakDisplayEl.textContent = streak;
+
+        playHappySound();
+        cardElement.classList.add('animate-correct');
+
+        const rect = cardElement.getBoundingClientRect();
+        spawnConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+        setTimeout(() => {
+          cardElement.classList.remove('animate-correct');
+          startNextRound();
+          isProcessing = false;
+        }, 900);
+
+      } else {
+        // Wrong Choice
+        streak = 0;
+        streakDisplayEl.textContent = streak;
+        playWrongSound();
+
+        cardElement.classList.add('animate-wrong');
+        setTimeout(() => {
+          cardElement.classList.remove('animate-wrong');
+        }, 550);
+      }
+    }
+
+    function startNextRound() {
+      if (itemPool.length < 9) {
+        alert("Please add at least 9 classroom items in Settings to start the game!");
+        return;
+      }
+
+      // Pick 9 random items out of the pool
+      const shuffledPool = shuffle(itemPool);
+      currentGridItems = shuffledPool.slice(0, 9);
+
+      // Re-shuffle positions on the 3x3 board
+      currentGridItems = shuffle(currentGridItems);
+      renderGrid();
+
+      // Pick the target item from the visible 9
+      const randomIndex = Math.floor(Math.random() * currentGridItems.length);
+      targetItem = currentGridItems[randomIndex];
+
+      // Update callout banner
+      targetNameDisplayEl.textContent = targetItem.name;
+    }
+
+    /*
+      ==================================================================
+      TEACHER CUSTOMIZATION MODAL (IN-APP)
+      ==================================================================
+    */
+    const settingsModal = document.getElementById('settingsModal');
+    const openSettingsBtn = document.getElementById('openSettingsBtn');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    const itemEditorList = document.getElementById('itemEditorList');
+    const poolCountEl = document.getElementById('poolCount');
+    const addItemBtn = document.getElementById('addItemBtn');
+    const resetDefaultsBtn = document.getElementById('resetDefaultsBtn');
+    const saveAndCloseBtn = document.getElementById('saveAndCloseBtn');
+
+    let workingItemsList = [];
+
+    function renderEditorRows() {
+      itemEditorList.innerHTML = '';
+      poolCountEl.textContent = workingItemsList.length;
+
+      workingItemsList.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = "flex items-center gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-200";
+        row.innerHTML = `
+          <span class="text-xs font-black text-slate-400 w-5 text-center">${index + 1}</span>
+          
+          <div class="flex-1 flex flex-col sm:flex-row gap-2">
+            <div class="flex-1">
+              <label class="block text-[10px] font-bold uppercase text-slate-400">Item Name</label>
+              <input 
+                type="text" 
+                value="${item.name}" 
+                class="item-name-input w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-sm font-semibold focus:outline-none focus:border-amber-500" 
+                data-index="${index}"
+                placeholder="e.g. Chair"
+              />
+            </div>
+            
+            <div class="flex-1">
+              <label class="block text-[10px] font-bold uppercase text-slate-400">JPG File Path / URL</label>
+              <input 
+                type="text" 
+                value="${item.image}" 
+                class="item-image-input w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-sm font-mono text-slate-600 focus:outline-none focus:border-amber-500" 
+                data-index="${index}"
+                placeholder="e.g. images/table.jpg"
+              />
+            </div>
+
+            <div class="w-16">
+              <label class="block text-[10px] font-bold uppercase text-slate-400">Fallback</label>
+              <input 
+                type="text" 
+                value="${item.emoji || '🏫'}" 
+                class="item-emoji-input w-full px-2 py-1.5 text-center bg-white border border-slate-300 rounded-xl text-base focus:outline-none focus:border-amber-500" 
+                data-index="${index}"
+              />
+            </div>
+          </div>
+
+          <button 
+            class="delete-item-btn text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-xl text-lg font-bold transition ${workingItemsList.length <= 9 ? 'opacity-30 cursor-not-allowed' : ''}" 
+            data-index="${index}"
+            title="${workingItemsList.length <= 9 ? 'A minimum of 9 items is required for the grid' : 'Delete this item'}"
+          >
+            🗑️
+          </button>
+        `;
+        itemEditorList.appendChild(row);
+      });
+
+      // Bind inputs
+      document.querySelectorAll('.item-name-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const idx = parseInt(e.target.dataset.index);
+          workingItemsList[idx].name = e.target.value;
+          workingItemsList[idx].id = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        });
+      });
+
+      document.querySelectorAll('.item-image-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const idx = parseInt(e.target.dataset.index);
+          workingItemsList[idx].image = e.target.value.trim();
+        });
+      });
+
+      document.querySelectorAll('.item-emoji-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const idx = parseInt(e.target.dataset.index);
+          workingItemsList[idx].emoji = e.target.value.trim() || '🏫';
+        });
+      });
+
+      document.querySelectorAll('.delete-item-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (workingItemsList.length <= 9) return;
+          const idx = parseInt(btn.dataset.index);
+          workingItemsList.splice(idx, 1);
+          renderEditorRows();
+        });
+      });
+    }
+
+    openSettingsBtn.addEventListener('click', () => {
+      workingItemsList = JSON.parse(JSON.stringify(itemPool));
+      renderEditorRows();
+      settingsModal.classList.remove('hidden');
+    });
+
+    closeSettingsBtn.addEventListener('click', () => {
+      settingsModal.classList.add('hidden');
+    });
+
+    addItemBtn.addEventListener('click', () => {
+      workingItemsList.push({
+        id: 'new-item-' + Date.now(),
+        name: 'New Item',
+        image: 'images/new-item.jpg',
+        emoji: '📌'
+      });
+      renderEditorRows();
+      itemEditorList.scrollTop = itemEditorList.scrollHeight;
+    });
+
+    resetDefaultsBtn.addEventListener('click', () => {
+      workingItemsList = JSON.parse(JSON.stringify(DEFAULT_ITEMS));
+      renderEditorRows();
+    });
+
+    saveAndCloseBtn.addEventListener('click', () => {
+      const valid = workingItemsList.every(i => i.name.trim().length > 0);
+      if (!valid) {
+        alert("Please ensure every item has a valid name.");
+        return;
+      }
+      itemPool = JSON.parse(JSON.stringify(workingItemsList));
+      saveItems(itemPool);
+      settingsModal.classList.add('hidden');
+      startNextRound();
+    });
+
+    // Toolbar Actions
+    document.getElementById('speakBtn').addEventListener('click', () => {
+      getAudioContext();
+      speakCurrentItem();
+    });
+
+    const soundToggleBtn = document.getElementById('soundToggleBtn');
+    soundToggleBtn.addEventListener('click', () => {
+      isSoundEnabled = !isSoundEnabled;
+      soundToggleBtn.textContent = isSoundEnabled ? '🔔' : '🔕';
+      soundToggleBtn.classList.toggle('opacity-60', !isSoundEnabled);
+    });
+
+    document.getElementById('resetScoreBtn').addEventListener('click', () => {
+      score = 0;
+      streak = 0;
+      scoreDisplayEl.textContent = '0';
+      streakDisplayEl.textContent = '0';
+    });
+
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    fullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => console.warn(err));
+        fullscreenBtn.textContent = '✕';
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+          fullscreenBtn.textContent = '⛶';
+        }
+      }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+      fullscreenBtn.textContent = document.fullscreenElement ? '✕' : '⛶';
+    });
+
+    window.onload = function() {
+      startNextRound();
+    };
+  </script>
+</body>
+</html>
