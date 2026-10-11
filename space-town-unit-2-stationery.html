@@ -130,7 +130,7 @@
     .word-card {
       font-size: 1.2rem;
       font-weight: 600;
-      text-transform: capitalize;
+      text-transform: lowercase;
     }
 
     @keyframes shake {
@@ -194,10 +194,10 @@
 
   <div class="game-container">
     <div class="column" id="images-column">
-      <div class="column-title">Picture</div>
+      <div class="column-title">picture</div>
     </div>
     <div class="column" id="words-column">
-      <div class="column-title">Word</div>
+      <div class="column-title">word</div>
     </div>
   </div>
 
@@ -208,16 +208,16 @@
 
   <script>
     const items = [
-      { id: 'pencil', word: 'a pencil', file: 'images/stationery/pencil.jpg' },
-      { id: 'eraser', word: 'an eraser', file: 'images/stationery/eraser.jpg' },
-      { id: 'ruler', word: 'a ruler', file: 'images/stationery/ruler.jpg' },
-      { id: 'sharpener', word: 'a sharpener', file: 'images/stationery/sharpener.jpg' },
-      { id: 'pen', word: 'a pen', file: 'images/stationery/en.jpg' },
-      { id: 'pencil-case', word: 'a pencil case', file: 'images/stationery/pencil-case.jpg' },
-      { id: 'book', word: 'a book', file: 'images/stationery/book.jpg' },
-      { id: 'school-bag', word: 'a school bag', file: 'images/stationery/school-bag.jpg' },
-      { id: 'coloured-pencil', word: 'a coloured pencil', file: 'images/stationery/coloured-pencil.jpg' },
-      { id: 'glue-stick', word: 'a glue stick', file: 'images/stationery/glue-stick.jpg' }
+      { id: 'pencil', word: 'a pencil', file: 'pencil.png' },
+      { id: 'eraser', word: 'an eraser', file: 'eraser.png' },
+      { id: 'ruler', word: 'a ruler', file: 'ruler.png' },
+      { id: 'sharpener', word: 'a sharpener', file: 'sharpener.png' },
+      { id: 'pen', word: 'a pen', file: 'pen.png' },
+      { id: 'pencil-case', word: 'a pencil case', file: 'pencil-case.png' },
+      { id: 'book', word: 'a book', file: 'book.png' },
+      { id: 'school-bag', word: 'a school bag', file: 'school-bag.png' },
+      { id: 'coloured-pencil', word: 'a coloured pencil', file: 'coloured-pencil.png' },
+      { id: 'glue-stick', word: 'a glue stick', file: 'glue-stick.png' }
     ];
 
     let selectedImage = null;
@@ -248,8 +248,8 @@
       const imgCol = document.getElementById('images-column');
       const wordCol = document.getElementById('words-column');
 
-      imgCol.innerHTML = '<div class="column-title">Picture</div>';
-      wordCol.innerHTML = '<div class="column-title">Word</div>';
+      imgCol.innerHTML = '<div class="column-title">picture</div>';
+      wordCol.innerHTML = '<div class="column-title">word</div>';
 
       const shuffledImages = shuffle(items);
       const shuffledWords = shuffle(items);
@@ -261,7 +261,7 @@
         
         const img = document.createElement('img');
         img.src = `images/stationery/${item.file}`;
-        img.alt = item.word;
+        img.alt = item.word.toLowerCase();
         card.appendChild(img);
 
         card.addEventListener('click', () => selectCard('image', card));
@@ -272,7 +272,7 @@
         const card = document.createElement('div');
         card.className = 'card word-card';
         card.dataset.id = item.id;
-        card.textContent = item.word;
+        card.textContent = item.word.toLowerCase();
 
         card.addEventListener('click', () => selectCard('word', card));
         wordCol.appendChild(card);
