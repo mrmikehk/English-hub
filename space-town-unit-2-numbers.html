@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Smartboard Number Word Matching Game</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts for playful, legible classroom typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@800;900&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
+    }
+
+    body {
+      font-family: 'Fredoka', 'Nunito', sans-serif;
+      background: radial-gradient(circle at 50% 15%, #ecfdf5 0%, #e0f2fe 55%, #bae6fd 100%);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    .word-card {
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease, border-color 0.2s ease;
+      cursor: pointer;
+      box-shadow: 0 10px 18px -4px rgba(15, 23, 42, 0.12), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
+    }
+
+    .word-card:active {
+      transform: scale(0.93);
+    }
+
+    @keyframes wiggleWrong {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-14px) rotate(-3deg); }
+      40% { transform: translateX(12px) rotate(3deg); }
+      60% { transform: translateX(-8px) rotate(-2deg); }
+      80% { transform: translateX(6px) rotate(1deg); }
+    }
+
+    .animate-wrong {
+      animation: wiggleWrong 0.5s ease-in-out;
+      border-color: #ef4444 !important;
+      background-color: #fee2e2 !important;
+      color: #b91c1c !important;
+    }
+
+    @keyframes celebratePop {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.1) rotate(2deg); filter: drop-shadow(0 0 25px rgba(34, 197, 94, 0.8)); }
+      100% { transform: scale(1); }
+    }
+
+    .animate-correct {
+      animation: celebratePop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-color: #22c55e !important;
+      background-color: #dcfce7 !important;
+      color: #15803d !important;
+    }
+
+    .particle {
+      position: absolute;
+      pointer-events: none;
+      font-size: 2.5rem;
+      animation: flyUpAndFade 0.85s ease-out forwards;
+      z-index: 60;
+    }
+
+    @keyframes flyUpAndFade {
+      0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
+      100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.4); opacity: 0; }
+    }
+
+    .grid-board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 1.1rem;
+      aspect-ratio: 1 / 1;
+      max-height: calc(100vh - 210px);
+      max-width: calc(100vw - 40px);
+      width: 100%;
+    }
+
+    @media (min-height: 800px) {
+      .grid-board {
+        gap: 1.35rem;
+        max-height: calc(100vh - 235px);
+      }
+    }
+  </style>
+</head>
+
+<body class="flex flex-col items-center justify-between p-3 sm:p-5 select-none">
+
+  <!-- Header Bar -->
+  <header class="w-full max-w-5xl flex items-center justify-between bg-white/90 backdrop-blur-md px-4 sm:px-6 py-2.5 rounded-3xl shadow-md border-2 border-emerald-200">
+    <div class="flex items-center gap-4 sm:gap-6">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl sm:text-3xl">⭐</span>
+        <div>
+          <div class="text-[11px] uppercase tracking-wider text-slate-500 font-bold">Score</div>
+          <div id="scoreDisplay" class="text-2xl sm:text-3xl font-black text-amber-500 leading-none">0</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 border-l-2 border-slate-200 pl-4">
+        <span class="text-2xl sm:text-3xl">🔥</span>
+        <div>
+          <div class="text-[11px] uppercase tracking-wider text-slate-500 font-bold">Streak</div>
+          <div id="streakDisplay" class="text-2xl sm:text-3xl font-black text-orange-500 leading-none">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hidden md:flex flex-col items-center">
+      <span class="text-xs uppercase tracking-widest text-emerald-600 font-extrabold">Number Challenge</span>
+      <span class="text-lg font-bold text-slate-700">Find the Matching Word!</span>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button id="speakBtn" title="Speak Word Aloud" class="w-12 h-12 rounded-2xl bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-xl font-bold flex items-center justify-center transition border-2 border-indigo-200 active:scale-95 shadow-sm">
+        🔊
+      </button>
+      <button id="soundToggleBtn" title="Toggle Sound" class="w-12 h-12 rounded-2xl bg-sky-100 hover:bg-sky-200 text-sky-700 text-xl font-bold flex items-center justify-center transition border-2 border-sky-200 active:scale-95 shadow-sm">
+        🔔
+      </button>
+      <button id="fullscreenBtn" title="Fullscreen (F11)" class="w-12 h-12 rounded-2xl bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xl font-bold flex items-center justify-center transition border-2 border-emerald-200 active:scale-95 shadow-sm">
+        ⛶
+      </button>
+    </div>
+  </header>
+
+  <!-- Number Prompt Callout Banner -->
+  <section class="w-full max-w-4xl my-2 flex items-center justify-center">
+    <div class="bg-white px-8 sm:px-14 py-2 sm:py-3 rounded-3xl shadow-lg border-4 border-emerald-400 flex items-center gap-3 sm:gap-6">
+      <span class="text-2xl sm:text-4xl animate-bounce">👉</span>
+      <span class="text-xl sm:text-3xl font-extrabold text-slate-600 uppercase tracking-wide">Touch:</span>
+      <div class="flex items-center gap-3">
+        <span id="targetNumberDisplay" class="text-4xl sm:text-6xl font-black text-emerald-600 drop-shadow-sm leading-none bg-emerald-50 px-4 py-1 rounded-2xl border-2 border-emerald-300">
+          ?
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3x3 Interactive Words Surface -->
+  <main class="flex-1 flex items-center justify-center w-full max-w-4xl">
+    <div id="numberGrid" class="grid-board"></div>
+  </main>
+
+  <!-- Footer Info Bar -->
+  <footer class="w-full max-w-4xl py-1 flex items-center justify-between text-slate-500 text-xs sm:text-sm font-semibold px-2">
+    <span>💡 Tip: Tap the speaker 🔊 to hear the number spoken aloud!</span>
+    <button id="resetScoreBtn" class="hover:text-red-600 underline font-bold transition">Reset Score</button>
+  </footer>
+
+  <script>
+    const NUMBER_ITEMS = [
+      { num: 1, word: 'one', color: 'text-rose-500' },
+      { num: 2, word: 'two', color: 'text-orange-500' },
+      { num: 3, word: 'three', color: 'text-amber-500' },
+      { num: 4, word: 'four', color: 'text-emerald-500' },
+      { num: 5, word: 'five', color: 'text-teal-500' },
+      { num: 6, word: 'six', color: 'text-sky-500' },
+      { num: 7, word: 'seven', color: 'text-blue-500' },
+      { num: 8, word: 'eight', color: 'text-indigo-500' },
+      { num: 9, word: 'nine', color: 'text-violet-500' },
+      { num: 10, word: 'ten', color: 'text-fuchsia-500' }
+    ];
+
+    let currentGridItems = [];
+    let targetItem = null;
+    let score = 0;
+    let streak = 0;
+    let isSoundEnabled = true;
+    let isProcessing = false;
+
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function playTone(freq, type, duration, delay = 0) {
+      if (!isSoundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime + delay);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + delay);
+        osc.stop(ctx.currentTime + delay + duration);
+      } catch (e) {}
+    }
+
+    function playHappySound() {
+      playTone(523.25, 'triangle', 0.15, 0.0);
+      playTone(659.25, 'triangle', 0.15, 0.1);
+      playTone(783.99, 'triangle', 0.15, 0.2);
+      playTone(1046.50, 'triangle', 0.35, 0.3);
+    }
+
+    function playWrongSound() {
+      playTone(220, 'sawtooth', 0.2, 0.0);
+      playTone(165, 'sawtooth', 0.3, 0.15);
+    }
+
+    function speakCurrentNumber() {
+      if (!targetItem || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(targetItem.word);
+      utterance.rate = 0.85;
+      utterance.pitch = 1.1;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function spawnConfetti(x, y) {
+      const symbols = ['⭐', '🎉', '✨', '🎈', '🌟', '🔢', '🥳'];
+      for (let i = 0; i < 14; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 60 + Math.random() * 110;
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+        particle.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+        particle.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 900);
+      }
+    }
+
+    const numberGridEl = document.getElementById('numberGrid');
+    const targetNumberDisplayEl = document.getElementById('targetNumberDisplay');
+    const scoreDisplayEl = document.getElementById('scoreDisplay');
+    const streakDisplayEl = document.getElementById('streakDisplay');
+
+    function renderGrid() {
+      numberGridEl.innerHTML = '';
+      currentGridItems.forEach((item) => {
+        const card = document.createElement('button');
+        card.className = `word-card relative flex items-center justify-center p-3 sm:p-5 bg-white rounded-3xl border-4 border-slate-200 hover:border-emerald-400 active:border-emerald-500 overflow-hidden w-full h-full`;
+        card.setAttribute('data-num', item.num);
+
+        card.innerHTML = `
+          <span class="text-3xl sm:text-5xl font-black capitalize tracking-wide text-slate-700 pointer-events-none drop-shadow-sm">
+            ${item.word}
+          </span>
+        `;
+
+        card.addEventListener('pointerdown', (e) => handleWordClick(item, card, e));
+        numberGridEl.appendChild(card);
+      });
+    }
+
+    function handleWordClick(selectedItem, cardElement, event) {
+      if (isProcessing) return;
+      getAudioContext();
+
+      if (selectedItem.num === targetItem.num) {
+        isProcessing = true;
+        score += 1;
+        streak += 1;
+        scoreDisplayEl.textContent = score;
+        streakDisplayEl.textContent = streak;
+
+        playHappySound();
+        cardElement.classList.add('animate-correct');
+
+        const rect = cardElement.getBoundingClientRect();
+        spawnConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+        setTimeout(() => {
+          cardElement.classList.remove('animate-correct');
+          startNextRound();
+          isProcessing = false;
+        }, 900);
+      } else {
+        streak = 0;
+        streakDisplayEl.textContent = streak;
+        playWrongSound();
+        cardElement.classList.add('animate-wrong');
+        setTimeout(() => {
+          cardElement.classList.remove('animate-wrong');
+        }, 550);
+      }
+    }
+
+    function startNextRound() {
+      // Pick 9 unique numbers out of 10
+      const shuffledPool = shuffle(NUMBER_ITEMS);
+      currentGridItems = shuffledPool.slice(0, 9);
+      currentGridItems = shuffle(currentGridItems);
+      renderGrid();
+
+      // Pick target from the 9 visible
+      const randomIndex = Math.floor(Math.random() * currentGridItems.length);
+      targetItem = currentGridItems[randomIndex];
+      targetNumberDisplayEl.textContent = targetItem.num;
+    }
+
+    document.getElementById('speakBtn').addEventListener('click', () => {
+      getAudioContext();
+      speakCurrentNumber();
+    });
+
+    const soundToggleBtn = document.getElementById('soundToggleBtn');
+    soundToggleBtn.addEventListener('click', () => {
+      isSoundEnabled = !isSoundEnabled;
+      soundToggleBtn.textContent = isSoundEnabled ? '🔔' : '🔕';
+      soundToggleBtn.classList.toggle('opacity-60', !isSoundEnabled);
+    });
+
+    document.getElementById('resetScoreBtn').addEventListener('click', () => {
+      score = 0;
+      streak = 0;
+      scoreDisplayEl.textContent = '0';
+      streakDisplayEl.textContent = '0';
+    });
+
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    fullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+        fullscreenBtn.textContent = '✕';
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        fullscreenBtn.textContent = '⛶';
+      }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+      fullscreenBtn.textContent = document.fullscreenElement ? '✕' : '⛶';
+    });
+
+    window.onload = startNextRound;
+  </script>
+</body>
+</html>
