@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Feed the Pencil Case! ✏️</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Fredoka', 'Quicksand', system-ui, sans-serif;
+      background: #eef7fe;
+      background-image: 
+        radial-gradient(#bdd8f8 1.5px, transparent 1.5px),
+        radial-gradient(#bdd8f8 1.5px, #eef7fe 1.5px);
+      background-size: 30px 30px;
+      background-position: 0 0, 15px 15px;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .desk-surface {
+      background: #faf6ee;
+      border: 6px solid #d4a373;
+      box-shadow: 0 16px 36px rgba(118, 75, 41, 0.15), inset 0 2px 10px rgba(0,0,0,0.03);
+    }
+
+    @keyframes idleBob {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-5px) rotate(0.8deg); }
+    }
+    .animate-idle {
+      animation: idleBob 3s ease-in-out infinite;
+    }
+
+    @keyframes chompSuccess {
+      0% { transform: scale(1) translateY(0); }
+      20% { transform: scale(1.16, 0.84) translateY(12px); }
+      50% { transform: scale(0.9, 1.18) translateY(-14px); }
+      75% { transform: scale(1.08, 0.94); }
+      100% { transform: scale(1) translateY(0); }
+    }
+    .animate-chomp {
+      animation: chompSuccess 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes spitReject {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      15% { transform: translateX(-18px) rotate(-8deg); }
+      30% { transform: translateX(18px) rotate(8deg); }
+      45% { transform: translateX(-14px) rotate(-5deg); }
+      60% { transform: translateX(14px) rotate(5deg); }
+      75% { transform: translateX(-7px) rotate(-2deg); }
+    }
+    .animate-reject {
+      animation: spitReject 0.6s ease-in-out;
+    }
+
+    .item-card {
+      transition: transform 0.18s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.18s ease;
+      touch-action: none;
+    }
+    .item-card:hover {
+      transform: translateY(-5px) scale(1.03);
+      box-shadow: 0 12px 20px -6px rgba(0, 0, 0, 0.15);
+    }
+    .item-card:active {
+      transform: scale(0.95);
+    }
+    .dragging-card {
+      opacity: 0.85;
+      transform: scale(1.1) rotate(4deg) !important;
+      z-index: 1000 !important;
+      pointer-events: none;
+      box-shadow: 0 20px 30px rgba(0,0,0,0.3) !important;
+    }
+
+    .drop-hover {
+      filter: drop-shadow(0 0 18px rgba(245, 158, 11, 0.8));
+      transform: scale(1.05) !important;
+    }
+
+    .bubble-float {
+      animation: floatUp 1.3s forwards cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes floatUp {
+      0% { opacity: 0; transform: translateY(15px) scale(0.85); }
+      20% { opacity: 1; transform: translateY(-5px) scale(1.03); }
+      80% { opacity: 1; transform: translateY(-18px) scale(1); }
+      100% { opacity: 0; transform: translateY(-35px) scale(0.9); }
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col items-center justify-between p-2 sm:p-4 selection:bg-amber-200">
+
+  <header class="w-full max-w-4xl flex items-center justify-between bg-white/90 backdrop-blur rounded-2xl px-4 py-2.5 shadow-md border-2 border-amber-200 mb-2">
+    <div class="flex items-center gap-2.5">
+      <div class="w-10 h-10 rounded-xl bg-amber-400 flex items-center justify-center text-2xl shadow-inner">
+        👝
+      </div>
+      <div>
+        <h1 class="text-base sm:text-xl font-bold leading-tight text-amber-900 tracking-wide">Feed the Pencil Case!</h1>
+        <p class="text-xs text-amber-700/80 font-medium">Stationery Vocabulary Game</p>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="flex items-center gap-2 sm:gap-4 font-semibold text-xs sm:text-sm">
+      <div class="bg-amber-50 border border-amber-300 px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-amber-900 shadow-sm">
+        <span class="text-base">⭐</span>
+        <span>Score: <strong id="scoreDisplay" class="text-amber-600 font-bold">0</strong></span>
+      </div>
+      <div class="bg-amber-50 border border-amber-300 px-3 py-1.5 rounded-xl hidden xs:flex items-center gap-1.5 text-amber-900 shadow-sm">
+        <span class="text-base">🔥</span>
+        <span>Streak: <strong id="streakDisplay" class="text-orange-500 font-bold">0</strong></span>
+      </div>
+      <div class="bg-sky-100 border border-sky-300 px-3 py-1.5 rounded-xl text-sky-900 shadow-sm">
+        <span>Round: <strong id="roundDisplay">1/10</strong></span>
+      </div>
+      <button id="soundToggleBtn" title="Toggle Sound Effects" class="p-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 transition-colors">
+        🔊
+      </button>
+    </div>
+  </header>
+
+  <main class="w-full max-w-4xl flex-1 flex flex-col justify-between desk-surface rounded-3xl p-3 sm:p-5 relative overflow-hidden">
+    
+    <!-- Top Prompt Banner -->
+    <section class="w-full bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 rounded-2xl p-3 sm:p-4 text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left z-10 border-2 border-white/60">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl backdrop-blur">
+          🍽️
+        </div>
+        <div>
+          <span class="text-xs uppercase tracking-wider font-semibold text-amber-100 block">Current Craving</span>
+          <div class="flex items-baseline gap-2 justify-center sm:justify-start">
+            <h2 class="text-lg sm:text-2xl font-bold tracking-wide">
+              Feed me the: <span id="targetItemName" class="text-yellow-100 underline decoration-white/60 decoration-wavy underline-offset-4">...</span>
+            </h2>
+          </div>
+        </div>
+      </div>
+
+      <!-- Listen button -->
+      <button id="speakTargetBtn" class="flex items-center gap-2 bg-white text-orange-600 hover:bg-orange-50 active:scale-95 transition-all px-4 py-2 rounded-xl font-bold text-sm shadow-md border-2 border-orange-200 cursor-pointer">
+        <span class="text-lg">📢</span>
+        <span>Pronounce Word</span>
+      </button>
+    </section>
+
+    <!-- Floating status speech bubble directly over Pencil Case -->
+    <div id="reactionToast" class="pointer-events-none absolute left-1/2 -translate-x-1/2 top-[20%] sm:top-[22%] z-40 hidden">
+      <div id="reactionToastBody" class="px-5 py-2.5 rounded-2xl text-sm sm:text-base font-bold shadow-xl border-2 flex items-center gap-2"></div>
+    </div>
+
+    <div class="relative w-full flex flex-col md:flex-row items-center justify-center gap-3 sm:gap-6 my-2 sm:my-3 select-none">
+      
+      <!-- Hungry Pencil Case Drop Zone -->
+      <div id="pencilCaseZone" class="relative group cursor-pointer flex flex-col items-center transition-transform duration-200">
+        
+        <!-- Speech prompt bubble above mascot -->
+        <div id="caseSpeechBubble" class="mb-1.5 bg-white border-2 border-amber-300 shadow-md text-amber-950 font-bold text-xs sm:text-sm px-4 py-1 rounded-full flex items-center gap-2 transition-all duration-200">
+          <span id="caseMoodEmoji">😋</span>
+          <span id="caseSpeechText">"I'm super hungry! Feed me!"</span>
+        </div>
+
+        <!-- Pencil Case Character Body -->
+        <div id="pencilCaseBody" class="relative w-56 h-32 sm:w-72 sm:h-40 rounded-3xl bg-gradient-to-b from-sky-400 via-sky-500 to-blue-600 shadow-xl border-4 border-white flex flex-col items-center justify-between p-2.5 sm:p-3 animate-idle transition-all duration-150">
+          
+          <!-- Zipper strip -->
+          <div class="w-full h-3 bg-blue-800/40 rounded-full flex items-center px-1 border-dashed border-t-2 border-white/30">
+            <div id="zipperPull" class="w-4 h-4 sm:w-5 sm:h-5 bg-amber-400 rounded-md border border-amber-600 shadow flex items-center justify-center text-[10px] font-bold text-amber-900 transition-all duration-300">
+              ⚡
+            </div>
+          </div>
+
+          <!-- Cartoon Eyes -->
+          <div class="flex items-center gap-6 sm:gap-8 -mt-1">
+            <!-- Left Eye -->
+            <div class="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full flex items-center justify-center shadow-inner relative overflow-hidden">
+              <div id="pupilL" class="w-3.5 h-3.5 bg-slate-900 rounded-full transition-transform duration-100 flex items-start justify-end p-0.5">
+                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+              </div>
+            </div>
+            <!-- Blush -->
+            <div class="w-3 h-1.5 bg-rose-400/60 rounded-full"></div>
+            <!-- Right Eye -->
+            <div class="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full flex items-center justify-center shadow-inner relative overflow-hidden">
+              <div id="pupilR" class="w-3.5 h-3.5 bg-slate-900 rounded-full transition-transform duration-100 flex items-start justify-end p-0.5">
+                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hungry Mouth / Drop Hatch -->
+          <div id="mouthOpenZone" class="w-40 sm:w-52 h-12 sm:h-14 bg-slate-950/90 rounded-2xl border-4 border-amber-300 shadow-inner flex items-center justify-center relative overflow-hidden transition-all duration-200">
+            <div id="mouthTongue" class="absolute -bottom-2 w-14 h-7 bg-rose-500 rounded-t-full transition-transform duration-200"></div>
+            <span id="mouthPrompt" class="text-[10px] sm:text-xs font-bold text-amber-200/90 tracking-wide z-10 pointer-events-none uppercase">
+              Drop Target Item 📥
+            </span>
+          </div>
+
+          <!-- Corner badge with safe image fallback -->
+          <div class="absolute -bottom-2 -right-2 w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white border-2 border-sky-300 shadow-md flex items-center justify-center overflow-hidden">
+            <img src="images/stationery/pencil-case.jpg" alt="Pencil Case" class="w-full h-full object-cover" onerror="this.style.display='none'; document.getElementById('caseBadgeEmoji').classList.remove('hidden');">
+            <span id="caseBadgeEmoji" class="text-lg hidden">👝</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Put Away Drop Zone (School Shelf / Storage Cubby) -->
+      <div id="putAwayZone" class="relative group cursor-pointer flex flex-col items-center transition-all duration-200 border-2 border-dashed border-emerald-400/80 bg-emerald-50/80 hover:bg-emerald-100/90 rounded-3xl p-3 sm:p-4 w-56 sm:w-64 text-center shadow-md">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-500 text-white rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow mb-1.5">
+          📦
+        </div>
+        <h4 class="text-xs sm:text-sm font-bold text-emerald-950 uppercase tracking-wide">
+          Put Away Zone
+        </h4>
+        <p class="text-[11px] text-emerald-800 font-medium leading-tight mt-0.5">
+          Drop items that <strong>don't fit</strong> in a pencil case!
+        </p>
+        <span class="mt-2 text-[10px] font-bold text-emerald-700 bg-emerald-200/80 px-2 py-0.5 rounded-full border border-emerald-300">
+          Books, bags & silly items go here!
+        </span>
+      </div>
+
+    </div>
+
+    <p class="text-[11px] text-amber-800/80 font-semibold text-center mb-1">
+      💡 Drag or tap: feed stationery to the <strong>Pencil Case</strong> 👝, or sort oversized/trick items to the <strong>Put Away Zone</strong> 📦!
+    </p>
+
+    <section class="w-full bg-white/70 backdrop-blur rounded-2xl p-2.5 sm:p-3 border-2 border-amber-200/80 shadow-inner">
+      <div class="flex items-center justify-between mb-2 px-1">
+        <h3 class="text-xs sm:text-sm font-bold text-amber-900 flex items-center gap-1.5">
+          <span>🎒</span> Stationery Tray: Pick the right item!
+        </h3>
+        <span class="text-[11px] font-medium text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+          Choose carefully!
+        </span>
+      </div>
+
+      <!-- Item Cards Grid -->
+      <div id="itemTray" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 max-h-[220px] sm:max-h-none overflow-y-auto p-1">
+        <!-- Injected dynamically -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal for Round Complete -->
+  <div id="victoryModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center shadow-2xl border-4 border-amber-400 relative overflow-hidden">
+      <div class="text-6xl mb-2 animate-bounce">🎉</div>
+      <h2 class="text-2xl font-bold text-amber-900 mb-1">Awesome Job!</h2>
+      <p class="text-slate-600 text-sm mb-4">The pencil case is full, happy, and ready for school!</p>
+      
+      <div class="bg-amber-50 rounded-2xl p-4 border border-amber-200 mb-5 flex justify-around items-center">
+        <div>
+          <span class="text-xs text-amber-700 block">Final Score</span>
+          <span id="finalScore" class="text-2xl font-bold text-amber-900">0</span>
+        </div>
+        <div class="h-8 w-px bg-amber-200"></div>
+        <div>
+          <span class="text-xs text-amber-700 block">Accuracy</span>
+          <span id="finalAccuracy" class="text-2xl font-bold text-emerald-600">100%</span>
+        </div>
+      </div>
+
+      <button id="playAgainBtn" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 active:scale-95 text-white font-bold py-3 rounded-2xl shadow-lg border-b-4 border-orange-700 transition-all text-base cursor-pointer">
+        Play Again! 🔄
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Stationery items that fit in the case and serve as valid targets
+    const VALID_STATIONERY = [
+      { id: 'coloured-pencil', name: 'Coloured Pencil', file: 'coloured-pencil.jpg', emoji: '✏️', isFitStationery: true, spoken: 'coloured pencil' },
+      { id: 'eraser', name: 'Eraser', file: 'eraser.jpg', emoji: '🧼', isFitStationery: true, spoken: 'eraser' },
+      { id: 'glue-stick', name: 'Glue Stick', file: 'glue-stick.jpg', emoji: '🧴', isFitStationery: true, spoken: 'glue stick' },
+      { id: 'pen', name: 'Pen', file: 'pen.jpg', emoji: '🖊️', isFitStationery: true, spoken: 'pen' },
+      { id: 'pencil', name: 'Pencil', file: 'pencil.jpg', emoji: '✏️', isFitStationery: true, spoken: 'pencil' },
+      { id: 'ruler', name: 'Ruler', file: 'ruler.jpg', emoji: '📏', isFitStationery: true, spoken: 'ruler' },
+      { id: 'sharpener', name: 'Sharpener', file: 'sharpener.jpg', emoji: '⚙️', isFitStationery: true, spoken: 'pencil sharpener' }
+    ];
+
+    // Trick items that do not belong inside a pencil case
+    const TRICK_ITEMS = [
+      { 
+        id: 'book', 
+        name: 'Book', 
+        file: 'book.jpg', 
+        emoji: '📖', 
+        isFitStationery: false, 
+        rejectQuote: "Whoa! A book is way too big to fit inside a pencil case! Put it away!", 
+        putAwayQuote: "Nice work! A book belongs on the bookshelf or in your bag!",
+        spoken: 'book' 
+      },
+      { 
+        id: 'school-bag', 
+        name: 'School Bag', 
+        file: 'school-bag.jpg', 
+        emoji: '🎒', 
+        isFitStationery: false, 
+        rejectQuote: "Blehh! A school bag is way too huge to fit inside a pencil case!", 
+        putAwayQuote: "Great job! Keep the school bag on your chair or in your locker!",
+        spoken: 'school bag' 
+      },
+      { 
+        id: 'baby', 
+        name: 'Baby', 
+        file: null, 
+        emoji: '👶', 
+        isFitStationery: false, 
+        rejectQuote: "Whaaa! A baby cannot fit into a pencil case!", 
+        putAwayQuote: "Good thinking! A baby definitely doesn't belong in a pencil case!",
+        spoken: 'baby' 
+      },
+      { 
+        id: 'watermelon', 
+        name: 'Watermelon', 
+        file: null, 
+        emoji: '🍉', 
+        isFitStationery: false, 
+        rejectQuote: "Yuck! A giant watermelon will squash me!", 
+        putAwayQuote: "Smart choice! Put the watermelon in the kitchen or fridge!",
+        spoken: 'watermelon' 
+      },
+      { 
+        id: 'bookshelf', 
+        name: 'Bookshelf', 
+        file: null, 
+        emoji: '📚', 
+        isFitStationery: false, 
+        rejectQuote: "Way too big! A whole bookshelf won't fit in here!", 
+        putAwayQuote: "Awesome! Bookshelves belong in the library or classroom!",
+        spoken: 'bookshelf' 
+      },
+      { 
+        id: 'tv', 
+        name: 'Television', 
+        file: null, 
+        emoji: '📺', 
+        isFitStationery: false, 
+        rejectQuote: "Ouch! A TV belongs in the living room!", 
+        putAwayQuote: "Correct! The television stays at home or on the wall!",
+        spoken: 'television' 
+      }
+    ];
+
+    const PRAISE_LINES = [
+      "Yum! Thank you!",
+      "Delicious stationery!",
+      "Nom nom nom! That fits perfectly!",
+      "Great job! Exactly what I needed!",
+      "Super! That goes in my pencil case!"
+    ];
+
+    // Game state tracking
+    let soundEnabled = true;
+    let score = 0;
+    let streak = 0;
+    let currentRound = 1;
+    const TOTAL_ROUNDS = 10;
+    let currentTarget = null;
+    let activeChoices = [];
+    let attemptsCount = 0;
+    let correctCount = 0;
+    let isProcessing = false;
+
+    const AudioEngine = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtxClass) {
+            this.ctx = new AudioCtxClass();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+      playChomp() {
+        if (!soundEnabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(120, now + 0.12);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.14);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      },
+      playSuccessFanfare() {
+        if (!soundEnabled || !this.ctx) return;
+        const notes = [440, 554, 659, 880];
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const start = this.ctx.currentTime + (idx * 0.08);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, start);
+          gain.gain.setValueAtTime(0.2, start);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + 0.25);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(start);
+          osc.stop(start + 0.27);
+        });
+      },
+      playBoingReject() {
+        if (!soundEnabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(260, now);
+        osc.frequency.exponentialRampToValueAtTime(70, now + 0.35);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.36);
+      },
+      playPutAwayPop() {
+        if (!soundEnabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(780, now + 0.15);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.19);
+      }
+    };
+
+    function speakText(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.95;
+      utterance.pitch = 1.1;
+      utterance.lang = 'en-US';
+      window.speechSynthesis.speak(utterance);
+    }
+
+    const targetItemNameEl = document.getElementById('targetItemName');
+    const speakTargetBtn = document.getElementById('speakTargetBtn');
+    const itemTrayEl = document.getElementById('itemTray');
+    const pencilCaseZoneEl = document.getElementById('pencilCaseZone');
+    const putAwayZoneEl = document.getElementById('putAwayZone');
+    const pencilCaseBodyEl = document.getElementById('pencilCaseBody');
+    const mouthOpenZoneEl = document.getElementById('mouthOpenZone');
+    const mouthPromptEl = document.getElementById('mouthPrompt');
+    const mouthTongueEl = document.getElementById('mouthTongue');
+    const caseSpeechBubbleEl = document.getElementById('caseSpeechBubble');
+    const caseSpeechTextEl = document.getElementById('caseSpeechText');
+    const caseMoodEmojiEl = document.getElementById('caseMoodEmoji');
+    const scoreDisplayEl = document.getElementById('scoreDisplay');
+    const streakDisplayEl = document.getElementById('streakDisplay');
+    const roundDisplayEl = document.getElementById('roundDisplay');
+    const soundToggleBtn = document.getElementById('soundToggleBtn');
+    const reactionToastEl = document.getElementById('reactionToast');
+    const reactionToastBodyEl = document.getElementById('reactionToastBody');
+    const victoryModalEl = document.getElementById('victoryModal');
+    const finalScoreEl = document.getElementById('finalScore');
+    const finalAccuracyEl = document.getElementById('finalAccuracy');
+    const playAgainBtn = document.getElementById('playAgainBtn');
+
+    function startNewRound() {
+      if (currentRound > TOTAL_ROUNDS) {
+        showVictoryScreen();
+        return;
+      }
+      isProcessing = false;
+      roundDisplayEl.textContent = `${currentRound}/${TOTAL_ROUNDS}`;
+
+      // Pick target strictly from items that CAN fit inside a pencil case
+      const targetIndex = Math.floor(Math.random() * VALID_STATIONERY.length);
+      currentTarget = VALID_STATIONERY[targetIndex];
+
+      // Update prompt
+      targetItemNameEl.textContent = currentTarget.name.toUpperCase();
+      caseSpeechTextEl.textContent = `Feed me the ${currentTarget.name}!`;
+      caseMoodEmojiEl.textContent = "😋";
+
+      // Select distractors: some real stationery + trick items
+      const otherValid = VALID_STATIONERY.filter(item => item.id !== currentTarget.id);
+      shuffleArray(otherValid);
+
+      const trickPool = [...TRICK_ITEMS];
+      shuffleArray(trickPool);
+
+      const selectedChoices = [
+        currentTarget,
+        otherValid[0],
+        trickPool[0],
+        Math.random() > 0.4 ? trickPool[1] : otherValid[1]
+      ];
+
+      shuffleArray(selectedChoices);
+      activeChoices = selectedChoices;
+
+      renderTrayCards();
+
+      setTimeout(() => {
+        speakText(`Feed me the ${currentTarget.spoken}`);
+      }, 350);
+    }
+
+    function renderTrayCards() {
+      itemTrayEl.innerHTML = '';
+
+      activeChoices.forEach((item) => {
+        const card = document.createElement('div');
+        card.className = "item-card relative bg-white border-2 border-amber-200 rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-between shadow-sm cursor-grab active:cursor-grabbing hover:border-amber-400 select-none";
+        card.setAttribute('draggable', 'true');
+        card.dataset.itemId = item.id;
+
+        const imgWrap = document.createElement('div');
+        imgWrap.className = "w-16 h-16 sm:w-20 sm:h-20 bg-amber-50/70 rounded-xl flex items-center justify-center p-1 overflow-hidden border border-amber-100 pointer-events-none";
+
+        if (item.file) {
+          const img = document.createElement('img');
+          img.src = `images/stationery/${item.file}`;
+          img.alt = item.name;
+          img.className = "max-w-full max-h-full object-contain filter drop-shadow";
+          
+          img.onerror = () => {
+            imgWrap.innerHTML = `<span class="text-3xl sm:text-4xl">${item.emoji}</span>`;
+          };
+          imgWrap.appendChild(img);
+        } else {
+          imgWrap.innerHTML = `<span class="text-3xl sm:text-4xl">${item.emoji}</span>`;
+        }
+
+        const nameLabel = document.createElement('span');
+        nameLabel.className = "text-xs font-bold text-slate-800 text-center mt-1 pointer-events-none leading-tight";
+        nameLabel.textContent = item.name;
+
+        const btnGroup = document.createElement('div');
+        btnGroup.className = "mt-1.5 w-full flex gap-1";
+
+        const feedBtn = document.createElement('button');
+        feedBtn.className = "flex-1 bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold py-1 px-1 rounded-lg text-[10px] sm:text-[11px] transition-colors flex items-center justify-center gap-0.5 border border-amber-300";
+        feedBtn.innerHTML = `<span>Feed</span> 👝`;
+        feedBtn.title = "Feed to Pencil Case";
+        feedBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          handleFeedAttempt(item, card);
+        });
+
+        const putAwayBtn = document.createElement('button');
+        putAwayBtn.className = "flex-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold py-1 px-1 rounded-lg text-[10px] sm:text-[11px] transition-colors flex items-center justify-center gap-0.5 border border-emerald-300";
+        putAwayBtn.innerHTML = `<span>Sort</span> 📦`;
+        putAwayBtn.title = "Put away (Doesn't fit in pencil case)";
+        putAwayBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          handlePutAwayAttempt(item, card);
+        });
+
+        btnGroup.appendChild(feedBtn);
+        btnGroup.appendChild(putAwayBtn);
+
+        card.appendChild(imgWrap);
+        card.appendChild(nameLabel);
+        card.appendChild(btnGroup);
+
+        card.addEventListener('click', () => {
+          handleFeedAttempt(item, card);
+        });
+
+        setupDragEvents(card, item);
+        setupTouchDrag(card, item);
+
+        itemTrayEl.appendChild(card);
+      });
+    }
+
+    function setupDragEvents(card, item) {
+      card.addEventListener('dragstart', (e) => {
+        AudioEngine.init();
+        card.classList.add('opacity-40');
+        e.dataTransfer.setData('text/plain', item.id);
+        caseMoodEmojiEl.textContent = "😮";
+        mouthTongueEl.style.transform = 'translateY(-6px) scale(1.15)';
+      });
+
+      card.addEventListener('dragend', () => {
+        card.classList.remove('opacity-40');
+        mouthTongueEl.style.transform = '';
+      });
+    }
+
+    function setupTouchDrag(card, item) {
+      let touchClone = null;
+
+      card.addEventListener('touchstart', (e) => {
+        if (isProcessing) return;
+        AudioEngine.init();
+        touchClone = card.cloneNode(true);
+        touchClone.classList.add('dragging-card');
+        touchClone.style.position = 'fixed';
+        touchClone.style.width = `${card.offsetWidth}px`;
+        touchClone.style.left = `${card.getBoundingClientRect().left}px`;
+        touchClone.style.top = `${card.getBoundingClientRect().top}px`;
+        document.body.appendChild(touchClone);
+
+        mouthTongueEl.style.transform = 'translateY(-6px) scale(1.15)';
+      }, { passive: true });
+
+      card.addEventListener('touchmove', (e) => {
+        if (!touchClone) return;
+        const touch = e.touches[0];
+        touchClone.style.left = `${touch.clientX - (card.offsetWidth / 2)}px`;
+        touchClone.style.top = `${touch.clientY - (card.offsetHeight / 2)}px`;
+
+        const caseRect = mouthOpenZoneEl.getBoundingClientRect();
+        const putAwayRect = putAwayZoneEl.getBoundingClientRect();
+
+        if (touch.clientX >= caseRect.left && touch.clientX <= caseRect.right &&
+            touch.clientY >= caseRect.top && touch.clientY <= caseRect.bottom) {
+          mouthOpenZoneEl.classList.add('drop-hover');
+        } else {
+          mouthOpenZoneEl.classList.remove('drop-hover');
+        }
+
+        if (touch.clientX >= putAwayRect.left && touch.clientX <= putAwayRect.right &&
+            touch.clientY >= putAwayRect.top && touch.clientY <= putAwayRect.bottom) {
+          putAwayZoneEl.classList.add('drop-hover');
+        } else {
+          putAwayZoneEl.classList.remove('drop-hover');
+        }
+      }, { passive: true });
+
+      card.addEventListener('touchend', (e) => {
+        if (!touchClone) return;
+        mouthOpenZoneEl.classList.remove('drop-hover');
+        putAwayZoneEl.classList.remove('drop-hover');
+        mouthTongueEl.style.transform = '';
+
+        const touch = e.changedTouches[0];
+        const caseRect = mouthOpenZoneEl.getBoundingClientRect();
+        const putAwayRect = putAwayZoneEl.getBoundingClientRect();
+
+        if (touch.clientX >= caseRect.left && touch.clientX <= caseRect.right &&
+            touch.clientY >= caseRect.top && touch.clientY <= caseRect.bottom) {
+          touchClone.remove();
+          touchClone = null;
+          handleFeedAttempt(item, card);
+        } else if (touch.clientX >= putAwayRect.left && touch.clientX <= putAwayRect.right &&
+                   touch.clientY >= putAwayRect.top && touch.clientY <= putAwayRect.bottom) {
+          touchClone.remove();
+          touchClone = null;
+          handlePutAwayAttempt(item, card);
+        } else {
+          touchClone.remove();
+          touchClone = null;
+        }
+      });
+    }
+
+    mouthOpenZoneEl.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      mouthOpenZoneEl.classList.add('drop-hover');
+    });
+
+    mouthOpenZoneEl.addEventListener('dragleave', () => {
+      mouthOpenZoneEl.classList.remove('drop-hover');
+    });
+
+    mouthOpenZoneEl.addEventListener('drop', (e) => {
+      e.preventDefault();
+      mouthOpenZoneEl.classList.remove('drop-hover');
+      const itemId = e.dataTransfer.getData('text/plain');
+      const item = activeChoices.find(c => c.id === itemId);
+      const cardEl = itemTrayEl.querySelector(`[data-item-id="${itemId}"]`);
+      if (item) {
+        handleFeedAttempt(item, cardEl);
+      }
+    });
+
+    // Put Away drop listeners
+    putAwayZoneEl.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      putAwayZoneEl.classList.add('drop-hover');
+    });
+
+    putAwayZoneEl.addEventListener('dragleave', () => {
+      putAwayZoneEl.classList.remove('drop-hover');
+    });
+
+    putAwayZoneEl.addEventListener('drop', (e) => {
+      e.preventDefault();
+      putAwayZoneEl.classList.remove('drop-hover');
+      const itemId = e.dataTransfer.getData('text/plain');
+      const item = activeChoices.find(c => c.id === itemId);
+      const cardEl = itemTrayEl.querySelector(`[data-item-id="${itemId}"]`);
+      if (item) {
+        handlePutAwayAttempt(item, cardEl);
+      }
+    });
+
+    function handlePutAwayAttempt(item, cardEl) {
+      if (isProcessing) return;
+      AudioEngine.init();
+
+      if (!item.isFitStationery) {
+        // Correctly sorted away!
+        score += 50;
+        scoreDisplayEl.textContent = score;
+        AudioEngine.playPutAwayPop();
+
+        const quote = item.putAwayQuote || `Good job! A ${item.name} does not fit inside a pencil case!`;
+        caseSpeechTextEl.textContent = quote;
+        speakText(quote);
+        showFeedbackToast(`📦 Stored away! (+50 pts)`, 'bg-emerald-600 text-white border-emerald-400');
+
+        if (cardEl) {
+          cardEl.style.transform = "scale(0) translateY(-20px)";
+          cardEl.style.opacity = "0";
+          setTimeout(() => cardEl.remove(), 250);
+        }
+      } else {
+        // Mistake: player tried to put away a valid pencil case item
+        AudioEngine.playBoingReject();
+        const msg = `Wait! A ${item.name} actually belongs in a pencil case!`;
+        caseSpeechTextEl.textContent = msg;
+        speakText(msg);
+        showFeedbackToast(`⚠️ That fits in a pencil case!`, 'bg-amber-500 text-white border-amber-300');
+
+        if (cardEl) {
+          cardEl.classList.add('animate-reject');
+          setTimeout(() => cardEl.classList.remove('animate-reject'), 600);
+        }
+      }
+    }
+
+    function handleFeedAttempt(item, cardEl) {
+      if (isProcessing) return;
+      isProcessing = true;
+      AudioEngine.init();
+      attemptsCount++;
+
+      if (item.id === currentTarget.id) {
+        // Correct item fed
+        correctCount++;
+        score += 100 + (streak * 20);
+        streak++;
+        scoreDisplayEl.textContent = score;
+        streakDisplayEl.textContent = streak;
+
+        pencilCaseBodyEl.classList.remove('animate-idle');
+        pencilCaseBodyEl.classList.add('animate-chomp');
+        mouthPromptEl.textContent = "CHOMP! YUM! 😋";
+        mouthTongueEl.style.transform = 'translateY(12px)';
+        caseMoodEmojiEl.textContent = "🥳";
+        caseSpeechTextEl.textContent = `Mmm! Thank you for the ${item.name}!`;
+
+        if (cardEl) {
+          cardEl.style.transform = "scale(0) rotate(20deg)";
+          cardEl.style.opacity = "0";
+        }
+
+        AudioEngine.playChomp();
+        setTimeout(() => AudioEngine.playSuccessFanfare(), 150);
+
+        confetti({
+          particleCount: 45,
+          spread: 60,
+          origin: { y: 0.55 },
+          colors: ['#38bdf8', '#fbbf24', '#34d399', '#f472b6']
+        });
+
+        const randomPraise = PRAISE_LINES[Math.floor(Math.random() * PRAISE_LINES.length)];
+        speakText(randomPraise);
+
+        showFeedbackToast(`🎉 Perfect! That's the ${item.name}!`, 'bg-emerald-500 text-white border-emerald-300');
+
+        setTimeout(() => {
+          pencilCaseBodyEl.classList.remove('animate-chomp');
+          pencilCaseBodyEl.classList.add('animate-idle');
+          mouthPromptEl.textContent = "Drop or Click Item Here! 📥";
+          mouthTongueEl.style.transform = '';
+          currentRound++;
+          startNewRound();
+        }, 1400);
+
+      } else {
+        // Wrong feed: trick item or wrong valid item
+        streak = 0;
+        streakDisplayEl.textContent = streak;
+
+        pencilCaseBodyEl.classList.remove('animate-idle');
+        pencilCaseBodyEl.classList.add('animate-reject');
+        mouthPromptEl.textContent = "BLEGH! YUCK! 😝";
+        caseMoodEmojiEl.textContent = "🤢";
+
+        AudioEngine.playBoingReject();
+
+        let rejectionMessage;
+        let toastText;
+
+        if (!item.isFitStationery) {
+          rejectionMessage = item.rejectQuote;
+          toastText = `🚫 ${item.rejectQuote}`;
+        } else {
+          rejectionMessage = `That's a ${item.name}! But I asked for the ${currentTarget.name}!`;
+          toastText = `❌ That's a ${item.name}! Need ${currentTarget.name}!`;
+        }
+
+        caseSpeechTextEl.textContent = rejectionMessage;
+        speakText(rejectionMessage);
+        showFeedbackToast(toastText, 'bg-rose-500 text-white border-rose-300');
+
+        if (cardEl) {
+          cardEl.classList.add('animate-reject');
+          setTimeout(() => cardEl.classList.remove('animate-reject'), 600);
+        }
+
+        setTimeout(() => {
+          pencilCaseBodyEl.classList.remove('animate-reject');
+          pencilCaseBodyEl.classList.add('animate-idle');
+          mouthPromptEl.textContent = "Drop or Click Item Here! 📥";
+          caseMoodEmojiEl.textContent = "🤔";
+          isProcessing = false;
+        }, 1300);
+      }
+    }
+
+    function showFeedbackToast(msg, classes) {
+      reactionToastBodyEl.className = `px-5 py-2.5 rounded-2xl text-sm sm:text-base font-bold shadow-xl border-2 flex items-center gap-2 ${classes}`;
+      reactionToastBodyEl.textContent = msg;
+      reactionToastEl.classList.remove('hidden');
+      reactionToastEl.classList.add('bubble-float');
+
+      setTimeout(() => {
+        reactionToastEl.classList.add('hidden');
+        reactionToastEl.classList.remove('bubble-float');
+      }, 1300);
+    }
+
+    function showVictoryScreen() {
+      finalScoreEl.textContent = score;
+      const acc = attemptsCount > 0 ? Math.round((correctCount / attemptsCount) * 100) : 100;
+      finalAccuracyEl.textContent = `${acc}%`;
+      victoryModalEl.classList.remove('hidden');
+
+      confetti({
+        particleCount: 120,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
+      speakText("Hooray! The pencil case is completely full! Wonderful work!");
+    }
+
+    speakTargetBtn.addEventListener('click', () => {
+      AudioEngine.init();
+      if (currentTarget) {
+        speakText(`Feed me the ${currentTarget.spoken}`);
+      }
+    });
+
+    soundToggleBtn.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      soundToggleBtn.textContent = soundEnabled ? '🔊' : '🔇';
+      soundToggleBtn.classList.toggle('bg-rose-100', !soundEnabled);
+      soundToggleBtn.classList.toggle('border-rose-300', !soundEnabled);
+    });
+
+    playAgainBtn.addEventListener('click', () => {
+      victoryModalEl.classList.add('hidden');
+      score = 0;
+      streak = 0;
+      currentRound = 1;
+      attemptsCount = 0;
+      correctCount = 0;
+      scoreDisplayEl.textContent = '0';
+      streakDisplayEl.textContent = '0';
+      startNewRound();
+    });
+
+    function shuffleArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // Responsive eye pupil tracker following mouse movement
+    window.addEventListener('mousemove', (e) => {
+      const pupils = [document.getElementById('pupilL'), document.getElementById('pupilR')];
+      pupils.forEach(pupil => {
+        if (!pupil) return;
+        const rect = pupil.getBoundingClientRect();
+        const eyeX = rect.left + rect.width / 2;
+        const eyeY = rect.top + rect.height / 2;
+        const angle = Math.atan2(e.clientY - eyeY, e.clientX - eyeX);
+        const dist = Math.min(3.5, Math.hypot(e.clientX - eyeX, e.clientY - eyeY) / 40);
+        pupil.style.transform = `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px)`;
+      });
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      startNewRound();
+    });
+  </script>
+</body>
+</html>
