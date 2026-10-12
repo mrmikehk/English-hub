@@ -280,3 +280,79 @@
         card.dataset.id = item.id;
         
         const img = document.createElement('img');
+        img.src = `images/stationery/${item.file}`;
+        img.alt = item.word.toLowerCase();
+        card.appendChild(img);
+
+        card.addEventListener('click', () => selectCard('image', card));
+        imgGrid.appendChild(card);
+      });
+
+      shuffledWords.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card word-card';
+        card.dataset.id = item.id;
+        card.textContent = item.word.toLowerCase();
+
+        card.addEventListener('click', () => selectCard('word', card));
+        wordGrid.appendChild(card);
+      });
+    }
+
+    function selectCard(type, card) {
+      if (card.classList.contains('matched')) return;
+
+      if (type === 'image') {
+        if (selectedImage) selectedImage.classList.remove('selected');
+        selectedImage = card;
+        card.classList.add('selected');
+      } else {
+        if (selectedWord) selectedWord.classList.remove('selected');
+        selectedWord = card;
+        card.classList.add('selected');
+      }
+
+      if (selectedImage && selectedWord) {
+        checkMatch();
+      }
+    }
+
+    function checkMatch() {
+      triesCount++;
+      document.getElementById('tries-count').textContent = triesCount;
+
+      const isMatch = selectedImage.dataset.id === selectedWord.dataset.id;
+
+      if (isMatch) {
+        selectedImage.className = 'card image-card matched';
+        selectedWord.className = 'card word-card matched';
+        matchedCount++;
+        document.getElementById('matches-count').textContent = matchedCount;
+        selectedImage = null;
+        selectedWord = null;
+
+        if (matchedCount === currentRoundItems.length) {
+          document.getElementById('win-banner').style.display = 'block';
+        }
+      } else {
+        const imgEl = selectedImage;
+        const wordEl = selectedWord;
+
+        imgEl.classList.add('wrong');
+        wordEl.classList.add('wrong');
+
+        setTimeout(() => {
+          imgEl.classList.remove('selected', 'wrong');
+          wordEl.classList.remove('selected', 'wrong');
+        }, 500);
+
+        selectedImage = null;
+        selectedWord = null;
+      }
+    }
+
+    // Ensure the DOM has finished loading before starting
+    window.addEventListener('DOMContentLoaded', initGame);
+  </script>
+</body>
+</html>
