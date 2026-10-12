@@ -60,38 +60,50 @@
     .game-container {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-      max-width: 900px;
+      gap: 2.5rem;
+      max-width: 1100px;
       width: 100%;
     }
 
-    .column {
+    .grid-section {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      align-items: center;
+      width: 100%;
     }
 
-    .column-title {
-      font-size: 1.1rem;
+    .section-title {
+      font-size: 1.2rem;
       font-weight: 700;
       text-align: center;
-      margin-bottom: 0.5rem;
+      margin-bottom: 1rem;
       color: #475569;
+    }
+
+    /* 3x3 Grid */
+    .grid-3x3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 0.75rem;
+      width: 100%;
     }
 
     .card {
       background: var(--card-bg);
       border: 2px solid var(--border);
       border-radius: 12px;
-      padding: 0.75rem 1rem;
+      padding: 0.5rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      aspect-ratio: 1 / 1;
       min-height: 85px;
       transition: all 0.2s ease;
       user-select: none;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      text-align: center;
     }
 
     .card:hover {
@@ -122,15 +134,16 @@
     }
 
     .image-card img {
-      max-height: 70px;
-      max-width: 100%;
+      max-height: 75%;
+      max-width: 75%;
       object-fit: contain;
     }
 
     .word-card {
-      font-size: 1.2rem;
+      font-size: 1.05rem;
       font-weight: 600;
       text-transform: lowercase;
+      padding: 0.5rem;
     }
 
     @keyframes shake {
@@ -159,179 +172,4 @@
       font-size: 1rem;
       font-weight: 600;
       border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    button.reset-btn:hover {
-      background: var(--primary-hover);
-    }
-
-    @media (max-width: 600px) {
-      .game-container {
-        gap: 1rem;
-      }
-      .word-card {
-        font-size: 1rem;
-      }
-      .image-card img {
-        max-height: 55px;
-      }
-    }
-  </style>
-</head>
-<body>
-
-  <header>
-    <h1>Stationery Matching Game</h1>
-    <p class="instructions">Click an image, then click the matching label.</p>
-  </header>
-
-  <div class="scoreboard">
-    <div>Matches: <span id="matches-count">0</span> / <span id="total-count">0</span></div>
-    <div>Tries: <span id="tries-count">0</span></div>
-  </div>
-
-  <div class="game-container">
-    <div class="column" id="images-column">
-      <div class="column-title">picture</div>
-    </div>
-    <div class="column" id="words-column">
-      <div class="column-title">word</div>
-    </div>
-  </div>
-
-  <div id="win-banner">
-    <h2>🎉 Well Done! All Matched!</h2>
-    <button class="reset-btn" onclick="initGame()">Play Again</button>
-  </div>
-
-  <script>
-    const items = [
-      { id: 'pencil', word: 'a pencil', file: 'pencil.jpg' },
-      { id: 'eraser', word: 'an eraser', file: 'eraser.jpg' },
-      { id: 'ruler', word: 'a ruler', file: 'ruler.jpg' },
-      { id: 'sharpener', word: 'a sharpener', file: 'sharpener.jpg' },
-      { id: 'pen', word: 'a pen', file: 'pen.jpg' },
-      { id: 'pencil-case', word: 'a pencil case', file: 'pencil-case.jpg' },
-      { id: 'book', word: 'a book', file: 'book.jpg' },
-      { id: 'school-bag', word: 'a school bag', file: 'school-bag.jpg' },
-      { id: 'coloured-pencil', word: 'a coloured pencil', file: 'coloured-pencil.jpg' },
-      { id: 'glue-stick', word: 'a glue stick', file: 'glue-stick.jpg' }
-    ];
-
-    let selectedImage = null;
-    let selectedWord = null;
-    let matchedCount = 0;
-    let triesCount = 0;
-
-    function shuffle(array) {
-      const arr = [...array];
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
-    }
-
-    function initGame() {
-      matchedCount = 0;
-      triesCount = 0;
-      selectedImage = null;
-      selectedWord = null;
-
-      document.getElementById('matches-count').textContent = '0';
-      document.getElementById('total-count').textContent = items.length;
-      document.getElementById('tries-count').textContent = '0';
-      document.getElementById('win-banner').style.display = 'none';
-
-      const imgCol = document.getElementById('images-column');
-      const wordCol = document.getElementById('words-column');
-
-      imgCol.innerHTML = '<div class="column-title">picture</div>';
-      wordCol.innerHTML = '<div class="column-title">word</div>';
-
-      const shuffledImages = shuffle(items);
-      const shuffledWords = shuffle(items);
-
-      shuffledImages.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'card image-card';
-        card.dataset.id = item.id;
-        
-        const img = document.createElement('img');
-        img.src = `images/stationery/${item.file}`;
-        img.alt = item.word.toLowerCase();
-        card.appendChild(img);
-
-        card.addEventListener('click', () => selectCard('image', card));
-        imgCol.appendChild(card);
-      });
-
-      shuffledWords.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'card word-card';
-        card.dataset.id = item.id;
-        card.textContent = item.word.toLowerCase();
-
-        card.addEventListener('click', () => selectCard('word', card));
-        wordCol.appendChild(card);
-      });
-    }
-
-    function selectCard(type, card) {
-      if (card.classList.contains('matched')) return;
-
-      if (type === 'image') {
-        if (selectedImage) selectedImage.classList.remove('selected');
-        selectedImage = card;
-        card.classList.add('selected');
-      } else {
-        if (selectedWord) selectedWord.classList.remove('selected');
-        selectedWord = card;
-        card.classList.add('selected');
-      }
-
-      if (selectedImage && selectedWord) {
-        checkMatch();
-      }
-    }
-
-    function checkMatch() {
-      triesCount++;
-      document.getElementById('tries-count').textContent = triesCount;
-
-      const isMatch = selectedImage.dataset.id === selectedWord.dataset.id;
-
-      if (isMatch) {
-        selectedImage.className = 'card image-card matched';
-        selectedWord.className = 'card word-card matched';
-        matchedCount++;
-        document.getElementById('matches-count').textContent = matchedCount;
-        selectedImage = null;
-        selectedWord = null;
-
-        if (matchedCount === items.length) {
-          document.getElementById('win-banner').style.display = 'block';
-        }
-      } else {
-        const imgEl = selectedImage;
-        const wordEl = selectedWord;
-
-        imgEl.classList.add('wrong');
-        wordEl.classList.add('wrong');
-
-        setTimeout(() => {
-          imgEl.classList.remove('selected', 'wrong');
-          wordEl.classList.remove('selected', 'wrong');
-        }, 500);
-
-        selectedImage = null;
-        selectedWord = null;
-      }
-    }
-
-    initGame();
-  </script>
-</body>
-</html>
+      cursor:
