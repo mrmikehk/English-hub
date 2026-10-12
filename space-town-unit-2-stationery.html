@@ -172,4 +172,180 @@
       font-size: 1rem;
       font-weight: 600;
       border-radius: 8px;
-      cursor:
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button.reset-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    @media (max-width: 800px) {
+      .game-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Stationery Matching Game</h1>
+    <p class="instructions">Click an image, then click the matching label.</p>
+  </header>
+
+  <div class="scoreboard">
+    <div>Matches: <span id="matches-count">0</span> / <span id="total-count">0</span></div>
+    <div>Tries: <span id="tries-count">0</span></div>
+  </div>
+
+  <div class="game-container">
+    <div class="grid-section">
+      <div class="section-title">picture</div>
+      <div class="grid-3x3" id="images-grid"></div>
+    </div>
+    <div class="grid-section">
+      <div class="section-title">word</div>
+      <div class="grid-3x3" id="words-grid"></div>
+    </div>
+  </div>
+
+  <div id="win-banner">
+    <h2>🎉 Well Done! All Matched!</h2>
+    <button class="reset-btn" onclick="initGame()">Play Again</button>
+  </div>
+
+  <script>
+    const allItems = [
+      { id: 'pencil', word: 'a pencil', file: 'pencil.jpg' },
+      { id: 'eraser', word: 'an eraser', file: 'eraser.jpg' },
+      { id: 'ruler', word: 'a ruler', file: 'ruler.jpg' },
+      { id: 'sharpener', word: 'a sharpener', file: 'sharpener.jpg' },
+      { id: 'pen', word: 'a pen', file: 'pen.jpg' },
+      { id: 'pencil-case', word: 'a pencil case', file: 'pencil-case.jpg' },
+      { id: 'book', word: 'a book', file: 'book.jpg' },
+      { id: 'school-bag', word: 'a school bag', file: 'school-bag.jpg' },
+      { id: 'coloured-pencil', word: 'a coloured pencil', file: 'coloured-pencil.jpg' },
+      { id: 'glue-stick', word: 'a glue stick', file: 'glue-stick.jpg' }
+    ];
+
+    let currentRoundItems = [];
+    let selectedImage = null;
+    let selectedWord = null;
+    let matchedCount = 0;
+    let triesCount = 0;
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function initGame() {
+      matchedCount = 0;
+      triesCount = 0;
+      selectedImage = null;
+      selectedWord = null;
+
+      // Randomly select 9 items from the pool
+      currentRoundItems = shuffle(allItems).slice(0, 9);
+
+      document.getElementById('matches-count').textContent = '0';
+      document.getElementById('total-count').textContent = currentRoundItems.length;
+      document.getElementById('tries-count').textContent = '0';
+      document.getElementById('win-banner').style.display = 'none';
+
+      const imgGrid = document.getElementById('images-grid');
+      const wordGrid = document.getElementById('words-grid');
+
+      imgGrid.innerHTML = '';
+      wordGrid.innerHTML = '';
+
+      const shuffledImages = shuffle(currentRoundItems);
+      const shuffledWords = shuffle(currentRoundItems);
+
+      shuffledImages.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card image-card';
+        card.dataset.id = item.id;
+        
+        const img = document.createElement('img');
+        img.src = `images/stationery/${item.file}`;
+        img.alt = item.word.toLowerCase();
+        card.appendChild(img);
+
+        card.addEventListener('click', () => selectCard('image', card));
+        imgGrid.appendChild(card);
+      });
+
+      shuffledWords.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card word-card';
+        card.dataset.id = item.id;
+        card.textContent = item.word.toLowerCase();
+
+        card.addEventListener('click', () => selectCard('word', card));
+        wordGrid.appendChild(card);
+      });
+    }
+
+    function selectCard(type, card) {
+      if (card.classList.contains('matched')) return;
+
+      if (type === 'image') {
+        if (selectedImage) selectedImage.classList.remove('selected');
+        selectedImage = card;
+        card.classList.add('selected');
+      } else {
+        if (selectedWord) selectedWord.classList.remove('selected');
+        selectedWord = card;
+        card.classList.add('selected');
+      }
+
+      if (selectedImage && selectedWord) {
+        checkMatch();
+      }
+    }
+
+    function checkMatch() {
+      triesCount++;
+      document.getElementById('tries-count').textContent = triesCount;
+
+      const isMatch = selectedImage.dataset.id === selectedWord.dataset.id;
+
+      if (isMatch) {
+        selectedImage.className = 'card image-card matched';
+        selectedWord.className = 'card word-card matched';
+        matchedCount++;
+        document.getElementById('matches-count').textContent = matchedCount;
+        selectedImage = null;
+        selectedWord = null;
+
+        if (matchedCount === currentRoundItems.length) {
+          document.getElementById('win-banner').style.display = 'block';
+        }
+      } else {
+        const imgEl = selectedImage;
+        const wordEl = selectedWord;
+
+        imgEl.classList.add('wrong');
+        wordEl.classList.add('wrong');
+
+        setTimeout(() => {
+          imgEl.classList.remove('selected', 'wrong');
+          wordEl.classList.remove('selected', 'wrong');
+        }, 500);
+
+        selectedImage = null;
+        selectedWord = null;
+      }
+    }
+
+    initGame();
+  </script>
+</body>
+</html>
