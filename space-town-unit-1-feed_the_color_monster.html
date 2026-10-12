@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Feed the Hungry Monster! - Color Words</title>
+  <title>Feed the Hungry Monster! - Color Words Cookie Game</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
@@ -18,201 +18,229 @@
       -webkit-user-select: none;
     }
 
-    /* Subtle classroom dot pattern */
-    .bg-dots {
-      background-color: #fdfbf7;
-      background-image: radial-gradient(#e2e8f0 1.5px, transparent 1.5px);
-      background-size: 24px 24px;
+    /* Cozy kitchen bakery background pattern */
+    .bg-cookie-kitchen {
+      background-color: #fefce8;
+      background-image: 
+        radial-gradient(#fed7aa 1.5px, transparent 1.5px),
+        radial-gradient(#fde68a 1.5px, #fefce8 1.5px);
+      background-size: 32px 32px;
+      background-position: 0 0, 16px 16px;
     }
 
-    /* Idle hovering animation */
+    /* Idle hovering animation for monster */
     .idle-float {
-      animation: monsterFloat 3.4s ease-in-out infinite alternate;
+      animation: monsterFloat 3.2s ease-in-out infinite alternate;
     }
 
     @keyframes monsterFloat {
       0% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-10px) rotate(1deg); }
-      100% { transform: translateY(0px) rotate(-1deg); }
+      50% { transform: translateY(-8px) rotate(1.2deg); }
+      100% { transform: translateY(0px) rotate(-1.2deg); }
     }
 
-    /* Eating animation */
+    /* Munching animation */
     .chomp-anim {
-      animation: monsterChomp 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: monsterChomp 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     @keyframes monsterChomp {
       0% { transform: scale(1); }
-      30% { transform: scale(1.22) rotate(-4deg); }
-      60% { transform: scale(0.9) rotate(4deg); }
+      25% { transform: scale(1.2) rotate(-5deg); }
+      50% { transform: scale(0.88) rotate(4deg); }
+      75% { transform: scale(1.1) rotate(-2deg); }
       100% { transform: scale(1) rotate(0deg); }
     }
 
-    /* Gentle head-shake animation for incorrect match */
+    /* Gentle shake animation for wrong cookie */
     .shake-anim {
       animation: monsterShake 0.6s ease-in-out;
     }
 
     @keyframes monsterShake {
       0%, 100% { transform: translateX(0); }
-      20% { transform: translateX(-15px) rotate(-4deg); }
-      40% { transform: translateX(14px) rotate(4deg); }
-      60% { transform: translateX(-10px) rotate(-2deg); }
-      80% { transform: translateX(8px) rotate(2deg); }
+      20% { transform: translateX(-14px) rotate(-3deg); }
+      40% { transform: translateX(14px) rotate(3deg); }
+      60% { transform: translateX(-9px) rotate(-2deg); }
+      80% { transform: translateX(7px) rotate(2deg); }
     }
 
     /* Mouth open glow on drop zone */
     .hover-target {
-      transform: scale(1.05);
-      filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.5));
+      transform: scale(1.06);
+      filter: drop-shadow(0 0 24px rgba(245, 158, 11, 0.6));
     }
 
-    /* Uniform neutral word flashcards */
-    .word-card {
-      background-color: #ffffff;
-      color: #0f172a; /* Deep Slate text */
-      border: 3px solid #cbd5e1; /* Neutral light border */
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    /* Cookie Item Styling */
+    .cookie-item {
+      position: relative;
       touch-action: none;
       cursor: grab;
-      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.18s ease;
+      filter: drop-shadow(0 4px 5px rgba(120, 53, 15, 0.22));
     }
 
-    .word-card:active {
+    .cookie-item:hover {
+      transform: translateY(-4px) scale(1.04);
+      filter: drop-shadow(0 8px 10px rgba(120, 53, 15, 0.28));
+    }
+
+    .cookie-item:active {
       cursor: grabbing;
+      transform: scale(0.97);
     }
 
-    .word-card.is-dragging {
-      opacity: 0.6;
-      transform: scale(1.08);
-      border-color: #94a3b8;
+    .cookie-item.is-dragging {
+      opacity: 0.45;
+      transform: scale(1.12);
     }
 
-    .word-card.is-selected {
-      border-color: #4f46e5;
-      background-color: #f8fafc;
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
-      transform: translateY(-4px);
+    .cookie-item.is-selected {
+      filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.9));
+      transform: translateY(-6px) scale(1.08);
+      animation: cookieBob 1s ease-in-out infinite alternate;
+    }
+
+    @keyframes cookieBob {
+      from { transform: translateY(-5px) scale(1.06); }
+      to { transform: translateY(-9px) scale(1.09); }
+    }
+
+    /* Floating cookie crumbs on feed */
+    .crumb-particle {
+      position: absolute;
+      pointer-events: none;
+      border-radius: 50%;
+      background: #92400e;
+      animation: crumbFall 0.75s forwards ease-out;
+    }
+
+    @keyframes crumbFall {
+      0% { opacity: 1; transform: translate(0, 0) scale(1); }
+      100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.2); }
     }
   </style>
 </head>
 
-<body class="bg-dots min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden">
+<body class="bg-cookie-kitchen min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden">
 
-  <!-- Header & Progress -->
-  <header class="w-full max-w-4xl mx-auto px-4 pt-3 pb-2 flex flex-wrap items-center justify-between gap-3">
+  <!-- Header & Scoreboard -->
+  <header class="w-full max-w-5xl mx-auto px-4 pt-3 pb-2 flex flex-wrap items-center justify-between gap-3">
     <div class="flex items-center gap-2.5">
-      <div class="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-xl shadow-md">
-        👾
+      <div class="w-11 h-11 bg-amber-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-md border-2 border-amber-300">
+        🍪
       </div>
       <div>
-        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">
-          Feed the Hungry Monster!
+        <h1 class="text-xl sm:text-2xl font-black text-amber-950 tracking-tight flex items-center gap-2">
+          Feed the Monster! 
+          <span class="text-xs bg-amber-200 text-amber-900 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Cookie Bakery</span>
         </h1>
-        <p class="text-xs sm:text-sm text-slate-500 font-semibold">
-          Read the color word and feed the monster!
+        <p class="text-xs sm:text-sm text-amber-800/80 font-bold">
+          Each monster only likes cookies with their color word!
         </p>
       </div>
     </div>
 
-    <!-- Stats & Controls -->
-    <div class="flex items-center gap-2 sm:gap-3 bg-white px-3.5 py-1.5 rounded-2xl shadow-sm border border-slate-200">
-      <div class="flex items-center gap-1 font-bold text-amber-500 text-sm sm:text-base">
+    <!-- Stats & Reset Controls -->
+    <div class="flex items-center gap-2.5 sm:gap-3 bg-white/95 backdrop-blur px-4 py-2 rounded-2xl shadow-sm border border-amber-200">
+      <div class="flex items-center gap-1.5 font-extrabold text-amber-600 text-sm sm:text-base">
         <span>⭐</span>
         <span id="score-counter">0</span>
       </div>
 
-      <div class="h-4 w-[1px] bg-slate-200"></div>
+      <div class="h-4 w-[1.5px] bg-amber-200"></div>
 
-      <div class="text-xs sm:text-sm font-bold text-slate-600">
-        Monster: <span id="progress-counter" class="text-indigo-600 font-extrabold">1 of 11</span>
+      <div class="text-xs sm:text-sm font-bold text-amber-900">
+        Monster: <span id="progress-counter" class="text-amber-600 font-black">1 of 11</span>
       </div>
 
-      <div class="h-4 w-[1px] bg-slate-200"></div>
+      <div class="h-4 w-[1.5px] bg-amber-200"></div>
 
-      <button id="sound-btn" class="p-1 rounded-lg hover:bg-slate-100 text-slate-600 transition" title="Toggle sound">
+      <button id="sound-btn" class="p-1 rounded-xl hover:bg-amber-100 text-slate-700 transition" title="Toggle audio sound">
         🔊
       </button>
 
-      <button id="restart-header-btn" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2 py-1 rounded-lg transition" title="Start over">
-        🔄 Reset
+      <button id="restart-header-btn" class="text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-2.5 py-1.5 rounded-xl transition" title="Start over">
+        🔄 Restart
       </button>
     </div>
   </header>
 
   <main class="flex-1 flex flex-col items-center justify-center px-4 max-w-3xl mx-auto w-full my-auto">
     <!-- Dialogue Bubble -->
-    <div id="speech-bubble" class="relative bg-white px-5 py-2.5 rounded-2xl shadow-md border-2 border-slate-200 text-center mb-3 transition-all duration-200">
-      <p id="speech-text" class="text-base sm:text-lg font-bold text-slate-700">
-        "I'm starving! Feed me my color word!"
+    <div id="speech-bubble" class="relative bg-white px-5 py-2.5 rounded-2xl shadow-md border-2 border-amber-200 text-center mb-2 transition-all duration-200">
+      <p id="speech-text" class="text-base sm:text-lg font-bold text-amber-950">
+        "I'm so hungry! But remember, I only eat the cookie with my color word!"
       </p>
       <!-- Arrow pointer -->
-      <div class="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-b-2 border-r-2 border-slate-200 rotate-45"></div>
+      <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-b-2 border-r-2 border-amber-200 rotate-45"></div>
     </div>
 
     <!-- Monster Feeding Stage Drop Zone -->
-    <div id="drop-zone" class="relative flex flex-col items-center justify-center p-3 sm:p-4 rounded-3xl transition-all duration-200 cursor-pointer">
+    <div id="drop-zone" class="relative flex flex-col items-center justify-center p-3 rounded-3xl transition-all duration-200 cursor-pointer">
       <div id="monster-frame" class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center idle-float transition-all duration-300">
-        <!-- Direct Image tag referencing images/monsters/ -->
+        <!-- Direct Image tag referencing images/monsters/ folder -->
         <img id="monster-image"
              src="images/monsters/red-monster.jpg"
              alt="Hungry colored monster"
              class="w-full h-full object-contain drop-shadow-md select-none pointer-events-none" />
 
         <!-- Floating Bite Reaction Message -->
-        <div id="chew-badge" class="absolute font-black text-2xl sm:text-3xl text-emerald-600 bg-white/95 px-4 py-1.5 rounded-full shadow-lg border-2 border-emerald-400 opacity-0 pointer-events-none transition-all duration-200 transform scale-75">
-          NOM NOM NOM! 😋
+        <div id="chew-badge" class="absolute font-black text-2xl sm:text-3xl text-amber-800 bg-amber-100/95 px-5 py-2 rounded-full shadow-xl border-3 border-amber-400 opacity-0 pointer-events-none transition-all duration-200 transform scale-75">
+          CRUNCH CRUNCH! 🍪😋
         </div>
       </div>
 
-      <!-- Instruction pill below monster -->
-      <div class="mt-2 bg-slate-800 text-white text-xs sm:text-sm font-bold px-4 py-1 rounded-full shadow-sm flex items-center gap-1.5">
-        <span>👇 Drag word here or tap to feed</span>
+      <!-- Feeding Prompt Pill -->
+      <div class="mt-2 bg-amber-900 text-amber-100 text-xs sm:text-sm font-bold px-4 py-1.5 rounded-full shadow-md flex items-center gap-2">
+        <span>👇 Drag the right cookie into my mouth (or tap the cookie, then tap me!)</span>
       </div>
     </div>
   </main>
 
-  <section class="w-full max-w-4xl mx-auto px-4 pb-4">
-    <div class="bg-white rounded-3xl p-3 sm:p-4 shadow-lg border-2 border-slate-200">
+  <!-- Cookie Word Bank (Baking Sheet) -->
+  <section class="w-full max-w-5xl mx-auto px-3 sm:px-4 pb-4">
+    <div class="bg-gradient-to-b from-stone-100 to-stone-200 rounded-3xl p-3 sm:p-4 shadow-xl border-4 border-stone-300">
       <div class="flex items-center justify-between px-2 mb-2">
-        <h2 class="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-          <span>📖</span> Word Bank (Read carefully)
+        <h2 class="text-xs sm:text-sm font-black text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
+          <span>🍪</span> Cookie Tray
         </h2>
-        <span class="text-xs text-slate-400 font-semibold hidden sm:inline">
-          No color hints — read each word!
+        <span class="text-xs text-amber-950 font-bold hidden sm:inline">
+          Monsters only eat the cookie with their color word on it!
         </span>
       </div>
 
-      <!-- 11 Identical Neutral Word Cards -->
-      <div id="words-container" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 sm:gap-2.5">
-        <!-- Cards generated programmatically with neutral dark text and white background -->
+      <!-- 11 Identical Baked Cookies (SVG Illustrated) -->
+      <div id="words-container" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-6 gap-2.5 sm:gap-3 place-items-center">
+        <!-- Populated dynamically via JS -->
       </div>
     </div>
   </section>
 
+  <!-- Celebration Modal -->
   <div id="victory-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 text-center shadow-2xl border-4 border-amber-300 transform scale-90 transition-transform duration-300" id="victory-card">
-      <div class="text-6xl mb-2 animate-bounce">🏆</div>
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 mb-1">
-        Super Reader!
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 text-center shadow-2xl border-4 border-amber-400 transform scale-90 transition-transform duration-300" id="victory-card">
+      <div class="text-6xl mb-2 animate-bounce">🍪🎉</div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-amber-950 mb-1">
+        Master Cookie Monster Reader!
       </h2>
-      <p class="text-slate-600 text-sm sm:text-base mb-4 font-semibold">
-        You read all the color words and fed all 11 hungry monsters!
+      <p class="text-amber-800 text-sm sm:text-base mb-4 font-semibold">
+        You read every single color word cookie and fed all 11 hungry monsters!
       </p>
 
-      <div class="bg-amber-50 rounded-2xl py-3 px-4 border border-amber-200 inline-flex items-center gap-2 mb-5">
+      <div class="bg-amber-100/80 rounded-2xl py-3 px-5 border-2 border-amber-300 inline-flex items-center gap-2 mb-5">
         <span class="text-2xl">⭐</span>
-        <span class="text-xl font-bold text-amber-600">Final Score: <span id="final-score">110</span></span>
+        <span class="text-xl font-black text-amber-900">Total Score: <span id="final-score">110</span></span>
       </div>
 
-      <button id="play-again-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-lg py-3 rounded-2xl shadow-md transition active:scale-95">
-        Play Again! 🔄
+      <button id="play-again-btn" class="w-full bg-amber-500 hover:bg-amber-600 text-amber-950 font-black text-lg py-3 rounded-2xl shadow-lg border-b-4 border-amber-600 transition active:scale-95">
+        Bake & Play Again! 🍪
       </button>
     </div>
   </div>
 
   <script>
-    // Exact monster filenames matched with their color name
+    // Exact monster filenames from images/monsters/
     const MONSTER_LIST = [
       { color: 'black', file: 'black-monster.jpg' },
       { color: 'blue', file: 'blue-monster.jpg' },
@@ -234,7 +262,7 @@
     let isProcessing = false;
     let selectedWord = null;
 
-    // Web Audio Synthesizer (Zero external file dependencies)
+    // Web Audio Synthesizer (Crunch, Munch, and Chimes with zero external file dependencies)
     let audioContext = null;
     function getAudioContext() {
       if (!audioContext) {
@@ -263,22 +291,35 @@
       } catch (err) {}
     }
 
-    function playMunchSound() {
+    // Realistic crunchy cookie bite sound
+    function playCookieCrunchSound() {
       if (!soundEnabled) return;
-      [340, 480, 620].forEach((freq, idx) => {
-        setTimeout(() => playTone(freq, 'triangle', 0.12, 0.25), idx * 75);
-      });
+      try {
+        const ctx = getAudioContext();
+        
+        // Multi-frequency bite clicks
+        [320, 520, 780, 420].forEach((freq, idx) => {
+          setTimeout(() => {
+            playTone(freq, 'triangle', 0.08, 0.28);
+          }, idx * 60);
+        });
+
+        // Deep chew satisfaction tone
+        setTimeout(() => {
+          playTone(240, 'sine', 0.25, 0.22);
+        }, 260);
+      } catch (e) {}
     }
 
     function playWrongSound() {
       if (!soundEnabled) return;
-      playTone(220, 'sawtooth', 0.15, 0.2);
-      setTimeout(() => playTone(170, 'sawtooth', 0.22, 0.25), 120);
+      playTone(200, 'sawtooth', 0.15, 0.2);
+      setTimeout(() => playTone(150, 'sawtooth', 0.22, 0.22), 110);
     }
 
-    function playVictoryChime() {
+    function playVictoryFanfare() {
       if (!soundEnabled) return;
-      const notes = [261.63, 329.63, 392.00, 523.25, 659.25];
+      const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
       notes.forEach((freq, idx) => {
         setTimeout(() => playTone(freq, 'sine', 0.25, 0.25), idx * 80);
       });
@@ -290,7 +331,7 @@
         window.speechSynthesis.cancel();
         const utter = new SpeechSynthesisUtterance(text);
         utter.rate = 0.95;
-        utter.pitch = 1.2;
+        utter.pitch = 1.25;
         window.speechSynthesis.speak(utter);
       } catch (e) {}
     }
@@ -304,7 +345,96 @@
       return copy;
     }
 
-    // Start or restart game
+    // Crumb burst particle animation
+    function spawnCookieCrumbs(x, y) {
+      const container = document.body;
+      for (let i = 0; i < 12; i++) {
+        const crumb = document.createElement('div');
+        crumb.className = 'crumb-particle';
+        const size = Math.floor(Math.random() * 7) + 4;
+        crumb.style.width = `${size}px`;
+        crumb.style.height = `${size}px`;
+        crumb.style.left = `${x}px`;
+        crumb.style.top = `${y}px`;
+
+        const dx = (Math.random() - 0.5) * 120 + 'px';
+        const dy = (Math.random() * 80 + 30) + 'px';
+        crumb.style.setProperty('--dx', dx);
+        crumb.style.setProperty('--dy', dy);
+
+        // Crumb color variety (golden brown / dark chocolate)
+        crumb.style.background = Math.random() > 0.4 ? '#b45309' : '#451a03';
+        container.appendChild(crumb);
+
+        setTimeout(() => crumb.remove(), 750);
+      }
+    }
+
+    // Generates an inline vector SVG cookie with identical golden tan bake, chocolate chips, and crisp dark text
+    function createCookieSVG(word) {
+      return `
+        <svg viewBox="0 0 120 120" class="w-24 h-24 sm:w-28 sm:h-28 transition-transform select-none pointer-events-none">
+          <defs>
+            <!-- Golden baked cookie gradient -->
+            <radialGradient id="cookieBakeGrad" cx="40%" cy="35%" r="65%">
+              <stop offset="0%" stop-color="#fed7aa" />
+              <stop offset="65%" stop-color="#f59e0b" />
+              <stop offset="92%" stop-color="#d97706" />
+              <stop offset="100%" stop-color="#b45309" />
+            </radialGradient>
+
+            <!-- Chocolate chip gradient -->
+            <radialGradient id="chocChip" cx="30%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#78350f" />
+              <stop offset="85%" stop-color="#451a03" />
+              <stop offset="100%" stop-color="#260e02" />
+            </radialGradient>
+
+            <filter id="cookieShadow" x="-10%" y="-10%" width="125%" height="125%">
+              <feDropShadow dx="0" dy="3" stdDeviation="2" flood-color="#78350f" flood-opacity="0.3" />
+            </filter>
+          </defs>
+
+          <!-- Cookie base with bumpy scalloped edge -->
+          <circle cx="60" cy="60" r="54" fill="url(#cookieBakeGrad)" stroke="#b45309" stroke-width="2.5" filter="url(#cookieShadow)" />
+          
+          <!-- Baked texture dots -->
+          <circle cx="48" cy="22" r="2.5" fill="#d97706" opacity="0.6" />
+          <circle cx="78" cy="24" r="2" fill="#d97706" opacity="0.6" />
+          <circle cx="28" cy="76" r="2.5" fill="#d97706" opacity="0.6" />
+          <circle cx="92" cy="74" r="2" fill="#d97706" opacity="0.6" />
+          <circle cx="60" cy="98" r="3" fill="#d97706" opacity="0.6" />
+
+          <!-- Chocolate Chips scattered around border (leaving clear center for reading) -->
+          <!-- Top chip -->
+          <path d="M 52,18 C 58,16 66,19 64,26 C 60,30 52,28 50,23 Z" fill="url(#chocChip)" />
+          <!-- Top Left chip -->
+          <path d="M 28,30 C 35,26 40,32 37,38 C 32,42 24,37 28,30 Z" fill="url(#chocChip)" />
+          <!-- Top Right chip -->
+          <path d="M 85,32 C 92,29 97,35 94,41 C 89,45 82,39 85,32 Z" fill="url(#chocChip)" />
+          <!-- Left chip -->
+          <path d="M 18,55 C 23,50 29,56 26,62 C 20,66 16,61 18,55 Z" fill="url(#chocChip)" />
+          <!-- Right chip -->
+          <path d="M 94,56 C 100,53 103,60 99,65 C 93,68 90,62 94,56 Z" fill="url(#chocChip)" />
+          <!-- Bottom Left chip -->
+          <path d="M 32,84 C 38,80 43,87 39,92 C 34,96 28,90 32,84 Z" fill="url(#chocChip)" />
+          <!-- Bottom Right chip -->
+          <path d="M 80,82 C 86,78 92,84 88,90 C 82,95 76,89 80,82 Z" fill="url(#chocChip)" />
+
+          <!-- Semi-translucent frosted icing band for maximum word contrast -->
+          <rect x="14" y="44" width="92" height="32" rx="16" fill="#fffbeb" opacity="0.88" />
+
+          <!-- Center English Color Word: Deep Chocolate / Slate #1e1b18 (ZERO color hint!) -->
+          <text x="60" y="65" 
+                text-anchor="middle" 
+                fill="#2e1065" 
+                style="fill: #261608; font-family: 'Fredoka', cursive, sans-serif; font-size: ${word.length > 5 ? '16px' : '18px'}; font-weight: 800; letter-spacing: 0.5px;">
+            ${word}
+          </text>
+        </svg>
+      `;
+    }
+
     function initGame() {
       gameDeck = shuffle(MONSTER_LIST);
       currentIndex = 0;
@@ -331,52 +461,53 @@
       const img = document.getElementById('monster-image');
       const speech = document.getElementById('speech-text');
 
-      // Point directly to your images/monsters/ directory
+      // Point directly to images/monsters/[color]-monster.jpg
       img.src = `images/monsters/${current.file}`;
       img.alt = `${current.color} monster`;
 
-      speech.textContent = `I am very hungry! Read my color and feed me!`;
+      speech.textContent = `I'm hungry! I only like the cookie with my color word: "${current.color.toUpperCase()}"!`;
       updateHeader();
     }
 
-    // Render 11 identical neutral cards (no color styling, no background clues)
+    // Render 11 Cookie Cards on the baking tray
     function renderWordBank() {
       const container = document.getElementById('words-container');
       container.innerHTML = '';
 
-      // Shuffle so kids don't memorize positions
-      const shuffledOptions = shuffle(MONSTER_LIST);
+      // Shuffle so positions vary each round
+      const shuffledList = shuffle(MONSTER_LIST);
 
-      shuffledOptions.forEach(item => {
-        const card = document.createElement('div');
-        // Uniform neutral styling: white background, dark slate text, slate border
-        card.className = 'word-card text-center py-2.5 px-3 rounded-2xl font-bold text-base sm:text-lg select-none';
-        card.textContent = item.color;
-        card.dataset.color = item.color;
+      shuffledList.forEach(item => {
+        const cookieWrap = document.createElement('div');
+        cookieWrap.className = 'cookie-item flex flex-col items-center justify-center p-1';
+        cookieWrap.dataset.color = item.color;
+        cookieWrap.setAttribute('draggable', 'true');
+        cookieWrap.setAttribute('title', `Cookie: ${item.color}`);
 
-        // HTML5 drag support
-        card.setAttribute('draggable', 'true');
-        card.addEventListener('dragstart', handleDragStart);
-        card.addEventListener('dragend', handleDragEnd);
+        cookieWrap.innerHTML = createCookieSVG(item.color);
 
-        // Touch & tap support
-        setupPointerInteraction(card);
+        // Standard HTML5 Drag & Drop
+        cookieWrap.addEventListener('dragstart', handleDragStart);
+        cookieWrap.addEventListener('dragend', handleDragEnd);
 
-        container.appendChild(card);
+        // Pointer/Touch drag & tap for mobile/smartboards
+        setupPointerInteraction(cookieWrap);
+
+        container.appendChild(cookieWrap);
       });
     }
 
     let draggedColor = null;
 
     function handleDragStart(e) {
-      draggedColor = e.target.dataset.color;
+      draggedColor = e.currentTarget.dataset.color;
       e.dataTransfer.setData('text/plain', draggedColor);
-      e.target.classList.add('is-dragging');
+      e.currentTarget.classList.add('is-dragging');
       document.getElementById('monster-frame').classList.add('hover-target');
     }
 
     function handleDragEnd(e) {
-      e.target.classList.remove('is-dragging');
+      e.currentTarget.classList.remove('is-dragging');
       document.getElementById('monster-frame').classList.remove('hover-target');
     }
 
@@ -397,64 +528,64 @@
       document.getElementById('monster-frame').classList.remove('hover-target');
       const word = e.dataTransfer.getData('text/plain') || draggedColor;
       if (word) {
-        processFeeding(word);
+        processFeeding(word, e.clientX, e.clientY);
       }
     });
 
-    // Clicking monster while a card is selected feeds it
-    dropZone.addEventListener('click', () => {
+    // Clicking monster feeds if a cookie is currently selected
+    dropZone.addEventListener('click', (e) => {
       if (selectedWord) {
-        processFeeding(selectedWord);
+        processFeeding(selectedWord, e.clientX, e.clientY);
       }
     });
 
-    // Pointer events for mobile, tablets, Chromebook touches
-    function setupPointerInteraction(card) {
+    // Unified pointer events for touch screens, iPads, and Chromebooks
+    function setupPointerInteraction(cookieEl) {
       let isDragging = false;
       let startX = 0, startY = 0;
-      let clone = null;
+      let ghost = null;
       let moved = false;
 
-      card.addEventListener('pointerdown', (e) => {
+      cookieEl.addEventListener('pointerdown', (e) => {
         getAudioContext();
         startX = e.clientX;
         startY = e.clientY;
         moved = false;
         isDragging = true;
-        card.setPointerCapture(e.pointerId);
+        cookieEl.setPointerCapture(e.pointerId);
       });
 
-      card.addEventListener('pointermove', (e) => {
+      cookieEl.addEventListener('pointermove', (e) => {
         if (!isDragging) return;
         const dx = e.clientX - startX;
         const dy = e.clientY - startY;
 
         if (!moved && (Math.abs(dx) > 7 || Math.abs(dy) > 7)) {
           moved = true;
-          clone = card.cloneNode(true);
-          clone.style.position = 'fixed';
-          clone.style.zIndex = '9999';
-          clone.style.pointerEvents = 'none';
-          clone.style.opacity = '0.9';
-          clone.style.transform = 'scale(1.1) rotate(4deg)';
-          document.body.appendChild(clone);
+          ghost = cookieEl.cloneNode(true);
+          ghost.style.position = 'fixed';
+          ghost.style.zIndex = '9999';
+          ghost.style.pointerEvents = 'none';
+          ghost.style.opacity = '0.9';
+          ghost.style.transform = 'scale(1.15) rotate(6deg)';
+          document.body.appendChild(ghost);
           document.getElementById('monster-frame').classList.add('hover-target');
         }
 
-        if (moved && clone) {
-          clone.style.left = `${e.clientX - clone.offsetWidth / 2}px`;
-          clone.style.top = `${e.clientY - clone.offsetHeight / 2}px`;
+        if (moved && ghost) {
+          ghost.style.left = `${e.clientX - ghost.offsetWidth / 2}px`;
+          ghost.style.top = `${e.clientY - ghost.offsetHeight / 2}px`;
         }
       });
 
-      card.addEventListener('pointerup', (e) => {
+      cookieEl.addEventListener('pointerup', (e) => {
         if (!isDragging) return;
         isDragging = false;
         document.getElementById('monster-frame').classList.remove('hover-target');
 
-        if (clone) {
-          clone.remove();
-          clone = null;
+        if (ghost) {
+          ghost.remove();
+          ghost = null;
         }
 
         const rect = dropZone.getBoundingClientRect();
@@ -466,37 +597,36 @@
         );
 
         if (moved && droppedOnMonster) {
-          processFeeding(card.dataset.color);
+          processFeeding(cookieEl.dataset.color, e.clientX, e.clientY);
         } else if (!moved) {
-          // Tap selection fallback: click word then click monster (or tap directly)
-          handleWordTap(card);
+          handleCookieTap(cookieEl);
         }
       });
 
-      card.addEventListener('pointercancel', () => {
+      cookieEl.addEventListener('pointercancel', () => {
         isDragging = false;
-        if (clone) {
-          clone.remove();
-          clone = null;
+        if (ghost) {
+          ghost.remove();
+          ghost = null;
         }
         document.getElementById('monster-frame').classList.remove('hover-target');
       });
     }
 
-    function handleWordTap(card) {
-      // Toggle selection or feed directly if tapped again
-      if (selectedWord === card.dataset.color) {
-        processFeeding(card.dataset.color);
+    function handleCookieTap(cookieEl) {
+      if (selectedWord === cookieEl.dataset.color) {
+        // Tapped selected cookie again -> feed directly
+        const rect = dropZone.getBoundingClientRect();
+        processFeeding(cookieEl.dataset.color, rect.left + rect.width / 2, rect.top + rect.height / 2);
       } else {
-        document.querySelectorAll('.word-card').forEach(c => c.classList.remove('is-selected'));
-        card.classList.add('is-selected');
-        selectedWord = card.dataset.color;
-        document.getElementById('speech-text').textContent = `Did you choose "${selectedWord.toUpperCase()}"? Tap me to feed!`;
+        document.querySelectorAll('.cookie-item').forEach(c => c.classList.remove('is-selected'));
+        cookieEl.classList.add('is-selected');
+        selectedWord = cookieEl.dataset.color;
+        document.getElementById('speech-text').textContent = `Did you pick the "${selectedWord.toUpperCase()}" cookie? Tap me to feed!`;
       }
     }
 
-    // Feeding evaluation logic
-    function processFeeding(word) {
+    function processFeeding(word, dropX, dropY) {
       if (isProcessing) return;
       isProcessing = true;
 
@@ -505,30 +635,37 @@
       const speech = document.getElementById('speech-text');
       const chewBadge = document.getElementById('chew-badge');
 
-      // Clear selection highlights
-      document.querySelectorAll('.word-card').forEach(c => c.classList.remove('is-selected'));
+      // Clear card selection state
+      document.querySelectorAll('.cookie-item').forEach(c => c.classList.remove('is-selected'));
       selectedWord = null;
 
       if (word.toLowerCase() === current.color.toLowerCase()) {
-        // Correct match!
+        // Correct cookie fed!
         score += 10;
         updateHeader();
-        playMunchSound();
+        playCookieCrunchSound();
+
+        // Spawn biscuit crumbs
+        const rect = frame.getBoundingClientRect();
+        const burstX = dropX || (rect.left + rect.width / 2);
+        const burstY = dropY || (rect.top + rect.height / 2);
+        spawnCookieCrumbs(burstX, burstY);
 
         frame.classList.add('chomp-anim');
         chewBadge.style.opacity = '1';
-        chewBadge.style.transform = 'scale(1.1) translateY(-10px)';
-        speech.textContent = `YUM! That is "${current.color.toUpperCase()}"! Delicious!`;
+        chewBadge.style.transform = 'scale(1.1) translateY(-12px)';
+        speech.textContent = `CRUNCH! That's my "${current.color.toUpperCase()}" cookie! SO GOOD!`;
 
         try {
           confetti({
-            particleCount: 40,
-            spread: 55,
-            origin: { y: 0.5 }
+            particleCount: 45,
+            spread: 60,
+            origin: { y: 0.55 },
+            colors: ['#f59e0b', '#d97706', '#92400e', '#fed7aa']
           });
         } catch (e) {}
 
-        speakEncouragement(`Yum! ${current.color}!`);
+        speakEncouragement(`Crunch! Delicious ${current.color} cookie!`);
 
         setTimeout(() => {
           chewBadge.style.opacity = '0';
@@ -543,25 +680,25 @@
           } else {
             showVictoryModal();
           }
-        }, 1100);
+        }, 1150);
 
       } else {
-        // Incorrect match
+        // Wrong cookie fed
         playWrongSound();
         frame.classList.add('shake-anim');
-        speech.textContent = `Blech! That says "${word.toUpperCase()}". That is not my color!`;
-        speakEncouragement(`Blech! That word says ${word}. Try again!`);
+        speech.textContent = `Blech! That cookie says "${word.toUpperCase()}"! I only like cookies with MY color word!`;
+        speakEncouragement(`Blech! That cookie says ${word}. I only like my color cookie!`);
 
         setTimeout(() => {
           frame.classList.remove('shake-anim');
-          speech.textContent = `Please read and feed me my color word!`;
+          speech.textContent = `Find my cookie that says "${current.color.toUpperCase()}"!`;
           isProcessing = false;
         }, 950);
       }
     }
 
     function showVictoryModal() {
-      playVictoryChime();
+      playVictoryFanfare();
       const modal = document.getElementById('victory-modal');
       const card = document.getElementById('victory-card');
       document.getElementById('final-score').textContent = score;
@@ -571,7 +708,7 @@
         modal.classList.remove('opacity-0');
         card.classList.remove('scale-90');
         card.classList.add('scale-100');
-      }, 15);
+      }, 20);
 
       try {
         confetti({
@@ -581,7 +718,7 @@
         });
       } catch (e) {}
 
-      speakEncouragement("Hooray! You read all the words and fed all 11 monsters!");
+      speakEncouragement("Hooray! You fed all eleven hungry monsters their color cookies!");
     }
 
     function hideVictoryModal() {
@@ -593,7 +730,7 @@
       setTimeout(() => modal.classList.add('hidden'), 300);
     }
 
-    // Control buttons
+    // Sound toggle and game restart listeners
     document.getElementById('sound-btn').addEventListener('click', (e) => {
       soundEnabled = !soundEnabled;
       e.currentTarget.textContent = soundEnabled ? '🔊' : '🔇';
@@ -607,7 +744,6 @@
       initGame();
     });
 
-    // Initialize game
     window.onload = function () {
       initGame();
     };
