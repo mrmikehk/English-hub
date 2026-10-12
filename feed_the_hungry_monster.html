@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Feed the Hungry Monster! - Color Words</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Fredoka', cursive, sans-serif;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Subtle classroom dot pattern */
+    .bg-dots {
+      background-color: #fdfbf7;
+      background-image: radial-gradient(#e2e8f0 1.5px, transparent 1.5px);
+      background-size: 24px 24px;
+    }
+
+    /* Idle hovering animation */
+    .idle-float {
+      animation: monsterFloat 3.4s ease-in-out infinite alternate;
+    }
+
+    @keyframes monsterFloat {
+      0% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(1deg); }
+      100% { transform: translateY(0px) rotate(-1deg); }
+    }
+
+    /* Eating animation */
+    .chomp-anim {
+      animation: monsterChomp 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes monsterChomp {
+      0% { transform: scale(1); }
+      30% { transform: scale(1.22) rotate(-4deg); }
+      60% { transform: scale(0.9) rotate(4deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    /* Gentle head-shake animation for incorrect match */
+    .shake-anim {
+      animation: monsterShake 0.6s ease-in-out;
+    }
+
+    @keyframes monsterShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-15px) rotate(-4deg); }
+      40% { transform: translateX(14px) rotate(4deg); }
+      60% { transform: translateX(-10px) rotate(-2deg); }
+      80% { transform: translateX(8px) rotate(2deg); }
+    }
+
+    /* Mouth open glow on drop zone */
+    .hover-target {
+      transform: scale(1.05);
+      filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.5));
+    }
+
+    /* Uniform neutral word flashcards */
+    .word-card {
+      background-color: #ffffff;
+      color: #0f172a; /* Deep Slate text */
+      border: 3px solid #cbd5e1; /* Neutral light border */
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      touch-action: none;
+      cursor: grab;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .word-card:active {
+      cursor: grabbing;
+    }
+
+    .word-card.is-dragging {
+      opacity: 0.6;
+      transform: scale(1.08);
+      border-color: #94a3b8;
+    }
+
+    .word-card.is-selected {
+      border-color: #4f46e5;
+      background-color: #f8fafc;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
+      transform: translateY(-4px);
+    }
+  </style>
+</head>
+
+<body class="bg-dots min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden">
+
+  <!-- Header & Progress -->
+  <header class="w-full max-w-4xl mx-auto px-4 pt-3 pb-2 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-2.5">
+      <div class="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-xl shadow-md">
+        👾
+      </div>
+      <div>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">
+          Feed the Hungry Monster!
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-500 font-semibold">
+          Read the color word and feed the monster!
+        </p>
+      </div>
+    </div>
+
+    <!-- Stats & Controls -->
+    <div class="flex items-center gap-2 sm:gap-3 bg-white px-3.5 py-1.5 rounded-2xl shadow-sm border border-slate-200">
+      <div class="flex items-center gap-1 font-bold text-amber-500 text-sm sm:text-base">
+        <span>⭐</span>
+        <span id="score-counter">0</span>
+      </div>
+
+      <div class="h-4 w-[1px] bg-slate-200"></div>
+
+      <div class="text-xs sm:text-sm font-bold text-slate-600">
+        Monster: <span id="progress-counter" class="text-indigo-600 font-extrabold">1 of 11</span>
+      </div>
+
+      <div class="h-4 w-[1px] bg-slate-200"></div>
+
+      <button id="sound-btn" class="p-1 rounded-lg hover:bg-slate-100 text-slate-600 transition" title="Toggle sound">
+        🔊
+      </button>
+
+      <button id="restart-header-btn" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2 py-1 rounded-lg transition" title="Start over">
+        🔄 Reset
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-1 flex flex-col items-center justify-center px-4 max-w-3xl mx-auto w-full my-auto">
+    <!-- Dialogue Bubble -->
+    <div id="speech-bubble" class="relative bg-white px-5 py-2.5 rounded-2xl shadow-md border-2 border-slate-200 text-center mb-3 transition-all duration-200">
+      <p id="speech-text" class="text-base sm:text-lg font-bold text-slate-700">
+        "I'm starving! Feed me my color word!"
+      </p>
+      <!-- Arrow pointer -->
+      <div class="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-b-2 border-r-2 border-slate-200 rotate-45"></div>
+    </div>
+
+    <!-- Monster Feeding Stage Drop Zone -->
+    <div id="drop-zone" class="relative flex flex-col items-center justify-center p-3 sm:p-4 rounded-3xl transition-all duration-200 cursor-pointer">
+      <div id="monster-frame" class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center idle-float transition-all duration-300">
+        <!-- Direct Image tag referencing images/monsters/ -->
+        <img id="monster-image"
+             src="images/monsters/red-monster.jpg"
+             alt="Hungry colored monster"
+             class="w-full h-full object-contain drop-shadow-md select-none pointer-events-none" />
+
+        <!-- Floating Bite Reaction Message -->
+        <div id="chew-badge" class="absolute font-black text-2xl sm:text-3xl text-emerald-600 bg-white/95 px-4 py-1.5 rounded-full shadow-lg border-2 border-emerald-400 opacity-0 pointer-events-none transition-all duration-200 transform scale-75">
+          NOM NOM NOM! 😋
+        </div>
+      </div>
+
+      <!-- Instruction pill below monster -->
+      <div class="mt-2 bg-slate-800 text-white text-xs sm:text-sm font-bold px-4 py-1 rounded-full shadow-sm flex items-center gap-1.5">
+        <span>👇 Drag word here or tap to feed</span>
+      </div>
+    </div>
+  </main>
+
+  <section class="w-full max-w-4xl mx-auto px-4 pb-4">
+    <div class="bg-white rounded-3xl p-3 sm:p-4 shadow-lg border-2 border-slate-200">
+      <div class="flex items-center justify-between px-2 mb-2">
+        <h2 class="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+          <span>📖</span> Word Bank (Read carefully)
+        </h2>
+        <span class="text-xs text-slate-400 font-semibold hidden sm:inline">
+          No color hints — read each word!
+        </span>
+      </div>
+
+      <!-- 11 Identical Neutral Word Cards -->
+      <div id="words-container" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 sm:gap-2.5">
+        <!-- Cards generated programmatically with neutral dark text and white background -->
+      </div>
+    </div>
+  </section>
+
+  <div id="victory-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 text-center shadow-2xl border-4 border-amber-300 transform scale-90 transition-transform duration-300" id="victory-card">
+      <div class="text-6xl mb-2 animate-bounce">🏆</div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 mb-1">
+        Super Reader!
+      </h2>
+      <p class="text-slate-600 text-sm sm:text-base mb-4 font-semibold">
+        You read all the color words and fed all 11 hungry monsters!
+      </p>
+
+      <div class="bg-amber-50 rounded-2xl py-3 px-4 border border-amber-200 inline-flex items-center gap-2 mb-5">
+        <span class="text-2xl">⭐</span>
+        <span class="text-xl font-bold text-amber-600">Final Score: <span id="final-score">110</span></span>
+      </div>
+
+      <button id="play-again-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-lg py-3 rounded-2xl shadow-md transition active:scale-95">
+        Play Again! 🔄
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Exact monster filenames matched with their color name
+    const MONSTER_LIST = [
+      { color: 'black', file: 'black-monster.jpg' },
+      { color: 'blue', file: 'blue-monster.jpg' },
+      { color: 'brown', file: 'brown-monster.jpg' },
+      { color: 'gray', file: 'gray-monster.jpg' },
+      { color: 'green', file: 'green-monster.jpg' },
+      { color: 'orange', file: 'orange-monster.jpg' },
+      { color: 'pink', file: 'pink-monster.jpg' },
+      { color: 'purple', file: 'purple-monster.jpg' },
+      { color: 'red', file: 'red-monster.jpg' },
+      { color: 'white', file: 'white-monster.jpg' },
+      { color: 'yellow', file: 'yellow-monster.jpg' }
+    ];
+
+    let gameDeck = [];
+    let currentIndex = 0;
+    let score = 0;
+    let soundEnabled = true;
+    let isProcessing = false;
+    let selectedWord = null;
+
+    // Web Audio Synthesizer (Zero external file dependencies)
+    let audioContext = null;
+    function getAudioContext() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+      return audioContext;
+    }
+
+    function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.2) {
+      if (!soundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(gainVal, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch (err) {}
+    }
+
+    function playMunchSound() {
+      if (!soundEnabled) return;
+      [340, 480, 620].forEach((freq, idx) => {
+        setTimeout(() => playTone(freq, 'triangle', 0.12, 0.25), idx * 75);
+      });
+    }
+
+    function playWrongSound() {
+      if (!soundEnabled) return;
+      playTone(220, 'sawtooth', 0.15, 0.2);
+      setTimeout(() => playTone(170, 'sawtooth', 0.22, 0.25), 120);
+    }
+
+    function playVictoryChime() {
+      if (!soundEnabled) return;
+      const notes = [261.63, 329.63, 392.00, 523.25, 659.25];
+      notes.forEach((freq, idx) => {
+        setTimeout(() => playTone(freq, 'sine', 0.25, 0.25), idx * 80);
+      });
+    }
+
+    function speakEncouragement(text) {
+      if (!('speechSynthesis' in window)) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.rate = 0.95;
+        utter.pitch = 1.2;
+        window.speechSynthesis.speak(utter);
+      } catch (e) {}
+    }
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    // Start or restart game
+    function initGame() {
+      gameDeck = shuffle(MONSTER_LIST);
+      currentIndex = 0;
+      score = 0;
+      selectedWord = null;
+      isProcessing = false;
+      updateHeader();
+      loadCurrentMonster();
+      renderWordBank();
+      hideVictoryModal();
+    }
+
+    function updateHeader() {
+      document.getElementById('score-counter').textContent = score;
+      document.getElementById('progress-counter').textContent = `${currentIndex + 1} of ${gameDeck.length}`;
+    }
+
+    function getCurrentMonster() {
+      return gameDeck[currentIndex];
+    }
+
+    function loadCurrentMonster() {
+      const current = getCurrentMonster();
+      const img = document.getElementById('monster-image');
+      const speech = document.getElementById('speech-text');
+
+      // Point directly to your images/monsters/ directory
+      img.src = `images/monsters/${current.file}`;
+      img.alt = `${current.color} monster`;
+
+      speech.textContent = `I am very hungry! Read my color and feed me!`;
+      updateHeader();
+    }
+
+    // Render 11 identical neutral cards (no color styling, no background clues)
+    function renderWordBank() {
+      const container = document.getElementById('words-container');
+      container.innerHTML = '';
+
+      // Shuffle so kids don't memorize positions
+      const shuffledOptions = shuffle(MONSTER_LIST);
+
+      shuffledOptions.forEach(item => {
+        const card = document.createElement('div');
+        // Uniform neutral styling: white background, dark slate text, slate border
+        card.className = 'word-card text-center py-2.5 px-3 rounded-2xl font-bold text-base sm:text-lg select-none';
+        card.textContent = item.color;
+        card.dataset.color = item.color;
+
+        // HTML5 drag support
+        card.setAttribute('draggable', 'true');
+        card.addEventListener('dragstart', handleDragStart);
+        card.addEventListener('dragend', handleDragEnd);
+
+        // Touch & tap support
+        setupPointerInteraction(card);
+
+        container.appendChild(card);
+      });
+    }
+
+    let draggedColor = null;
+
+    function handleDragStart(e) {
+      draggedColor = e.target.dataset.color;
+      e.dataTransfer.setData('text/plain', draggedColor);
+      e.target.classList.add('is-dragging');
+      document.getElementById('monster-frame').classList.add('hover-target');
+    }
+
+    function handleDragEnd(e) {
+      e.target.classList.remove('is-dragging');
+      document.getElementById('monster-frame').classList.remove('hover-target');
+    }
+
+    // Drop Target handlers
+    const dropZone = document.getElementById('drop-zone');
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      document.getElementById('monster-frame').classList.add('hover-target');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      document.getElementById('monster-frame').classList.remove('hover-target');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      document.getElementById('monster-frame').classList.remove('hover-target');
+      const word = e.dataTransfer.getData('text/plain') || draggedColor;
+      if (word) {
+        processFeeding(word);
+      }
+    });
+
+    // Clicking monster while a card is selected feeds it
+    dropZone.addEventListener('click', () => {
+      if (selectedWord) {
+        processFeeding(selectedWord);
+      }
+    });
+
+    // Pointer events for mobile, tablets, Chromebook touches
+    function setupPointerInteraction(card) {
+      let isDragging = false;
+      let startX = 0, startY = 0;
+      let clone = null;
+      let moved = false;
+
+      card.addEventListener('pointerdown', (e) => {
+        getAudioContext();
+        startX = e.clientX;
+        startY = e.clientY;
+        moved = false;
+        isDragging = true;
+        card.setPointerCapture(e.pointerId);
+      });
+
+      card.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        if (!moved && (Math.abs(dx) > 7 || Math.abs(dy) > 7)) {
+          moved = true;
+          clone = card.cloneNode(true);
+          clone.style.position = 'fixed';
+          clone.style.zIndex = '9999';
+          clone.style.pointerEvents = 'none';
+          clone.style.opacity = '0.9';
+          clone.style.transform = 'scale(1.1) rotate(4deg)';
+          document.body.appendChild(clone);
+          document.getElementById('monster-frame').classList.add('hover-target');
+        }
+
+        if (moved && clone) {
+          clone.style.left = `${e.clientX - clone.offsetWidth / 2}px`;
+          clone.style.top = `${e.clientY - clone.offsetHeight / 2}px`;
+        }
+      });
+
+      card.addEventListener('pointerup', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        document.getElementById('monster-frame').classList.remove('hover-target');
+
+        if (clone) {
+          clone.remove();
+          clone = null;
+        }
+
+        const rect = dropZone.getBoundingClientRect();
+        const droppedOnMonster = (
+          e.clientX >= rect.left &&
+          e.clientX <= rect.right &&
+          e.clientY >= rect.top &&
+          e.clientY <= rect.bottom
+        );
+
+        if (moved && droppedOnMonster) {
+          processFeeding(card.dataset.color);
+        } else if (!moved) {
+          // Tap selection fallback: click word then click monster (or tap directly)
+          handleWordTap(card);
+        }
+      });
+
+      card.addEventListener('pointercancel', () => {
+        isDragging = false;
+        if (clone) {
+          clone.remove();
+          clone = null;
+        }
+        document.getElementById('monster-frame').classList.remove('hover-target');
+      });
+    }
+
+    function handleWordTap(card) {
+      // Toggle selection or feed directly if tapped again
+      if (selectedWord === card.dataset.color) {
+        processFeeding(card.dataset.color);
+      } else {
+        document.querySelectorAll('.word-card').forEach(c => c.classList.remove('is-selected'));
+        card.classList.add('is-selected');
+        selectedWord = card.dataset.color;
+        document.getElementById('speech-text').textContent = `Did you choose "${selectedWord.toUpperCase()}"? Tap me to feed!`;
+      }
+    }
+
+    // Feeding evaluation logic
+    function processFeeding(word) {
+      if (isProcessing) return;
+      isProcessing = true;
+
+      const current = getCurrentMonster();
+      const frame = document.getElementById('monster-frame');
+      const speech = document.getElementById('speech-text');
+      const chewBadge = document.getElementById('chew-badge');
+
+      // Clear selection highlights
+      document.querySelectorAll('.word-card').forEach(c => c.classList.remove('is-selected'));
+      selectedWord = null;
+
+      if (word.toLowerCase() === current.color.toLowerCase()) {
+        // Correct match!
+        score += 10;
+        updateHeader();
+        playMunchSound();
+
+        frame.classList.add('chomp-anim');
+        chewBadge.style.opacity = '1';
+        chewBadge.style.transform = 'scale(1.1) translateY(-10px)';
+        speech.textContent = `YUM! That is "${current.color.toUpperCase()}"! Delicious!`;
+
+        try {
+          confetti({
+            particleCount: 40,
+            spread: 55,
+            origin: { y: 0.5 }
+          });
+        } catch (e) {}
+
+        speakEncouragement(`Yum! ${current.color}!`);
+
+        setTimeout(() => {
+          chewBadge.style.opacity = '0';
+          chewBadge.style.transform = 'scale(0.75)';
+          frame.classList.remove('chomp-anim');
+
+          currentIndex++;
+          if (currentIndex < gameDeck.length) {
+            loadCurrentMonster();
+            renderWordBank();
+            isProcessing = false;
+          } else {
+            showVictoryModal();
+          }
+        }, 1100);
+
+      } else {
+        // Incorrect match
+        playWrongSound();
+        frame.classList.add('shake-anim');
+        speech.textContent = `Blech! That says "${word.toUpperCase()}". That is not my color!`;
+        speakEncouragement(`Blech! That word says ${word}. Try again!`);
+
+        setTimeout(() => {
+          frame.classList.remove('shake-anim');
+          speech.textContent = `Please read and feed me my color word!`;
+          isProcessing = false;
+        }, 950);
+      }
+    }
+
+    function showVictoryModal() {
+      playVictoryChime();
+      const modal = document.getElementById('victory-modal');
+      const card = document.getElementById('victory-card');
+      document.getElementById('final-score').textContent = score;
+
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        card.classList.remove('scale-90');
+        card.classList.add('scale-100');
+      }, 15);
+
+      try {
+        confetti({
+          particleCount: 160,
+          spread: 90,
+          origin: { y: 0.6 }
+        });
+      } catch (e) {}
+
+      speakEncouragement("Hooray! You read all the words and fed all 11 monsters!");
+    }
+
+    function hideVictoryModal() {
+      const modal = document.getElementById('victory-modal');
+      const card = document.getElementById('victory-card');
+      modal.classList.add('opacity-0');
+      card.classList.remove('scale-100');
+      card.classList.add('scale-90');
+      setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    // Control buttons
+    document.getElementById('sound-btn').addEventListener('click', (e) => {
+      soundEnabled = !soundEnabled;
+      e.currentTarget.textContent = soundEnabled ? '🔊' : '🔇';
+    });
+
+    document.getElementById('restart-header-btn').addEventListener('click', () => {
+      initGame();
+    });
+
+    document.getElementById('play-again-btn').addEventListener('click', () => {
+      initGame();
+    });
+
+    // Initialize game
+    window.onload = function () {
+      initGame();
+    };
+  </script>
+</body>
+</html>
