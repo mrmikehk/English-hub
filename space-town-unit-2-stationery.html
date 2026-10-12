@@ -60,8 +60,8 @@
     .game-container {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 2.5rem;
-      max-width: 1100px;
+      gap: 2rem;
+      max-width: 900px;
       width: 100%;
     }
 
@@ -84,7 +84,6 @@
     .grid-3x3 {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(3, 1fr);
       gap: 0.75rem;
       width: 100%;
     }
@@ -98,8 +97,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      min-height: 100px;
       aspect-ratio: 1 / 1;
-      min-height: 85px;
       transition: all 0.2s ease;
       user-select: none;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
@@ -134,16 +133,17 @@
     }
 
     .image-card img {
-      max-height: 75%;
-      max-width: 75%;
+      width: 100%;
+      height: 100%;
+      max-height: 80px;
       object-fit: contain;
     }
 
     .word-card {
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 600;
       text-transform: lowercase;
-      padding: 0.5rem;
+      line-height: 1.2;
     }
 
     @keyframes shake {
@@ -180,10 +180,16 @@
       background: var(--primary-hover);
     }
 
-    @media (max-width: 800px) {
+    @media (max-width: 768px) {
       .game-container {
         grid-template-columns: 1fr;
         gap: 2rem;
+      }
+      .card {
+        min-height: 85px;
+      }
+      .word-card {
+        font-size: 0.9rem;
       }
     }
   </style>
@@ -251,7 +257,7 @@
       selectedImage = null;
       selectedWord = null;
 
-      // Randomly select 9 items from the pool
+      // Randomly pick 9 items from the complete list
       currentRoundItems = shuffle(allItems).slice(0, 9);
 
       document.getElementById('matches-count').textContent = '0';
@@ -274,78 +280,3 @@
         card.dataset.id = item.id;
         
         const img = document.createElement('img');
-        img.src = `images/stationery/${item.file}`;
-        img.alt = item.word.toLowerCase();
-        card.appendChild(img);
-
-        card.addEventListener('click', () => selectCard('image', card));
-        imgGrid.appendChild(card);
-      });
-
-      shuffledWords.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'card word-card';
-        card.dataset.id = item.id;
-        card.textContent = item.word.toLowerCase();
-
-        card.addEventListener('click', () => selectCard('word', card));
-        wordGrid.appendChild(card);
-      });
-    }
-
-    function selectCard(type, card) {
-      if (card.classList.contains('matched')) return;
-
-      if (type === 'image') {
-        if (selectedImage) selectedImage.classList.remove('selected');
-        selectedImage = card;
-        card.classList.add('selected');
-      } else {
-        if (selectedWord) selectedWord.classList.remove('selected');
-        selectedWord = card;
-        card.classList.add('selected');
-      }
-
-      if (selectedImage && selectedWord) {
-        checkMatch();
-      }
-    }
-
-    function checkMatch() {
-      triesCount++;
-      document.getElementById('tries-count').textContent = triesCount;
-
-      const isMatch = selectedImage.dataset.id === selectedWord.dataset.id;
-
-      if (isMatch) {
-        selectedImage.className = 'card image-card matched';
-        selectedWord.className = 'card word-card matched';
-        matchedCount++;
-        document.getElementById('matches-count').textContent = matchedCount;
-        selectedImage = null;
-        selectedWord = null;
-
-        if (matchedCount === currentRoundItems.length) {
-          document.getElementById('win-banner').style.display = 'block';
-        }
-      } else {
-        const imgEl = selectedImage;
-        const wordEl = selectedWord;
-
-        imgEl.classList.add('wrong');
-        wordEl.classList.add('wrong');
-
-        setTimeout(() => {
-          imgEl.classList.remove('selected', 'wrong');
-          wordEl.classList.remove('selected', 'wrong');
-        }, 500);
-
-        selectedImage = null;
-        selectedWord = null;
-      }
-    }
-
-    initGame();
-  </script>
-</body>
-</html>
