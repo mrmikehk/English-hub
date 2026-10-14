@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stationery Speed Matching</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --success: #16a34a;
+      --error: #dc2626;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 1.25rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 0.35rem;
+    }
+
+    .instructions {
+      color: #64748b;
+      font-size: 1rem;
+    }
+
+    .timer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #e0e7ff;
+      color: var(--primary);
+      padding: 0.4rem 1.25rem;
+      border-radius: 9999px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      border: 2px solid #c7d2fe;
+    }
+
+    .scoreboard {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 1.25rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .game-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .grid-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 0.75rem;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .grid-3x3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 0.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100px;
+      aspect-ratio: 1 / 1;
+      transition: all 0.2s ease;
+      user-select: none;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .card:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+    }
+
+    .card.selected {
+      border-color: var(--primary);
+      background: #eef2ff;
+      outline: 2px solid var(--primary);
+    }
+
+    .card.matched {
+      border-color: var(--success);
+      background: #f0fdf4;
+      cursor: default;
+      opacity: 0.55;
+      pointer-events: none;
+      transform: none;
+    }
+
+    .card.wrong {
+      border-color: var(--error);
+      background: #fef2f2;
+      animation: shake 0.3s ease-in-out;
+    }
+
+    .image-card img {
+      width: 100%;
+      height: 100%;
+      max-height: 80px;
+      object-fit: contain;
+    }
+
+    .word-card {
+      font-size: 1rem;
+      font-weight: 600;
+      text-transform: lowercase;
+      line-height: 1.2;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    #win-banner {
+      display: none;
+      margin-top: 1.5rem;
+      text-align: center;
+      background: #ffffff;
+      padding: 1.5rem 2rem;
+      border-radius: 12px;
+      border: 2px solid #bbf7d0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    #win-banner h2 {
+      color: var(--success);
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .stats-summary {
+      font-size: 1.1rem;
+      color: #334155;
+      margin-bottom: 1rem;
+    }
+
+    .new-record {
+      color: #ea580c;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      display: none;
+    }
+
+    button.reset-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.75rem 1.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button.reset-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    @media (max-width: 768px) {
+      .game-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      .card {
+        min-height: 85px;
+      }
+      .word-card {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Stationery Speed Test ⚡</h1>
+    <p class="instructions">Click any card to start the stopwatch. Match all 9 pairs as fast as you can!</p>
+  </header>
+
+  <div class="timer-badge">
+    ⏱️ <span id="timer-display">00:00.0</span>
+  </div>
+
+  <div class="scoreboard">
+    <div>Matches: <span id="matches-count">0</span> / <span id="total-count">0</span></div>
+    <div>Tries: <span id="tries-count">0</span></div>
+    <div>Best: <span id="best-time">--</span></div>
+  </div>
+
+  <div class="game-container">
+    <div class="grid-section">
+      <div class="section-title">Picture</div>
+      <div class="grid-3x3" id="images-grid"></div>
+    </div>
+    <div class="grid-section">
+      <div class="section-title">Word</div>
+      <div class="grid-3x3" id="words-grid"></div>
+    </div>
+  </div>
+
+  <div id="win-banner">
+    <h2>🎉 Speed Run Complete!</h2>
+    <div id="new-record-tag" class="new-record">🔥 New Record!</div>
+    <div class="stats-summary" id="stats-summary"></div>
+    <button class="reset-btn" onclick="initGame()">Try Again</button>
+  </div>
+
+  <script>
+    const allItems = [
+      { id: 'pencil', word: 'a pencil', file: 'pencil.jpg' },
+      { id: 'eraser', word: 'an eraser', file: 'eraser.jpg' },
+      { id: 'ruler', word: 'a ruler', file: 'ruler.jpg' },
+      { id: 'sharpener', word: 'a sharpener', file: 'sharpener.jpg' },
+      { id: 'pen', word: 'a pen', file: 'pen.jpg' },
+      { id: 'pencil-case', word: 'a pencil case', file: 'pencil-case.jpg' },
+      { id: 'book', word: 'a book', file: 'book.jpg' },
+      { id: 'school-bag', word: 'a school bag', file: 'school-bag.jpg' },
+      { id: 'coloured-pencil', word: 'a coloured pencil', file: 'coloured-pencil.jpg' },
+      { id: 'glue-stick', word: 'a glue stick', file: 'glue-stick.jpg' }
+    ];
+
+    let currentRoundItems = [];
+    let selectedImage = null;
+    let selectedWord = null;
+    let matchedCount = 0;
+    let triesCount = 0;
+
+    // Timer variables
+    let startTime = null;
+    let timerInterval = null;
+    let isTimerRunning = false;
+    let finalElapsedMs = 0;
+
+    function formatTime(ms) {
+      const totalSeconds = Math.floor(ms / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      const tenths = Math.floor((ms % 1000) / 100);
+
+      const mm = String(minutes).padStart(2, '0');
+      const ss = String(seconds).padStart(2, '0');
+      return `${mm}:${ss}.${tenths}`;
+    }
+
+    function startTimer() {
+      if (isTimerRunning) return;
+      isTimerRunning = true;
+      startTime = Date.now();
+      timerInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        document.getElementById('timer-display').textContent = formatTime(elapsed);
+      }, 50);
+    }
+
+    function stopTimer() {
+      if (!isTimerRunning) return;
+      clearInterval(timerInterval);
+      finalElapsedMs = Date.now() - startTime;
+      isTimerRunning = false;
+      document.getElementById('timer-display').textContent = formatTime(finalElapsedMs);
+    }
+
+    function resetTimerDisplay() {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      startTime = null;
+      document.getElementById('timer-display').textContent = '00:00.0';
+    }
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function updateBestTimeDisplay() {
+      const best = localStorage.getItem('stationery_best_time');
+      document.getElementById('best-time').textContent = best ? formatTime(parseInt(best, 10)) : '--';
+    }
+
+    function initGame() {
+      matchedCount = 0;
+      triesCount = 0;
+      selectedImage = null;
+      selectedWord = null;
+      resetTimerDisplay();
+      updateBestTimeDisplay();
+
+      currentRoundItems = shuffle(allItems).slice(0, 9);
+
+      document.getElementById('matches-count').textContent = '0';
+      document.getElementById('total-count').textContent = currentRoundItems.length;
+      document.getElementById('tries-count').textContent = '0';
+      document.getElementById('win-banner').style.display = 'none';
+      document.getElementById('new-record-tag').style.display = 'none';
+
+      const imgGrid = document.getElementById('images-grid');
+      const wordGrid = document.getElementById('words-grid');
+
+      imgGrid.innerHTML = '';
+      wordGrid.innerHTML = '';
+
+      const shuffledImages = shuffle(currentRoundItems);
+      const shuffledWords = shuffle(currentRoundItems);
+
+      shuffledImages.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card image-card';
+        card.dataset.id = item.id;
+        
+        const img = document.createElement('img');
+        img.src = `images/stationery/${item.file}`;
+        img.alt = item.word.toLowerCase();
+        card.appendChild(img);
+
+        card.addEventListener('click', () => selectCard('image', card));
+        imgGrid.appendChild(card);
+      });
+
+      shuffledWords.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card word-card';
+        card.dataset.id = item.id;
+        card.textContent = item.word.toLowerCase();
+
+        card.addEventListener('click', () => selectCard('word', card));
+        wordGrid.appendChild(card);
+      });
+    }
+
+    function selectCard(type, card) {
+      if (card.classList.contains('matched')) return;
+
+      // Start the stopwatch on the player's initial action
+      if (!isTimerRunning && matchedCount < currentRoundItems.length) {
+        startTimer();
+      }
+
+      if (type === 'image') {
+        if (selectedImage) selectedImage.classList.remove('selected');
+        selectedImage = card;
+        card.classList.add('selected');
+      } else {
+        if (selectedWord) selectedWord.classList.remove('selected');
+        selectedWord = card;
+        card.classList.add('selected');
+      }
+
+      if (selectedImage && selectedWord) {
+        checkMatch();
+      }
+    }
+
+    function checkMatch() {
+      triesCount++;
+      document.getElementById('tries-count').textContent = triesCount;
+
+      const isMatch = selectedImage.dataset.id === selectedWord.dataset.id;
+
+      if (isMatch) {
+        selectedImage.className = 'card image-card matched';
+        selectedWord.className = 'card word-card matched';
+        matchedCount++;
+        document.getElementById('matches-count').textContent = matchedCount;
+        selectedImage = null;
+        selectedWord = null;
+
+        if (matchedCount === currentRoundItems.length) {
+          handleWin();
+        }
+      } else {
+        const imgEl = selectedImage;
+        const wordEl = selectedWord;
+
+        imgEl.classList.add('wrong');
+        wordEl.classList.add('wrong');
+
+        setTimeout(() => {
+          imgEl.classList.remove('selected', 'wrong');
+          wordEl.classList.remove('selected', 'wrong');
+        }, 400);
+
+        selectedImage = null;
+        selectedWord = null;
+      }
+    }
+
+    function handleWin() {
+      stopTimer();
+
+      const best = localStorage.getItem('stationery_best_time');
+      const isNewRecord = !best || finalElapsedMs < parseInt(best, 10);
+
+      if (isNewRecord) {
+        localStorage.setItem('stationery_best_time', finalElapsedMs);
+        document.getElementById('new-record-tag').style.display = 'block';
+        updateBestTimeDisplay();
+      }
+
+      const formatted = formatTime(finalElapsedMs);
+      const accuracy = Math.round((currentRoundItems.length / triesCount) * 100);
+
+      document.getElementById('stats-summary').innerHTML = 
+        `Time: <strong>${formatted}</strong> | Tries: <strong>${triesCount}</strong> (Accuracy: <strong>${accuracy}%</strong>)`;
+      
+      document.getElementById('win-banner').style.display = 'block';
+    }
+
+    window.addEventListener('DOMContentLoaded', initGame);
+  </script>
+</body>
+</html>
