@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sight Words Snakes & Ladders</title>
+  
+  <!-- Google Fonts & Tailwind CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --board-pink: #fbcfe8;
+      --board-babyblue: #cceeff;
+    }
+
+    body {
+      font-family: 'Fredoka', 'Nunito', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    /* Board Tile Styling */
+    .tile-pink {
+      background-color: #fbcfe8;
+    }
+    .tile-babyblue {
+      background-color: #cceeff;
+    }
+    .tile-start {
+      background: linear-gradient(135deg, #bae6fd 0%, #e0f2fe 100%);
+    }
+    .tile-finish {
+      background: linear-gradient(135deg, #bbf7d0 0%, #a7f3d0 100%);
+    }
+
+    .tile-highlight {
+      outline: 4px solid #f43f5e;
+      z-index: 25;
+      animation: pulseTile 0.7s infinite alternate;
+    }
+
+    @keyframes pulseTile {
+      0% { transform: scale(1); box-shadow: 0 0 0 rgba(244, 63, 94, 0.4); }
+      100% { transform: scale(1.04); box-shadow: 0 0 14px rgba(244, 63, 94, 0.8); }
+    }
+
+    /* Responsive Board Container */
+    .board-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 620px;
+      aspect-ratio: 1 / 1;
+      margin: 0 auto;
+    }
+
+    /* Fullscreen classroom presentation mode adjustments */
+    body.is-fullscreen {
+      padding: 4px sm:p-2 !important;
+      justify-content: center !important;
+      overflow: hidden;
+    }
+    body.is-fullscreen #topHeader {
+      display: none !important;
+    }
+    body.is-fullscreen .board-wrapper {
+      max-width: min(84vh, 760px);
+    }
+    body.is-fullscreen #fullscreenExitFloatingBtn {
+      display: flex !important;
+    }
+
+    /* 3D Rolling Die Styling */
+    .dice-scene {
+      width: 66px;
+      height: 66px;
+      perspective: 420px;
+      cursor: pointer;
+    }
+    .dice-cube {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.3, 1);
+    }
+    .dice-face {
+      position: absolute;
+      width: 66px;
+      height: 66px;
+      background: #ffffff;
+      border: 3px solid #cbd5e1;
+      border-radius: 14px;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.08);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      padding: 6px;
+      box-sizing: border-box;
+    }
+
+    .dot {
+      background-color: #ef4444;
+      border-radius: 50%;
+      margin: auto;
+      width: 11px;
+      height: 11px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
+    }
+    .dice-face:not(.face-1) .dot {
+      background-color: #1e293b;
+    }
+
+    /* Dice 3D positions */
+    .face-1 { transform: rotateY(0deg) translateZ(33px); }
+    .face-6 { transform: rotateY(180deg) translateZ(33px); }
+    .face-2 { transform: rotateY(90deg) translateZ(33px); }
+    .face-5 { transform: rotateY(-90deg) translateZ(33px); }
+    .face-3 { transform: rotateX(90deg) translateZ(33px); }
+    .face-4 { transform: rotateX(-90deg) translateZ(33px); }
+
+    /* Animated dice rolling */
+    @keyframes tumble {
+      0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(0.9); }
+      25% { transform: rotateX(360deg) rotateY(180deg) rotateZ(90deg) scale(1.1); }
+      50% { transform: rotateX(720deg) rotateY(540deg) rotateZ(180deg) scale(0.95); }
+      75% { transform: rotateX(900deg) rotateY(720deg) rotateZ(270deg) scale(1.05); }
+      100% { transform: rotateX(1080deg) rotateY(900deg) rotateZ(360deg) scale(1); }
+    }
+    .rolling-animation {
+      animation: tumble 0.6s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+    }
+
+    /* Player Token Styling */
+    .player-token {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      transition: left 0.4s ease-in-out, top 0.4s ease-in-out, transform 0.3s ease;
+      z-index: 30;
+      pointer-events: none;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35));
+    }
+    .player-token.moving {
+      animation: tokenHop 0.4s ease-in-out;
+    }
+    @keyframes tokenHop {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -85%) scale(1.3); }
+    }
+
+    /* Repeat countdown timer animation */
+    @keyframes shrinkWidth {
+      from { width: 100%; }
+      to { width: 0%; }
+    }
+    .animate-progress {
+      animation: shrinkWidth linear forwards;
+    }
+
+    /* Confetti Canvas */
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 100;
+    }
+  </style>
+</head>
+
+<body id="gameBody" class="bg-gradient-to-br from-amber-50 via-rose-50 to-sky-50 min-h-screen text-slate-800 flex flex-col items-center justify-between p-2 sm:p-4">
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- Floating Exit Fullscreen Button (Shown only in Fullscreen Mode) -->
+  <button id="fullscreenExitFloatingBtn" onclick="toggleFullscreen()" class="hidden fixed top-3 right-3 z-50 bg-slate-800/85 hover:bg-slate-900 text-white text-xs sm:text-sm font-black px-3.5 py-2 rounded-xl shadow-xl backdrop-blur items-center gap-1.5 border border-white/20 transition active:scale-95">
+    <span>✕</span> Exit Full Screen
+  </button>
+
+  <!-- Top Navigation & Player Selection Bar (Hidden in Full Screen) -->
+  <header id="topHeader" class="w-full max-w-3xl bg-white/95 backdrop-blur rounded-2xl shadow-md border-2 border-rose-200 p-2.5 sm:p-3 mb-2 flex flex-wrap items-center justify-between gap-2 transition-all">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-black text-rose-500 tracking-wide flex items-center gap-1.5">
+        <span>🐍</span> Sight Words Ladders <span>🪜</span>
+      </h1>
+      <p class="text-xs text-slate-500 font-bold">Listen carefully and repeat each sight word aloud!</p>
+    </div>
+
+    <!-- Players Count Picker -->
+    <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+      <span class="text-xs font-bold text-slate-600 px-1">Players:</span>
+      <button onclick="setPlayerCount(1)" id="btn-p1" class="player-btn px-2.5 py-1 text-xs sm:text-sm font-bold rounded-lg transition bg-rose-500 text-white shadow">1</button>
+      <button onclick="setPlayerCount(2)" id="btn-p2" class="player-btn px-2.5 py-1 text-xs sm:text-sm font-bold rounded-lg transition bg-white text-slate-700 hover:bg-rose-100">2</button>
+      <button onclick="setPlayerCount(3)" id="btn-p3" class="player-btn px-2.5 py-1 text-xs sm:text-sm font-bold rounded-lg transition bg-white text-slate-700 hover:bg-rose-100">3</button>
+      <button onclick="setPlayerCount(4)" id="btn-p4" class="player-btn px-2.5 py-1 text-xs sm:text-sm font-bold rounded-lg transition bg-white text-slate-700 hover:bg-rose-100">4</button>
+    </div>
+
+    <!-- Controls: Full Screen, Shuffle, Restart -->
+    <div class="flex items-center gap-1.5">
+      <button onclick="toggleFullscreen()" id="fullscreenBtn" title="Classroom Full Screen" class="px-2.5 py-1.5 text-xs font-black bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg border border-indigo-200 flex items-center gap-1 transition shadow-sm active:scale-95">
+        <span id="fullscreenIcon">🖥️</span> <span id="fullscreenLabel">Full Screen</span>
+      </button>
+      <button onclick="shuffleAndReset()" title="Shuffle Words & Restart" class="px-2.5 py-1.5 text-xs font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg border border-amber-300 flex items-center gap-1 transition">
+        <span>🔀</span> Shuffle
+      </button>
+      <button onclick="resetGame()" title="Reset Token Positions" class="px-2.5 py-1.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-300 transition">
+        Restart
+      </button>
+    </div>
+  </header>
+
+  <!-- Turn Banner & Repeat-After-Me Prompter -->
+  <div class="w-full max-w-3xl bg-white/90 rounded-xl shadow-sm border border-slate-200 p-2 mb-1.5">
+    <div class="flex items-center justify-between text-sm sm:text-base font-bold">
+      <div id="turnIndicator" class="flex items-center gap-2 text-rose-600">
+        <span id="turnTokenEmoji" class="text-2xl animate-bounce">🚗</span>
+        <span>Player 1's Turn (<span id="turnToyName">Toy Car</span>)</span>
+      </div>
+      <div id="statusMessage" class="text-xs sm:text-sm font-semibold text-slate-500 truncate max-w-[210px] sm:max-w-md text-right">
+        Tap the die to roll!
+      </div>
+    </div>
+
+    <!-- Visual Repeat Bar shown during step pronunciation -->
+    <div id="repeatPromptBar" class="hidden mt-2 pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="text-lg">📢</span>
+        <span class="text-xs sm:text-sm font-extrabold text-slate-700">Say out loud: <strong id="promptWordHighlight" class="text-rose-600 text-base uppercase">...</strong></span>
+      </div>
+      <div class="w-32 sm:w-52 bg-slate-200 h-2.5 rounded-full overflow-hidden">
+        <div id="repeatProgress" class="bg-gradient-to-r from-amber-400 to-rose-500 h-full rounded-full w-full"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main 8x8 Board Container -->
+  <main class="w-full max-w-3xl flex items-center justify-center relative flex-1 my-0.5">
+    <div id="boardWrapper" class="board-wrapper shadow-2xl rounded-2xl overflow-hidden border-4 border-amber-200 bg-white">
+      
+      <!-- 8x8 Grid of 64 tiles -->
+      <div id="boardGrid" class="grid grid-cols-8 grid-rows-8 w-full h-full">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- SVG Overlay for Snakes and Ladders -->
+      <svg id="boardSvg" class="absolute inset-0 w-full h-full pointer-events-none z-10" viewBox="0 0 800 800">
+        <!-- Ladders & Snakes drawn dynamically -->
+      </svg>
+
+      <!-- Player Token Layer -->
+      <div id="tokenLayer" class="absolute inset-0 pointer-events-none z-20">
+        <!-- Interactive animated tokens -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Control Bar with Expanded Player Cards and 3D Die -->
+  <footer class="w-full max-w-3xl mt-1.5 bg-white/95 backdrop-blur rounded-2xl shadow-lg border-2 border-rose-200 p-2.5 sm:p-3 flex flex-col md:flex-row items-center justify-between gap-3">
+    
+    <!-- Expanded Player Status Cards (No scrolling, ample space for 2-digit tile numbers) -->
+    <div id="playerLegend" class="w-full md:w-auto flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2 items-stretch">
+      <!-- Generated via JS with comfortable min-width & no clipping -->
+    </div>
+
+    <!-- Interactive Rolling Die & Action Button -->
+    <div class="flex items-center justify-end gap-3 w-full md:w-auto shrink-0 border-t md:border-t-0 pt-2 md:pt-0 border-slate-100">
+      <div class="text-right hidden sm:block">
+        <span class="block text-xs font-black uppercase tracking-wider text-rose-500">Tap to Roll</span>
+        <span id="lastRolledText" class="text-xs font-bold text-slate-400">Ready</span>
+      </div>
+
+      <div id="diceScene" class="dice-scene" onclick="rollDice()" title="Click or tap to roll!">
+        <div id="diceCube" class="dice-cube">
+          <div class="dice-face face-1">
+            <div></div><div></div><div></div>
+            <div></div><div class="dot"></div><div></div>
+            <div></div><div></div><div></div>
+          </div>
+          <div class="dice-face face-6">
+            <div class="dot"></div><div></div><div class="dot"></div>
+            <div class="dot"></div><div></div><div class="dot"></div>
+            <div class="dot"></div><div></div><div class="dot"></div>
+          </div>
+          <div class="dice-face face-2">
+            <div class="dot"></div><div></div><div></div>
+            <div></div><div></div><div></div>
+            <div></div><div></div><div class="dot"></div>
+          </div>
+          <div class="dice-face face-5">
+            <div class="dot"></div><div></div><div class="dot"></div>
+            <div></div><div class="dot"></div><div></div>
+            <div class="dot"></div><div></div><div class="dot"></div>
+          </div>
+          <div class="dice-face face-3">
+            <div class="dot"></div><div></div><div></div>
+            <div></div><div class="dot"></div><div></div>
+            <div></div><div></div><div class="dot"></div>
+          </div>
+          <div class="dice-face face-4">
+            <div class="dot"></div><div></div><div class="dot"></div>
+            <div></div><div></div><div></div>
+            <div class="dot"></div><div></div><div class="dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <button id="rollButton" onclick="rollDice()" class="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 active:scale-95 text-white font-extrabold px-5 sm:px-6 py-2.5 rounded-xl shadow-md border-b-4 border-rose-700 text-sm sm:text-base transition">
+        ROLL 🎲
+      </button>
+    </div>
+  </footer>
+
+  <!-- Win Announcement Modal -->
+  <div id="winModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center shadow-2xl border-4 border-amber-300 transform scale-95 transition-transform duration-300">
+      <div id="winnerEmoji" class="text-6xl mb-2 animate-bounce">🏆</div>
+      <h2 id="winnerText" class="text-2xl font-black text-rose-500">Player 1 Wins!</h2>
+      <p class="text-sm font-bold text-slate-600 mt-1 mb-5">Fantastic sight word reading!</p>
+      <button onclick="closeWinModal()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black py-3 rounded-2xl shadow-lg border-b-4 border-emerald-700 active:scale-95 transition">
+        Play Again! 🌟
+      </button>
+    </div>
+  </div>
+
+  <!-- Big Pop-Up Word Card for Students to Read -->
+  <div id="wordToast" class="fixed top-16 left-1/2 -translate-x-1/2 bg-white/95 border-3 border-amber-400 shadow-2xl rounded-2xl px-6 py-3 z-40 hidden flex items-center gap-3 transition">
+    <span class="text-3xl">🗣️</span>
+    <div>
+      <span class="text-xs text-amber-600 block font-black uppercase tracking-wider">Listen & Repeat:</span>
+      <span id="toastWord" class="text-2xl sm:text-3xl font-black text-slate-900 tracking-wider">WORD</span>
+    </div>
+  </div>
+
+  <script>
+    /* =====================================================================
+       1. CUSTOMIZABLE SIGHT WORDS LIST
+       Change or replace the words below for your weekly sight word units.
+       ===================================================================== */
+    const SIGHT_WORDS = [
+      "she", "he", "I", "am", "five", "six", "old", "this",
+      "a", "in", "on", "like", "no", "red", "yellow", "pink",
+      "green", "orange", "purple", "blue"
+    ];
+
+    /* =====================================================================
+       2. CUSTOM MP3 AUDIO FILE MAPPING
+       Want to use your own voice or custom MP3 files?
+       Simply create an "audio" folder in your GitHub repo and link them here!
+       Example: "she": "audio/she.mp3"
+       If an MP3 is missing, empty, or fails to load, it will AUTOMATICALLY 
+       fall back to clear, slow Speech Synthesis!
+       ===================================================================== */
+    const CUSTOM_WORD_AUDIO = {
+      /* Examples:
+      "she": "audio/she.mp3",
+      "he": "audio/he.mp3",
+      "I": "audio/i.mp3",
+      "am": "audio/am.mp3",
+      "five": "audio/five.mp3",
+      "six": "audio/six.mp3",
+      "old": "audio/old.mp3",
+      "this": "audio/this.mp3",
+      "a": "audio/a.mp3",
+      "in": "audio/in.mp3",
+      "on": "audio/on.mp3",
+      "like": "audio/like.mp3",
+      "no": "audio/no.mp3",
+      "red": "audio/red.mp3",
+      "yellow": "audio/yellow.mp3",
+      "pink": "audio/pink.mp3",
+      "green": "audio/green.mp3",
+      "orange": "audio/orange.mp3",
+      "purple": "audio/purple.mp3",
+      "blue": "audio/blue.mp3",
+      "Start": "audio/start.mp3",
+      "Finish": "audio/finish.mp3"
+      */
+    };
+
+    /* Configuration for student repetition time */
+    const STUDENT_REPEAT_DELAY_MS = 1400; // Pause duration after speaking for kids to repeat out loud
+    const SPEECH_SYNTHESIS_RATE = 0.68;   // Slow, gentle pace for early learners
+
+    const BOARD_ROWS = 8;
+    const BOARD_COLS = 8;
+    const TOTAL_TILES = 64;
+
+    /* Ladders and Snakes Coordinates */
+    const LADDERS = {
+      6: 11,
+      15: 34,
+      20: 29,
+      24: 41,
+      27: 43,
+      46: 62
+    };
+
+    const SNAKES = {
+      26: 10,
+      34: 18,
+      50: 21,
+      57: 40,
+      14: 4
+    };
+
+    /* Player Toy Tokens */
+    const PLAYERS_CONFIG = [
+      { id: 1, name: "Player 1", toy: "Toy Car", emoji: "🚗", color: "rose", bg: "#f43f5e" },
+      { id: 2, name: "Player 2", toy: "Dinosaur", emoji: "🦖", color: "emerald", bg: "#10b981" },
+      { id: 3, name: "Player 3", toy: "Teddy Bear", emoji: "🧸", color: "amber", bg: "#f59e0b" },
+      { id: 4, name: "Player 4", toy: "Airplane", emoji: "✈️", color: "sky", bg: "#0284c7" },
+    ];
+
+    let totalPlayers = 1;
+    let currentPlayerIndex = 0;
+    let playerPositions = [1, 1, 1, 1];
+    let isRolling = false;
+    let tileWordMap = {};
+
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playSound(type) {
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'dice') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(170 + Math.random() * 80, now);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+          osc.start(now);
+          osc.stop(now + 0.1);
+        } else if (type === 'step') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(400, now);
+          osc.frequency.exponentialRampToValueAtTime(650, now + 0.08);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'ladder') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.linearRampToValueAtTime(750, now + 0.35);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        } else if (type === 'snake') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(500, now);
+          osc.frequency.exponentialRampToValueAtTime(120, now + 0.4);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+          osc.start(now);
+          osc.stop(now + 0.4);
+        } else if (type === 'win') {
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = 'triangle';
+            o.frequency.value = freq;
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            g.gain.setValueAtTime(0.25, now + idx * 0.12);
+            g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.35);
+            o.start(now + idx * 0.12);
+            o.stop(now + idx * 0.12 + 0.35);
+          });
+        }
+      } catch (err) {}
+    }
+
+    /**
+     * Pronounces a word using custom MP3 if defined, or SpeechSynthesis as fallback.
+     * Waits for repetition delay so students have time to repeat aloud.
+     */
+    function playWordAudioWithRepetition(word) {
+      return new Promise((resolve) => {
+        const cleanWord = word.trim();
+        const customUrl = CUSTOM_WORD_AUDIO[cleanWord] || CUSTOM_WORD_AUDIO[cleanWord.toLowerCase()];
+
+        // Show student repetition countdown prompt
+        triggerRepeatPrompt(cleanWord);
+
+        const speakViaSynthesis = () => {
+          if (!window.speechSynthesis) {
+            setTimeout(resolve, STUDENT_REPEAT_DELAY_MS);
+            return;
+          }
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(cleanWord);
+          utterance.rate = SPEECH_SYNTHESIS_RATE;
+          utterance.pitch = 1.05;
+
+          utterance.onend = () => {
+            setTimeout(resolve, STUDENT_REPEAT_DELAY_MS);
+          };
+
+          utterance.onerror = () => {
+            setTimeout(resolve, STUDENT_REPEAT_DELAY_MS);
+          };
+
+          window.speechSynthesis.speak(utterance);
+        };
+
+        if (customUrl) {
+          const audio = new Audio(customUrl);
+          audio.onended = () => {
+            setTimeout(resolve, STUDENT_REPEAT_DELAY_MS);
+          };
+          audio.onerror = () => {
+            console.warn(`Could not load ${customUrl}, falling back to Web Speech Synthesis.`);
+            speakViaSynthesis();
+          };
+          audio.play().catch(() => {
+            speakViaSynthesis();
+          });
+        } else {
+          speakViaSynthesis();
+        }
+      });
+    }
+
+    function triggerRepeatPrompt(word) {
+      showWordToast(word);
+      const bar = document.getElementById("repeatPromptBar");
+      const highlight = document.getElementById("promptWordHighlight");
+      const progress = document.getElementById("repeatProgress");
+
+      highlight.textContent = word;
+      bar.classList.remove("hidden");
+
+      progress.classList.remove("animate-progress");
+      void progress.offsetWidth; // Force reflow
+      progress.style.animationDuration = `${STUDENT_REPEAT_DELAY_MS + 900}ms`;
+      progress.classList.add("animate-progress");
+    }
+
+    function hideRepeatPrompt() {
+      const bar = document.getElementById("repeatPromptBar");
+      bar.classList.add("hidden");
+    }
+
+    function showWordToast(word) {
+      const toast = document.getElementById("wordToast");
+      document.getElementById("toastWord").textContent = word.toUpperCase();
+      toast.classList.remove("hidden");
+      setTimeout(() => {
+        toast.classList.add("hidden");
+      }, STUDENT_REPEAT_DELAY_MS + 800);
+    }
+
+    function toggleFullscreen() {
+      const body = document.getElementById("gameBody");
+      const isCurrentlyFs = !!(document.fullscreenElement || document.webkitFullscreenElement || body.classList.contains("is-fullscreen"));
+
+      if (!isCurrentlyFs) {
+        // Enter Full Screen
+        const docEl = document.documentElement;
+        if (docEl.requestFullscreen) {
+          docEl.requestFullscreen().catch(() => {});
+        } else if (docEl.webkitRequestFullscreen) {
+          docEl.webkitRequestFullscreen();
+        }
+        body.classList.add("is-fullscreen");
+        document.getElementById("fullscreenLabel").textContent = "Exit Full Screen";
+        document.getElementById("fullscreenIcon").textContent = "✕";
+      } else {
+        // Exit Full Screen
+        if (document.exitFullscreen && document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen && document.webkitFullscreenElement) {
+          document.webkitExitFullscreen();
+        }
+        body.classList.remove("is-fullscreen");
+        document.getElementById("fullscreenLabel").textContent = "Full Screen";
+        document.getElementById("fullscreenIcon").textContent = "🖥️";
+      }
+
+      setTimeout(() => {
+        renderTokens();
+      }, 150);
+    }
+
+    // Sync fullscreen state if user presses ESC key
+    document.addEventListener("fullscreenchange", () => {
+      const body = document.getElementById("gameBody");
+      if (!document.fullscreenElement) {
+        body.classList.remove("is-fullscreen");
+        document.getElementById("fullscreenLabel").textContent = "Full Screen";
+        document.getElementById("fullscreenIcon").textContent = "🖥️";
+        setTimeout(renderTokens, 150);
+      }
+    });
+
+    function getTileRowCol(tileNum) {
+      const zeroIndex = tileNum - 1;
+      const rowIndex = Math.floor(zeroIndex / BOARD_COLS);
+      const colInRow = zeroIndex % BOARD_COLS;
+      let colIndex = 0;
+      if (rowIndex % 2 === 0) {
+        colIndex = colInRow; // Left to right
+      } else {
+        colIndex = (BOARD_COLS - 1) - colInRow; // Right to left
+      }
+      return { row: rowIndex, col: colIndex };
+    }
+
+    function getTileCenterPercent(tileNum) {
+      const { row, col } = getTileRowCol(tileNum);
+      const colWidth = 100 / BOARD_COLS;
+      const rowHeight = 100 / BOARD_ROWS;
+      const x = (col + 0.5) * colWidth;
+      const y = ((BOARD_ROWS - 1 - row) + 0.5) * rowHeight;
+      return { x, y };
+    }
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function randomizeWords() {
+      tileWordMap = {};
+      let shuffled = shuffleArray(SIGHT_WORDS);
+      let wordIdx = 0;
+      for (let tile = 2; tile <= 63; tile++) {
+        if (wordIdx >= shuffled.length) {
+          shuffled = shuffleArray(SIGHT_WORDS);
+          wordIdx = 0;
+        }
+        tileWordMap[tile] = shuffled[wordIdx++];
+      }
+    }
+
+    function renderBoardDOM() {
+      const grid = document.getElementById("boardGrid");
+      grid.innerHTML = "";
+
+      for (let displayRow = BOARD_ROWS - 1; displayRow >= 0; displayRow--) {
+        for (let displayCol = 0; displayCol < BOARD_COLS; displayCol++) {
+          let tileNum;
+          if (displayRow % 2 === 0) {
+            tileNum = displayRow * BOARD_COLS + displayCol + 1;
+          } else {
+            tileNum = displayRow * BOARD_COLS + (BOARD_COLS - 1 - displayCol) + 1;
+          }
+
+          const tileEl = document.createElement("div");
+          tileEl.id = `tile-${tileNum}`;
+          tileEl.setAttribute("data-tile", tileNum);
+          
+          const isCheckered = (displayRow + displayCol) % 2 === 0;
+          let bgClass = isCheckered ? "tile-babyblue" : "tile-pink";
+          
+          if (tileNum === 1) bgClass = "tile-start";
+          if (tileNum === 64) bgClass = "tile-finish";
+
+          tileEl.className = `relative flex flex-col items-center justify-between p-1 border border-sky-200/70 select-none cursor-pointer transition duration-150 hover:brightness-95 ${bgClass}`;
+
+          const numSpan = document.createElement("span");
+          numSpan.className = "text-[9px] sm:text-xs font-bold text-slate-500 self-start leading-none pointer-events-none";
+          numSpan.textContent = tileNum;
+
+          const wordDiv = document.createElement("div");
+          wordDiv.className = "my-auto text-center px-0.5 leading-tight";
+
+          if (tileNum === 1) {
+            wordDiv.innerHTML = `<span class="text-sky-700 font-extrabold text-xs sm:text-sm block">⭐ START</span>`;
+          } else if (tileNum === 64) {
+            wordDiv.innerHTML = `<span class="text-emerald-700 font-black text-xs sm:text-sm block">🏆 FINISH</span>`;
+          } else {
+            const word = tileWordMap[tileNum] || "";
+            wordDiv.innerHTML = `<span class="font-extrabold text-[12px] sm:text-[15px] text-slate-800 drop-shadow-sm tracking-tight">${word}</span>`;
+          }
+
+          const footerDiv = document.createElement("div");
+          footerDiv.className = "text-[9px] sm:text-[10px] self-end leading-none";
+          if (LADDERS[tileNum]) {
+            footerDiv.innerHTML = `<span class="text-amber-800 font-bold" title="Ladder to ${LADDERS[tileNum]}">🪜</span>`;
+          } else if (SNAKES[tileNum]) {
+            footerDiv.innerHTML = `<span class="text-emerald-700 font-bold" title="Snake to ${SNAKES[tileNum]}">🐍</span>`;
+          }
+
+          tileEl.appendChild(numSpan);
+          tileEl.appendChild(wordDiv);
+          tileEl.appendChild(footerDiv);
+
+          // Click to listen and practice anytime
+          tileEl.addEventListener("click", () => {
+            initAudio();
+            let wordToSpeak = tileNum === 1 ? "Start" : (tileNum === 64 ? "Finish" : tileWordMap[tileNum]);
+            if (wordToSpeak) {
+              highlightTile(tileNum);
+              playWordAudioWithRepetition(wordToSpeak);
+            }
+          });
+
+          grid.appendChild(tileEl);
+        }
+      }
+    }
+
+    function highlightTile(tileNum) {
+      document.querySelectorAll(".tile-highlight").forEach(el => el.classList.remove("tile-highlight"));
+      const target = document.getElementById(`tile-${tileNum}`);
+      if (target) {
+        target.classList.add("tile-highlight");
+        setTimeout(() => target.classList.remove("tile-highlight"), 1400);
+      }
+    }
+
+    function drawSnakesAndLadders() {
+      const svg = document.getElementById("boardSvg");
+      svg.innerHTML = `
+        <defs>
+          <linearGradient id="snakeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#4ade80" />
+            <stop offset="50%" stop-color="#22c55e" />
+            <stop offset="100%" stop-color="#15803d" />
+          </linearGradient>
+          <linearGradient id="snakeBelly" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fef08a" />
+            <stop offset="100%" stop-color="#fde047" />
+          </linearGradient>
+          <filter id="svgShadow" x="-20%" y="-20%" width="150%" height="150%">
+            <feDropShadow dx="3" dy="4" stdDeviation="3" flood-opacity="0.25"/>
+          </filter>
+        </defs>
+      `;
+
+      function getSvgCoords(tileNum) {
+        const pt = getTileCenterPercent(tileNum);
+        return {
+          x: (pt.x / 100) * 800,
+          y: (pt.y / 100) * 800
+        };
+      }
+
+      Object.entries(LADDERS).forEach(([from, to]) => {
+        const start = getSvgCoords(parseInt(from));
+        const end = getSvgCoords(parseInt(to));
+        drawLadder(svg, start.x, start.y, end.x, end.y);
+      });
+
+      Object.entries(SNAKES).forEach(([head, tail]) => {
+        const headPt = getSvgCoords(parseInt(head));
+        const tailPt = getSvgCoords(parseInt(tail));
+        drawSnake(svg, headPt.x, headPt.y, tailPt.x, tailPt.y);
+      });
+    }
+
+    function drawLadder(svg, x1, y1, x2, y2) {
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const dist = Math.hypot(dx, dy);
+      const angle = Math.atan2(dy, dx);
+      
+      const width = 18;
+      const nx = -Math.sin(angle) * width;
+      const ny = Math.cos(angle) * width;
+
+      const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      group.setAttribute("filter", "url(#svgShadow)");
+
+      const rail1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      rail1.setAttribute("x1", x1 + nx);
+      rail1.setAttribute("y1", y1 + ny);
+      rail1.setAttribute("x2", x2 + nx);
+      rail1.setAttribute("y2", y2 + ny);
+      rail1.setAttribute("stroke", "#b45309");
+      rail1.setAttribute("stroke-width", "6");
+      rail1.setAttribute("stroke-linecap", "round");
+
+      const rail2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      rail2.setAttribute("x1", x1 - nx);
+      rail2.setAttribute("y1", y1 - ny);
+      rail2.setAttribute("x2", x2 - nx);
+      rail2.setAttribute("y2", y2 - ny);
+      rail2.setAttribute("stroke", "#92400e");
+      rail2.setAttribute("stroke-width", "6");
+      rail2.setAttribute("stroke-linecap", "round");
+
+      group.appendChild(rail1);
+      group.appendChild(rail2);
+
+      const rungs = Math.max(3, Math.floor(dist / 32));
+      for (let i = 1; i < rungs; i++) {
+        const t = i / rungs;
+        const rx = x1 + dx * t;
+        const ry = y1 + dy * t;
+
+        const rung = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        rung.setAttribute("x1", rx + nx);
+        rung.setAttribute("y1", ry + ny);
+        rung.setAttribute("x2", rx - nx);
+        rung.setAttribute("y2", ry - ny);
+        rung.setAttribute("stroke", "#d97706");
+        rung.setAttribute("stroke-width", "4.5");
+        rung.setAttribute("stroke-linecap", "round");
+        group.appendChild(rung);
+      }
+
+      svg.appendChild(group);
+    }
+
+    function drawSnake(svg, x1, y1, x2, y2) {
+      const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      group.setAttribute("filter", "url(#svgShadow)");
+
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const dist = Math.hypot(dx, dy);
+      const angle = Math.atan2(dy, dx);
+      const perpAngle = angle + Math.PI / 2;
+
+      const curveOffset = Math.min(dist * 0.45, 90);
+      const cx1 = x1 + dx * 0.3 + Math.cos(perpAngle) * curveOffset;
+      const cy1 = y1 + dy * 0.3 + Math.sin(perpAngle) * curveOffset;
+      const cx2 = x1 + dx * 0.7 - Math.cos(perpAngle) * curveOffset;
+      const cy2 = y1 + dy * 0.7 - Math.sin(perpAngle) * curveOffset;
+
+      const pathData = `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2} ${y2}`;
+
+      const underBody = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      underBody.setAttribute("d", pathData);
+      underBody.setAttribute("stroke", "url(#snakeBelly)");
+      underBody.setAttribute("stroke-width", "16");
+      underBody.setAttribute("fill", "none");
+      underBody.setAttribute("stroke-linecap", "round");
+
+      const body = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      body.setAttribute("d", pathData);
+      body.setAttribute("stroke", "url(#snakeGrad)");
+      body.setAttribute("stroke-width", "12");
+      body.setAttribute("fill", "none");
+      body.setAttribute("stroke-linecap", "round");
+
+      group.appendChild(underBody);
+      group.appendChild(body);
+
+      const headG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      headG.setAttribute("transform", `translate(${x1}, ${y1})`);
+
+      const headCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      headCircle.setAttribute("r", "13");
+      headCircle.setAttribute("fill", "#22c55e");
+      headCircle.setAttribute("stroke", "#15803d");
+      headCircle.setAttribute("stroke-width", "2");
+
+      const eyeLeft = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      eyeLeft.setAttribute("cx", "-4");
+      eyeLeft.setAttribute("cy", "-5");
+      eyeLeft.setAttribute("r", "4");
+      eyeLeft.setAttribute("fill", "#ffffff");
+
+      const pupilLeft = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      pupilLeft.setAttribute("cx", "-3.5");
+      pupilLeft.setAttribute("cy", "-5");
+      pupilLeft.setAttribute("r", "2");
+      pupilLeft.setAttribute("fill", "#0f172a");
+
+      const eyeRight = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      eyeRight.setAttribute("cx", "4");
+      eyeRight.setAttribute("cy", "-5");
+      eyeRight.setAttribute("r", "4");
+      eyeRight.setAttribute("fill", "#ffffff");
+
+      const pupilRight = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      pupilRight.setAttribute("cx", "4.5");
+      pupilRight.setAttribute("cy", "-5");
+      pupilRight.setAttribute("r", "2");
+      pupilRight.setAttribute("fill", "#0f172a");
+
+      const tongue = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      tongue.setAttribute("d", "M 0 11 L -2 18 M 0 11 L 2 18");
+      tongue.setAttribute("stroke", "#ef4444");
+      tongue.setAttribute("stroke-width", "2.5");
+      tongue.setAttribute("stroke-linecap", "round");
+
+      headG.appendChild(tongue);
+      headG.appendChild(headCircle);
+      headG.appendChild(eyeLeft);
+      headG.appendChild(pupilLeft);
+      headG.appendChild(eyeRight);
+      headG.appendChild(pupilRight);
+
+      group.appendChild(headG);
+      svg.appendChild(group);
+    }
+
+    function renderTokens() {
+      const layer = document.getElementById("tokenLayer");
+      layer.innerHTML = "";
+
+      for (let i = 0; i < totalPlayers; i++) {
+        const config = PLAYERS_CONFIG[i];
+        const tileNum = playerPositions[i];
+        const pt = getTileCenterPercent(tileNum);
+
+        const angle = (i / totalPlayers) * Math.PI * 2;
+        const offsetPx = totalPlayers > 1 ? 9 : 0;
+        const offsetX = Math.cos(angle) * offsetPx;
+        const offsetY = Math.sin(angle) * offsetPx;
+
+        const token = document.createElement("div");
+        token.id = `token-p${i}`;
+        token.className = "player-token flex items-center justify-center";
+        token.style.left = `calc(${pt.x}% + ${offsetX}px)`;
+        token.style.top = `calc(${pt.y}% + ${offsetY}px)`;
+
+        token.innerHTML = `
+          <div class="relative group">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-white shadow-md border-2 border-${config.color}-500 text-lg sm:text-2xl transition transform group-hover:scale-125">
+              ${config.emoji}
+            </div>
+            <span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-${config.color}-500 text-white text-[9px] font-black flex items-center justify-center shadow">
+              ${i + 1}
+            </span>
+          </div>
+        `;
+
+        layer.appendChild(token);
+      }
+    }
+
+    function updateTurnUI() {
+      const config = PLAYERS_CONFIG[currentPlayerIndex];
+      const indicator = document.getElementById("turnIndicator");
+      indicator.className = `flex items-center gap-2 text-${config.color}-600`;
+      
+      document.getElementById("turnTokenEmoji").textContent = config.emoji;
+      document.getElementById("turnToyName").textContent = `${config.toy}`;
+      indicator.querySelector("span:nth-child(2)").innerHTML = `${config.name}'s Turn (<span id="turnToyName">${config.toy}</span>)`;
+
+      for (let n = 1; n <= 4; n++) {
+        const btn = document.getElementById(`btn-p${n}`);
+        if (n === totalPlayers) {
+          btn.className = "player-btn px-2.5 py-1 text-xs sm:text-sm font-bold rounded-lg transition bg-rose-500 text-white shadow";
+        } else {
+          btn.className = "player-btn px-2.5 py-1 text-xs sm:text-sm font-bold rounded-lg transition bg-white text-slate-700 hover:bg-rose-100";
+        }
+      }
+
+      // Render wide, comfortably readable player status cards (no scrolling for 2 digits)
+      const legend = document.getElementById("playerLegend");
+      legend.innerHTML = "";
+      
+      // Auto-adjust grid columns based on player count so cards expand nicely
+      let gridColsClass = "grid-cols-1";
+      if (totalPlayers === 2) gridColsClass = "grid-cols-2";
+      else if (totalPlayers === 3) gridColsClass = "grid-cols-3";
+      else if (totalPlayers >= 4) gridColsClass = "grid-cols-2 sm:grid-cols-4";
+      legend.className = `w-full md:w-auto flex-1 grid ${gridColsClass} gap-2 items-stretch`;
+
+      for (let i = 0; i < totalPlayers; i++) {
+        const p = PLAYERS_CONFIG[i];
+        const isCurrent = i === currentPlayerIndex;
+        const pos = playerPositions[i];
+        const item = document.createElement("div");
+        
+        item.className = `flex items-center justify-between px-2.5 sm:px-3 py-2 rounded-xl border text-xs sm:text-sm font-bold transition shadow-sm ${
+          isCurrent 
+            ? `bg-${p.color}-100 border-${p.color}-500 text-${p.color}-900 ring-2 ring-${p.color}-400 shadow-md scale-[1.02]` 
+            : `bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100`
+        }`;
+
+        item.innerHTML = `
+          <div class="flex items-center gap-1.5 truncate">
+            <span class="text-lg sm:text-xl shrink-0">${p.emoji}</span>
+            <span class="truncate font-black text-xs sm:text-sm">${p.name}</span>
+          </div>
+          <div class="shrink-0 ml-1 px-2 py-0.5 rounded-lg bg-white/90 border border-slate-200 font-black text-xs sm:text-sm text-slate-700 whitespace-nowrap shadow-xs">
+            Tile ${pos}
+          </div>
+        `;
+        legend.appendChild(item);
+      }
+    }
+
+    function setStatus(msg) {
+      document.getElementById("statusMessage").textContent = msg;
+    }
+
+    const DICE_ROTATIONS = {
+      1: { x: 0, y: 0 },
+      6: { x: 0, y: 180 },
+      2: { x: 0, y: -90 },
+      5: { x: 0, y: 90 },
+      3: { x: -90, y: 0 },
+      4: { x: 90, y: 0 }
+    };
+
+    function rollDice() {
+      if (isRolling) return;
+      initAudio();
+      isRolling = true;
+      setStatus("Rolling the die...");
+      document.getElementById("rollButton").disabled = true;
+
+      const cube = document.getElementById("diceCube");
+      cube.classList.add("rolling-animation");
+
+      const rattleInterval = setInterval(() => {
+        playSound('dice');
+      }, 90);
+
+      const rolledValue = Math.floor(Math.random() * 6) + 1;
+
+      setTimeout(() => {
+        clearInterval(rattleInterval);
+        cube.classList.remove("rolling-animation");
+
+        const baseRot = DICE_ROTATIONS[rolledValue];
+        cube.style.transform = `rotateX(${baseRot.x + 720}deg) rotateY(${baseRot.y + 720}deg)`;
+
+        playSound('dice');
+        document.getElementById("lastRolledText").textContent = `Rolled a ${rolledValue}!`;
+        setStatus(`Rolled a ${rolledValue}! Read each word as you move!`);
+
+        setTimeout(() => {
+          moveCurrentPlayer(rolledValue);
+        }, 500);
+      }, 700);
+    }
+
+    async function moveCurrentPlayer(steps) {
+      const currentPos = playerPositions[currentPlayerIndex];
+      let targetPos = currentPos + steps;
+
+      if (targetPos > TOTAL_TILES) {
+        targetPos = TOTAL_TILES;
+      }
+
+      const tokenEl = document.getElementById(`token-p${currentPlayerIndex}`);
+
+      // Step-by-step movement: speak each word and wait so students can repeat aloud
+      for (let next = currentPos + 1; next <= targetPos; next++) {
+        playerPositions[currentPlayerIndex] = next;
+        updateTurnUI();
+        playSound('step');
+        highlightTile(next);
+
+        if (tokenEl) {
+          tokenEl.classList.add("moving");
+          const pt = getTileCenterPercent(next);
+          tokenEl.style.left = `${pt.x}%`;
+          tokenEl.style.top = `${pt.y}%`;
+        }
+
+        const stepWord = next === TOTAL_TILES ? "Finish" : (tileWordMap[next] || "");
+        setStatus(`Moving... Word: "${stepWord}"`);
+
+        // Pronounce word and wait for children to repeat out loud
+        if (stepWord) {
+          await playWordAudioWithRepetition(stepWord);
+        } else {
+          await new Promise(r => setTimeout(r, 450));
+        }
+
+        if (tokenEl) tokenEl.classList.remove("moving");
+      }
+
+      hideRepeatPrompt();
+
+      // Landed on final square
+      const landedTile = targetPos;
+
+      if (landedTile === TOTAL_TILES) {
+        playSound('win');
+        await playWordAudioWithRepetition("Finish");
+        showWinModal(PLAYERS_CONFIG[currentPlayerIndex]);
+        isRolling = false;
+        document.getElementById("rollButton").disabled = false;
+        return;
+      }
+
+      // Check for Ladder or Snake with extra audio affirmation
+      await new Promise(r => setTimeout(r, 400));
+
+      if (LADDERS[landedTile]) {
+        const ladderTop = LADDERS[landedTile];
+        setStatus(`🪜 Ladder! Climbing up to ${ladderTop}!`);
+        playSound('ladder');
+        highlightTile(ladderTop);
+        playerPositions[currentPlayerIndex] = ladderTop;
+        updateTurnUI();
+        renderTokens();
+
+        const ladderWord = tileWordMap[ladderTop];
+        if (ladderWord) {
+          setStatus(`Climbed ladder to: "${ladderWord}"!`);
+          await playWordAudioWithRepetition(ladderWord);
+        }
+        await new Promise(r => setTimeout(r, 500));
+      } else if (SNAKES[landedTile]) {
+        const snakeTail = SNAKES[landedTile];
+        setStatus(`🐍 Whoops! Sliding down snake to ${snakeTail}!`);
+        playSound('snake');
+        highlightTile(snakeTail);
+        playerPositions[currentPlayerIndex] = snakeTail;
+        updateTurnUI();
+        renderTokens();
+
+        const snakeWord = tileWordMap[snakeTail];
+        if (snakeWord) {
+          setStatus(`Slid down snake to: "${snakeWord}"!`);
+          await playWordAudioWithRepetition(snakeWord);
+        }
+        await new Promise(r => setTimeout(r, 500));
+      }
+
+      hideRepeatPrompt();
+
+      // Advance to next player
+      currentPlayerIndex = (currentPlayerIndex + 1) % totalPlayers;
+      updateTurnUI();
+      renderTokens();
+      setStatus(`Next turn! Tap the die to roll.`);
+      isRolling = false;
+      document.getElementById("rollButton").disabled = false;
+    }
+
+    function setPlayerCount(count) {
+      if (isRolling) return;
+      totalPlayers = count;
+      currentPlayerIndex = 0;
+      resetGame();
+    }
+
+    function resetGame() {
+      playerPositions = [1, 1, 1, 1];
+      currentPlayerIndex = 0;
+      isRolling = false;
+      hideRepeatPrompt();
+      document.getElementById("rollButton").disabled = false;
+      document.getElementById("lastRolledText").textContent = "Ready";
+      setStatus("Game started! Tap the die to roll.");
+      updateTurnUI();
+      renderTokens();
+    }
+
+    function shuffleAndReset() {
+      randomizeWords();
+      renderBoardDOM();
+      drawSnakesAndLadders();
+      resetGame();
+    }
+
+    function showWinModal(winner) {
+      const modal = document.getElementById("winModal");
+      const winnerEmoji = document.getElementById("winnerEmoji");
+      const winnerText = document.getElementById("winnerText");
+      
+      winnerEmoji.textContent = winner.emoji;
+      winnerText.textContent = `${winner.name} (${winner.toy}) Wins!`;
+      modal.classList.remove("hidden");
+      startConfetti();
+    }
+
+    function closeWinModal() {
+      document.getElementById("winModal").classList.add("hidden");
+      stopConfetti();
+      shuffleAndReset();
+    }
+
+    let confettiAnimationId = null;
+    let confettiParticles = [];
+
+    function startConfetti() {
+      const canvas = document.getElementById("confettiCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      confettiParticles = [];
+      const colors = ['#f43f5e', '#10b981', '#f59e0b', '#0284c7', '#ec4899', '#8b5cf6'];
+      for (let i = 0; i < 120; i++) {
+        confettiParticles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          size: Math.random() * 8 + 6,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 4,
+          vy: Math.random() * 4 + 3,
+          rot: Math.random() * 360,
+          vrot: (Math.random() - 0.5) * 10
+        });
+      }
+
+      function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        confettiParticles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vrot;
+          if (p.y > canvas.height) p.y = -20;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        });
+        confettiAnimationId = requestAnimationFrame(loop);
+      }
+      loop();
+    }
+
+    function stopConfetti() {
+      if (confettiAnimationId) {
+        cancelAnimationFrame(confettiAnimationId);
+        confettiAnimationId = null;
+      }
+      const canvas = document.getElementById("confettiCanvas");
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    window.addEventListener("resize", () => {
+      renderTokens();
+    });
+
+    window.addEventListener("load", () => {
+      randomizeWords();
+      renderBoardDOM();
+      drawSnakesAndLadders();
+      updateTurnUI();
+      renderTokens();
+    });
+  </script>
+</body>
+</html>
