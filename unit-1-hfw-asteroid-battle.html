@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Red Word Asteroid Blaster</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #060713;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI', sans-serif;
+    }
+    #gameCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+    #ui-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+      color: #ffffff;
+      font-size: 22px;
+      font-weight: bold;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      z-index: 5;
+    }
+    .hud-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .interactive-btn {
+      pointer-events: auto;
+      background: linear-gradient(180deg, #ff5252 0%, #c62828 100%);
+      color: white;
+      border: 2px solid #ff8a80;
+      padding: 10px 18px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(255, 82, 82, 0.4);
+      transition: transform 0.1s, background 0.2s;
+      font-family: inherit;
+    }
+    .interactive-btn:active {
+      transform: scale(0.95);
+    }
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(6, 7, 19, 0.88);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      z-index: 10;
+      text-align: center;
+      padding: 20px;
+    }
+    #overlay h1 {
+      font-size: 46px;
+      color: #ff5252;
+      text-shadow: 0 0 20px rgba(255, 82, 82, 0.7);
+      margin: 0 0 15px 0;
+    }
+    #overlay p {
+      font-size: 22px;
+      max-width: 520px;
+      margin: 0 0 30px 0;
+      line-height: 1.5;
+      color: #cfd8dc;
+    }
+    .start-btn {
+      background: linear-gradient(180deg, #00e676 0%, #00b248 100%);
+      border: 3px solid #b9f6ca;
+      color: #003314;
+      padding: 16px 42px;
+      font-size: 26px;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(0, 230, 118, 0.5);
+      transition: transform 0.15s;
+      font-family: inherit;
+    }
+    .start-btn:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="ui-layer">
+    <div class="hud-group">
+      <div id="score-display">Score: 0</div>
+      <div id="progress-display">Word: 0 / 20</div>
+    </div>
+    <button id="repeat-btn" class="interactive-btn" style="display: none;">🔊 Hear Word Again</button>
+    <div id="lives-display">❤️❤️❤️</div>
+  </div>
+
+  <div id="overlay">
+    <h1 id="overlay-title">Red Word Asteroid Blaster</h1>
+    <p id="overlay-desc">Listen carefully to the mission control voice and tap the matching <strong>Red Word Asteroid</strong> before it reaches your spaceship!</p>
+    <button id="start-btn" class="start-btn">🚀 Launch Mission</button>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
+
+  <script>
+    // =========================================================================
+    // 1. UNIT & AUDIO CONFIGURATION (Update this list for new units!)
+    // =========================================================================
+    const SIGHT_WORDS = [
+      "she", "he", "I", "am", "five", "six", "old", "this",
+      "a", "in", "on", "like", "no", "red", "yellow", "pink",
+      "green", "orange", "purple", "blue"
+    ];
+
+    const CONFIG = {
+      asteroidsPerWave: 3,        // Number of asteroids falling at once (1 target + distractors)
+      fallDurationSeconds: 11,    // Seconds it takes for an asteroid to reach the ship (higher = slower)
+      startingLives: 3,           // Number of shields/lives
+      pointsPerHit: 100,          // Score awarded per correct word
+
+      // CUSTOM VOICE RECORDING SETTINGS:
+      useCustomAudio: true,       // If true, checks ./audio/[word].mp3 first, then falls back to TTS
+      audioFolder: './audio',     // Relative folder path (safe for GitHub Pages project subfolders)
+      audioExtension: '.mp3'      // File format (.mp3, .wav, or .ogg)
+    };
+
+    // =========================================================================
+    // 2. HYBRID AUDIO ENGINE (Custom MP3 + Web Speech Fallback + SFX)
+    // =========================================================================
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    let activeVoiceAudio = null; // Tracks currently playing MP3 so we can stop it if needed
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new AudioContextClass();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function speakPrompt(word) {
+      // Stop any existing speech or custom audio clip
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      if (activeVoiceAudio) {
+        activeVoiceAudio.pause();
+        activeVoiceAudio.currentTime = 0;
+        activeVoiceAudio = null;
+      }
+
+      if (CONFIG.useCustomAudio) {
+        // Normalize filename to lowercase so GitHub Pages (case-sensitive) never misses "I" -> "i.mp3"
+        const safeFilename = encodeURIComponent(word.trim().toLowerCase());
+        const filePath = `${CONFIG.audioFolder}/${safeFilename}${CONFIG.audioExtension}`;
+        const audio = new Audio(filePath);
+        activeVoiceAudio = audio;
+
+        // If the MP3 is missing or fails to load, automatically fall back to synthesized speech
+        audio.onerror = () => {
+          speakWithBrowserTTS(word);
+        };
+
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            // Fallback if file doesn't exist or browser blocks playback
+            speakWithBrowserTTS(word);
+          });
+        }
+      } else {
+        speakWithBrowserTTS(word);
+      }
+    }
+
+    function speakWithBrowserTTS(word) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+
+      const spokenWord = word === "I" ? "capital I" : word;
+      const utterance = new SpeechSynthesisUtterance(`Find the word: ${spokenWord}`);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.88;
+      utterance.pitch = 1.05;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function playSound(type) {
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+
+      if (type === 'laser') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(900, now);
+        osc.frequency.exponentialRampToValueAtTime(120, now + 0.18);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      } else if (type === 'explosion') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(35, now + 0.35);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'wrong') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.setValueAtTime(150, now + 0.12);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.28);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.28);
+      }
+    }
+
+    // =========================================================================
+    // 3. GAME STATE & ENTITIES
+    // =========================================================================
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const scoreEl = document.getElementById('score-display');
+    const progressEl = document.getElementById('progress-display');
+    const livesEl = document.getElementById('lives-display');
+    const repeatBtn = document.getElementById('repeat-btn');
+    const overlay = document.getElementById('overlay');
+    const overlayTitle = document.getElementById('overlay-title');
+    const overlayDesc = document.getElementById('overlay-desc');
+    const startBtn = document.getElementById('start-btn');
+
+    let gameState = 'START';
+    let score = 0;
+    let lives = CONFIG.startingLives;
+    let wordQueue = [];
+    let completedCount = 0;
+    let currentTargetWord = '';
+
+    let asteroids = [];
+    let lasers = [];
+    let particles = [];
+    let stars = [];
+    let waveTimeout = null;
+    let lastFrameTime = 0;
+
+    const ship = { x: 0, y: 0 };
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      ship.x = canvas.width / 2;
+      ship.y = canvas.height - 75;
+      createStarfield();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function createStarfield() {
+      stars = [];
+      for (let i = 0; i < 90; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.8 + 0.4,
+          speed: Math.random() * 18 + 6,
+          alpha: Math.random() * 0.7 + 0.3
+        });
+      }
+    }
+
+    function shuffle(array) {
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function createAsteroidShape(x, y, word) {
+      const radius = Math.min(Math.max(canvas.width * 0.08, 48), 68);
+      const speed = (canvas.height - 160) / CONFIG.fallDurationSeconds;
+      const vertices = [];
+      const points = 11;
+
+      for (let i = 0; i < points; i++) {
+        const angle = (i / points) * Math.PI * 2;
+        const r = radius * (0.86 + Math.random() * 0.22);
+        vertices.push({ x: Math.cos(angle) * r, y: Math.sin(angle) * r });
+      }
+
+      return {
+        x,
+        y,
+        word,
+        radius,
+        speed,
+        vertices,
+        shakeTimer: 0
+      };
+    }
+
+    function spawnWave() {
+      if (gameState !== 'PLAYING') return;
+      asteroids = [];
+
+      if (wordQueue.length === 0) {
+        endGame(true);
+        return;
+      }
+
+      currentTargetWord = wordQueue[0];
+      updateHUD();
+      speakPrompt(currentTargetWord);
+
+      const distractors = shuffle(SIGHT_WORDS.filter(w => w !== currentTargetWord))
+        .slice(0, CONFIG.asteroidsPerWave - 1);
+
+      const waveWords = shuffle([currentTargetWord, ...distractors]);
+      const laneWidth = canvas.width / waveWords.length;
+
+      waveWords.forEach((word, index) => {
+        const centerX = laneWidth * index + laneWidth / 2;
+        const jitterX = (Math.random() - 0.5) * Math.min(laneWidth * 0.25, 45);
+        const x = Math.max(75, Math.min(canvas.width - 75, centerX + jitterX));
+        const y = -80 - Math.random() * 55;
+        asteroids.push(createAsteroidShape(x, y, word));
+      });
+    }
+
+    function spawnExplosion(x, y, color) {
+      for (let i = 0; i < 28; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 190 + 40;
+        particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          radius: Math.random() * 5 + 2,
+          color,
+          alpha: 1
+        });
+      }
+    }
+
+    // =========================================================================
+    // 4. INPUT HANDLING
+    // =========================================================================
+    function handlePointerDown(e) {
+      if (gameState !== 'PLAYING') return;
+
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const clickX = clientX - rect.left;
+      const clickY = clientY - rect.top;
+
+      for (let i = asteroids.length - 1; i >= 0; i--) {
+        const ast = asteroids[i];
+        const dist = Math.hypot(clickX - ast.x, clickY - ast.y);
+
+        if (dist <= ast.radius * 1.2) {
+          if (ast.word === currentTargetWord) {
+            playSound('laser');
+            setTimeout(() => playSound('explosion'), 90);
+
+            lasers.push({
+              x1: ship.x,
+              y1: ship.y - 25,
+              x2: ast.x,
+              y2: ast.y,
+              alpha: 1
+            });
+
+            spawnExplosion(ast.x, ast.y, '#ff5252');
+            score += CONFIG.pointsPerHit;
+            completedCount++;
+            wordQueue.shift();
+            asteroids = [];
+            updateHUD();
+
+            clearTimeout(waveTimeout);
+            waveTimeout = setTimeout(spawnWave, 950);
+          } else {
+            playSound('wrong');
+            ast.shakeTimer = 0.35;
+            speakPrompt(currentTargetWord);
+          }
+          break;
+        }
+      }
+    }
+
+    canvas.addEventListener('pointerdown', handlePointerDown);
+
+    repeatBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (gameState === 'PLAYING' && currentTargetWord) {
+        speakPrompt(currentTargetWord);
+      }
+    });
+
+    startBtn.addEventListener('click', () => {
+      initAudio();
+      startGame();
+    });
+
+    // =========================================================================
+    // 5. GAME FLOW & LOOP
+    // =========================================================================
+    function updateHUD() {
+      scoreEl.textContent = `Score: ${score}`;
+      progressEl.textContent = `Word: ${completedCount} / ${SIGHT_WORDS.length}`;
+      livesEl.textContent = '❤️'.repeat(Math.max(0, lives)) + '🖤'.repeat(Math.max(0, CONFIG.startingLives - lives));
+    }
+
+    function startGame() {
+      score = 0;
+      lives = CONFIG.startingLives;
+      completedCount = 0;
+      wordQueue = shuffle(SIGHT_WORDS);
+      asteroids = [];
+      lasers = [];
+      particles = [];
+      gameState = 'PLAYING';
+
+      overlay.style.display = 'none';
+      repeatBtn.style.display = 'block';
+      updateHUD();
+
+      clearTimeout(waveTimeout);
+      waveTimeout = setTimeout(spawnWave, 400);
+    }
+
+    function endGame(victory) {
+      gameState = 'OVER';
+      repeatBtn.style.display = 'none';
+      overlay.style.display = 'flex';
+
+      if (victory) {
+        overlayTitle.textContent = '🌟 Mission Accomplished! 🌟';
+        overlayDesc.innerHTML = `You blasted all <strong>${SIGHT_WORDS.length} Red Words</strong>!<br>Final Score: <strong>${score}</strong>`;
+        startBtn.textContent = '🔄 Play Again';
+      } else {
+        overlayTitle.textContent = '🛸 Shields Depleted!';
+        overlayDesc.innerHTML = `Good effort, Space Cadet! You mastered <strong>${completedCount}</strong> words.<br>Final Score: <strong>${score}</strong>`;
+        startBtn.textContent = '🚀 Try Again';
+      }
+    }
+
+    function update(dt) {
+      stars.forEach(s => {
+        s.y += s.speed * dt;
+        if (s.y > canvas.height) {
+          s.y = 0;
+          s.x = Math.random() * canvas.width;
+        }
+      });
+
+      for (let i = lasers.length - 1; i >= 0; i--) {
+        lasers[i].alpha -= dt * 4.5;
+        if (lasers[i].alpha <= 0) lasers.splice(i, 1);
+      }
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.alpha -= dt * 1.6;
+        if (p.alpha <= 0) particles.splice(i, 1);
+      }
+
+      if (gameState !== 'PLAYING') return;
+
+      for (let i = asteroids.length - 1; i >= 0; i--) {
+        const ast = asteroids[i];
+        ast.y += ast.speed * dt;
+        if (ast.shakeTimer > 0) ast.shakeTimer -= dt;
+
+        if (ast.y + ast.radius >= ship.y - 25) {
+          playSound('explosion');
+          spawnExplosion(ship.x, ship.y - 10, '#ffab00');
+          lives--;
+
+          const missedWord = wordQueue.shift();
+          wordQueue.push(missedWord);
+
+          asteroids = [];
+          updateHUD();
+
+          if (lives <= 0) {
+            endGame(false);
+          } else {
+            clearTimeout(waveTimeout);
+            waveTimeout = setTimeout(spawnWave, 1100);
+          }
+          break;
+        }
+      }
+    }
+
+    function drawShip() {
+      ctx.save();
+      ctx.translate(ship.x, ship.y);
+
+      ctx.fillStyle = '#ff9100';
+      ctx.beginPath();
+      ctx.moveTo(-12, 22);
+      ctx.lineTo(0, 38 + Math.random() * 12);
+      ctx.lineTo(12, 22);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#d32f2f';
+      ctx.beginPath();
+      ctx.moveTo(-38, 22);
+      ctx.lineTo(0, -18);
+      ctx.lineTo(38, 22);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#eceff1';
+      ctx.beginPath();
+      ctx.moveTo(0, -38);
+      ctx.lineTo(-20, 22);
+      ctx.lineTo(20, 22);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#29b6f6';
+      ctx.beginPath();
+      ctx.ellipse(0, -4, 9, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      stars.forEach(s => {
+        ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      if (gameState === 'PLAYING') {
+        ctx.strokeStyle = 'rgba(255, 82, 82, 0.22)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([8, 8]);
+        ctx.beginPath();
+        ctx.moveTo(0, ship.y - 25);
+        ctx.lineTo(canvas.width, ship.y - 25);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      lasers.forEach(l => {
+        ctx.strokeStyle = `rgba(0, 230, 118, ${l.alpha})`;
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(l.x1, l.y1);
+        ctx.lineTo(l.x2, l.y2);
+        ctx.stroke();
+      });
+
+      asteroids.forEach(ast => {
+        ctx.save();
+        const shakeOffset = ast.shakeTimer > 0 ? Math.sin(ast.shakeTimer * 55) * 9 : 0;
+        ctx.translate(ast.x + shakeOffset, ast.y);
+
+        const grad = ctx.createRadialGradient(-12, -12, 8, 0, 0, ast.radius);
+        grad.addColorStop(0, '#ff5252');
+        grad.addColorStop(1, '#8e0000');
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = '#ff8a80';
+        ctx.lineWidth = 3;
+
+        ctx.beginPath();
+        ast.vertices.forEach((v, idx) => {
+          if (idx === 0) ctx.moveTo(v.x, v.y);
+          else ctx.lineTo(v.x, v.y);
+        });
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        const fontSize = Math.max(24, Math.min(34, Math.floor(ast.radius * 0.52)));
+        ctx.font = `bold ${fontSize}px 'Comic Sans MS', 'Chalkboard SE', sans-serif`;
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+        ctx.shadowBlur = 4;
+        ctx.fillText(ast.word, 0, 2);
+
+        ctx.restore();
+      });
+
+      particles.forEach(p => {
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.max(0, p.alpha);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+
+      drawShip();
+    }
+
+    function gameLoop(timestamp) {
+      const dt = Math.min((timestamp - lastFrameTime) / 1000, 0.1);
+      lastFrameTime = timestamp;
+      update(dt);
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    resizeCanvas();
+    requestAnimationFrame(gameLoop);
+  </script>
+</body>
+</html>
