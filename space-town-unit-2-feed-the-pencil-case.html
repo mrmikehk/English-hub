@@ -140,7 +140,7 @@
           <span class="text-xs uppercase tracking-wider font-semibold text-amber-100 block">Current Craving</span>
           <div class="flex items-baseline gap-2 justify-center sm:justify-start">
             <h2 class="text-lg sm:text-2xl font-bold tracking-wide">
-              Feed me the: <span id="targetItemName" class="text-yellow-100 underline decoration-white/60 decoration-wavy underline-offset-4">...</span>
+              Feed me the: <span id="targetItemName" class="text-yellow-100 underline decoration-white/60 decoration-wavy underline-offset-4 lowercase">...</span>
             </h2>
           </div>
         </div>
@@ -207,7 +207,7 @@
 
           <!-- Corner badge with safe image fallback -->
           <div class="absolute -bottom-2 -right-2 w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white border-2 border-sky-300 shadow-md flex items-center justify-center overflow-hidden">
-            <img src="images/stationery/pencil-case.jpg" alt="Pencil Case" class="w-full h-full object-cover" onerror="this.style.display='none'; document.getElementById('caseBadgeEmoji').classList.remove('hidden');">
+            <img src="images/stationery/pencil-case.jpg" alt="pencil case" class="w-full h-full object-cover" onerror="this.style.display='none'; document.getElementById('caseBadgeEmoji').classList.remove('hidden');">
             <span id="caseBadgeEmoji" class="text-lg hidden">👝</span>
           </div>
         </div>
@@ -280,87 +280,87 @@
   </div>
 
   <script>
-    // Stationery items that fit in the case and serve as valid targets
+    // Stationery items in lowercase
     const VALID_STATIONERY = [
-      { id: 'coloured-pencil', name: 'Coloured Pencil', file: 'coloured-pencil.jpg', emoji: '✏️', isFitStationery: true, spoken: 'coloured pencil' },
-      { id: 'eraser', name: 'Eraser', file: 'eraser.jpg', emoji: '🧼', isFitStationery: true, spoken: 'eraser' },
-      { id: 'glue-stick', name: 'Glue Stick', file: 'glue-stick.jpg', emoji: '🧴', isFitStationery: true, spoken: 'glue stick' },
-      { id: 'pen', name: 'Pen', file: 'pen.jpg', emoji: '🖊️', isFitStationery: true, spoken: 'pen' },
-      { id: 'pencil', name: 'Pencil', file: 'pencil.jpg', emoji: '✏️', isFitStationery: true, spoken: 'pencil' },
-      { id: 'ruler', name: 'Ruler', file: 'ruler.jpg', emoji: '📏', isFitStationery: true, spoken: 'ruler' },
-      { id: 'sharpener', name: 'Sharpener', file: 'sharpener.jpg', emoji: '⚙️', isFitStationery: true, spoken: 'pencil sharpener' }
+      { id: 'coloured-pencil', name: 'coloured pencil', file: 'coloured-pencil.jpg', emoji: '✏️', isFitStationery: true, spoken: 'coloured pencil' },
+      { id: 'eraser', name: 'eraser', file: 'eraser.jpg', emoji: '🧼', isFitStationery: true, spoken: 'eraser' },
+      { id: 'glue-stick', name: 'glue stick', file: 'glue-stick.jpg', emoji: '🧴', isFitStationery: true, spoken: 'glue stick' },
+      { id: 'pen', name: 'pen', file: 'pen.jpg', emoji: '🖊️', isFitStationery: true, spoken: 'pen' },
+      { id: 'pencil', name: 'pencil', file: 'pencil.jpg', emoji: '✏️', isFitStationery: true, spoken: 'pencil' },
+      { id: 'ruler', name: 'ruler', file: 'ruler.jpg', emoji: '📏', isFitStationery: true, spoken: 'ruler' },
+      { id: 'sharpener', name: 'sharpener', file: 'sharpener.jpg', emoji: '⚙️', isFitStationery: true, spoken: 'pencil sharpener' }
     ];
 
-    // Trick items that do not belong inside a pencil case
+    // Trick items in lowercase
     const TRICK_ITEMS = [
       { 
         id: 'book', 
-        name: 'Book', 
+        name: 'book', 
         file: 'book.jpg', 
         emoji: '📖', 
         isFitStationery: false, 
-        rejectQuote: "Whoa! A book is way too big to fit inside a pencil case! Put it away!", 
-        putAwayQuote: "Nice work! A book belongs on the bookshelf or in your bag!",
+        rejectQuote: "whoa! a book is way too big to fit inside a pencil case! put it away!", 
+        putAwayQuote: "nice work! a book belongs on the bookshelf or in your bag!",
         spoken: 'book' 
       },
       { 
         id: 'school-bag', 
-        name: 'School Bag', 
+        name: 'school bag', 
         file: 'school-bag.jpg', 
         emoji: '🎒', 
         isFitStationery: false, 
-        rejectQuote: "Blehh! A school bag is way too huge to fit inside a pencil case!", 
-        putAwayQuote: "Great job! Keep the school bag on your chair or in your locker!",
+        rejectQuote: "blehh! a school bag is way too huge to fit inside a pencil case!", 
+        putAwayQuote: "great job! keep the school bag on your chair or in your locker!",
         spoken: 'school bag' 
       },
       { 
         id: 'baby', 
-        name: 'Baby', 
+        name: 'baby', 
         file: null, 
         emoji: '👶', 
         isFitStationery: false, 
-        rejectQuote: "Whaaa! A baby cannot fit into a pencil case!", 
-        putAwayQuote: "Good thinking! A baby definitely doesn't belong in a pencil case!",
+        rejectQuote: "whaaa! a baby cannot fit into a pencil case!", 
+        putAwayQuote: "good thinking! a baby definitely doesn't belong in a pencil case!",
         spoken: 'baby' 
       },
       { 
         id: 'watermelon', 
-        name: 'Watermelon', 
+        name: 'watermelon', 
         file: null, 
         emoji: '🍉', 
         isFitStationery: false, 
-        rejectQuote: "Yuck! A giant watermelon will squash me!", 
-        putAwayQuote: "Smart choice! Put the watermelon in the kitchen or fridge!",
+        rejectQuote: "yuck! a giant watermelon will squash me!", 
+        putAwayQuote: "smart choice! put the watermelon in the kitchen or fridge!",
         spoken: 'watermelon' 
       },
       { 
         id: 'bookshelf', 
-        name: 'Bookshelf', 
+        name: 'bookshelf', 
         file: null, 
         emoji: '📚', 
         isFitStationery: false, 
-        rejectQuote: "Way too big! A whole bookshelf won't fit in here!", 
-        putAwayQuote: "Awesome! Bookshelves belong in the library or classroom!",
+        rejectQuote: "way too big! a whole bookshelf won't fit in here!", 
+        putAwayQuote: "awesome! bookshelves belong in the library or classroom!",
         spoken: 'bookshelf' 
       },
       { 
         id: 'tv', 
-        name: 'Television', 
+        name: 'television', 
         file: null, 
         emoji: '📺', 
         isFitStationery: false, 
-        rejectQuote: "Ouch! A TV belongs in the living room!", 
-        putAwayQuote: "Correct! The television stays at home or on the wall!",
+        rejectQuote: "ouch! a television belongs in the living room!", 
+        putAwayQuote: "correct! the television stays at home or on the wall!",
         spoken: 'television' 
       }
     ];
 
     const PRAISE_LINES = [
-      "Yum! Thank you!",
-      "Delicious stationery!",
-      "Nom nom nom! That fits perfectly!",
-      "Great job! Exactly what I needed!",
-      "Super! That goes in my pencil case!"
+      "yum! thank you!",
+      "delicious stationery!",
+      "nom nom nom! that fits perfectly!",
+      "great job! exactly what i needed!",
+      "super! that goes in my pencil case!"
     ];
 
     // Game state tracking
@@ -497,9 +497,9 @@
       const targetIndex = Math.floor(Math.random() * VALID_STATIONERY.length);
       currentTarget = VALID_STATIONERY[targetIndex];
 
-      // Update prompt
-      targetItemNameEl.textContent = currentTarget.name.toUpperCase();
-      caseSpeechTextEl.textContent = `Feed me the ${currentTarget.name}!`;
+      // Update prompt in lowercase
+      targetItemNameEl.textContent = currentTarget.name.toLowerCase();
+      caseSpeechTextEl.textContent = `feed me the ${currentTarget.name.toLowerCase()}!`;
       caseMoodEmojiEl.textContent = "😋";
 
       // Select distractors: some real stationery + trick items
@@ -522,7 +522,7 @@
       renderTrayCards();
 
       setTimeout(() => {
-        speakText(`Feed me the ${currentTarget.spoken}`);
+        speakText(`feed me the ${currentTarget.spoken}`);
       }, 350);
     }
 
@@ -541,7 +541,7 @@
         if (item.file) {
           const img = document.createElement('img');
           img.src = `images/stationery/${item.file}`;
-          img.alt = item.name;
+          img.alt = item.name.toLowerCase();
           img.className = "max-w-full max-h-full object-contain filter drop-shadow";
           
           img.onerror = () => {
@@ -553,15 +553,15 @@
         }
 
         const nameLabel = document.createElement('span');
-        nameLabel.className = "text-xs font-bold text-slate-800 text-center mt-1 pointer-events-none leading-tight";
-        nameLabel.textContent = item.name;
+        nameLabel.className = "text-xs font-bold text-slate-800 text-center mt-1 pointer-events-none leading-tight lowercase";
+        nameLabel.textContent = item.name.toLowerCase();
 
         const btnGroup = document.createElement('div');
         btnGroup.className = "mt-1.5 w-full flex gap-1";
 
         const feedBtn = document.createElement('button');
         feedBtn.className = "flex-1 bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold py-1 px-1 rounded-lg text-[10px] sm:text-[11px] transition-colors flex items-center justify-center gap-0.5 border border-amber-300";
-        feedBtn.innerHTML = `<span>Feed</span> 👝`;
+        feedBtn.innerHTML = `<span>feed</span> 👝`;
         feedBtn.title = "Feed to Pencil Case";
         feedBtn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -570,7 +570,7 @@
 
         const putAwayBtn = document.createElement('button');
         putAwayBtn.className = "flex-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold py-1 px-1 rounded-lg text-[10px] sm:text-[11px] transition-colors flex items-center justify-center gap-0.5 border border-emerald-300";
-        putAwayBtn.innerHTML = `<span>Sort</span> 📦`;
+        putAwayBtn.innerHTML = `<span>sort</span> 📦`;
         putAwayBtn.title = "Put away (Doesn't fit in pencil case)";
         putAwayBtn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -724,12 +724,11 @@
       AudioEngine.init();
 
       if (!item.isFitStationery) {
-        // Correctly sorted away!
         score += 50;
         scoreDisplayEl.textContent = score;
         AudioEngine.playPutAwayPop();
 
-        const quote = item.putAwayQuote || `Good job! A ${item.name} does not fit inside a pencil case!`;
+        const quote = item.putAwayQuote || `good job! a ${item.name.toLowerCase()} does not fit inside a pencil case!`;
         caseSpeechTextEl.textContent = quote;
         speakText(quote);
         showFeedbackToast(`📦 Stored away! (+50 pts)`, 'bg-emerald-600 text-white border-emerald-400');
@@ -740,9 +739,8 @@
           setTimeout(() => cardEl.remove(), 250);
         }
       } else {
-        // Mistake: player tried to put away a valid pencil case item
         AudioEngine.playBoingReject();
-        const msg = `Wait! A ${item.name} actually belongs in a pencil case!`;
+        const msg = `wait! a ${item.name.toLowerCase()} actually belongs in a pencil case!`;
         caseSpeechTextEl.textContent = msg;
         speakText(msg);
         showFeedbackToast(`⚠️ That fits in a pencil case!`, 'bg-amber-500 text-white border-amber-300');
@@ -761,7 +759,6 @@
       attemptsCount++;
 
       if (item.id === currentTarget.id) {
-        // Correct item fed
         correctCount++;
         score += 100 + (streak * 20);
         streak++;
@@ -770,10 +767,10 @@
 
         pencilCaseBodyEl.classList.remove('animate-idle');
         pencilCaseBodyEl.classList.add('animate-chomp');
-        mouthPromptEl.textContent = "CHOMP! YUM! 😋";
+        mouthPromptEl.textContent = "chomp! yum! 😋";
         mouthTongueEl.style.transform = 'translateY(12px)';
         caseMoodEmojiEl.textContent = "🥳";
-        caseSpeechTextEl.textContent = `Mmm! Thank you for the ${item.name}!`;
+        caseSpeechTextEl.textContent = `mmm! thank you for the ${item.name.toLowerCase()}!`;
 
         if (cardEl) {
           cardEl.style.transform = "scale(0) rotate(20deg)";
@@ -793,7 +790,7 @@
         const randomPraise = PRAISE_LINES[Math.floor(Math.random() * PRAISE_LINES.length)];
         speakText(randomPraise);
 
-        showFeedbackToast(`🎉 Perfect! That's the ${item.name}!`, 'bg-emerald-500 text-white border-emerald-300');
+        showFeedbackToast(`🎉 Perfect! That's the ${item.name.toLowerCase()}!`, 'bg-emerald-500 text-white border-emerald-300');
 
         setTimeout(() => {
           pencilCaseBodyEl.classList.remove('animate-chomp');
@@ -805,13 +802,12 @@
         }, 1400);
 
       } else {
-        // Wrong feed: trick item or wrong valid item
         streak = 0;
         streakDisplayEl.textContent = streak;
 
         pencilCaseBodyEl.classList.remove('animate-idle');
         pencilCaseBodyEl.classList.add('animate-reject');
-        mouthPromptEl.textContent = "BLEGH! YUCK! 😝";
+        mouthPromptEl.textContent = "blegh! yuck! 😝";
         caseMoodEmojiEl.textContent = "🤢";
 
         AudioEngine.playBoingReject();
@@ -823,8 +819,8 @@
           rejectionMessage = item.rejectQuote;
           toastText = `🚫 ${item.rejectQuote}`;
         } else {
-          rejectionMessage = `That's a ${item.name}! But I asked for the ${currentTarget.name}!`;
-          toastText = `❌ That's a ${item.name}! Need ${currentTarget.name}!`;
+          rejectionMessage = `that's a ${item.name.toLowerCase()}! but i asked for the ${currentTarget.name.toLowerCase()}!`;
+          toastText = `❌ that's a ${item.name.toLowerCase()}! need ${currentTarget.name.toLowerCase()}!`;
         }
 
         caseSpeechTextEl.textContent = rejectionMessage;
@@ -875,7 +871,7 @@
     speakTargetBtn.addEventListener('click', () => {
       AudioEngine.init();
       if (currentTarget) {
-        speakText(`Feed me the ${currentTarget.spoken}`);
+        speakText(`feed me the ${currentTarget.spoken}`);
       }
     });
 
