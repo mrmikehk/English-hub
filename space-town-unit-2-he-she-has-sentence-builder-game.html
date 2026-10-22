@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentence Builder Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Basic animations and custom styling for a playful feel */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0fdf4; /* Light green background */
+        }
+        .word-btn {
+            transition: all 0.2s ease;
+        }
+        .word-btn:active {
+            transform: scale(0.95);
+        }
+        /* Shake animation for incorrect answer */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+        .image-container {
+            width: 150px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="bg-white w-full max-w-4xl rounded-2xl shadow-xl p-6 md:p-8">
+        
+        <!-- Header / Scoreboard -->
+        <div class="flex justify-between items-center mb-8 border-b pb-4">
+            <h1 class="text-2xl md:text-3xl font-bold text-green-600">Sentence Builder</h1>
+            <div class="text-lg font-semibold text-gray-700">
+                Score: <span id="scoreDisplay" class="text-green-500">0</span>
+            </div>
+        </div>
+
+        <!-- Visual Prompts Area -->
+        <div class="flex flex-col md:flex-row items-center justify-center gap-8 mb-10">
+            <!-- Subject Image (Boy/Girl) -->
+            <div class="flex flex-col items-center">
+                <div class="image-container">
+                    <img id="subjectImage" src="" alt="Subject" onerror="this.src='https://placehold.co/150x150/e2e8f0/475569?text=Subject'">
+                </div>
+            </div>
+
+            <!-- Plus & Amount -->
+            <div class="text-4xl font-bold text-gray-400 flex items-center gap-4">
+                <span>+</span>
+                <div class="bg-yellow-100 text-yellow-600 rounded-full w-16 h-16 flex items-center justify-center border-4 border-yellow-300 shadow-inner">
+                    <span id="amountDisplay"></span>
+                </div>
+                <span>+</span>
+            </div>
+
+            <!-- Stationery Item Image -->
+            <div class="flex flex-col items-center">
+                <div class="image-container">
+                    <img id="itemImage" src="" alt="Stationery" onerror="this.src='https://placehold.co/150x150/e2e8f0/475569?text=Item'">
+                </div>
+            </div>
+        </div>
+
+        <!-- Constructed Sentence Area -->
+        <div class="mb-8">
+            <h2 class="text-gray-600 font-semibold mb-2">Your Sentence: (Click a word to remove it)</h2>
+            <div id="sentenceArea" class="flex flex-wrap gap-2 p-4 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl min-h-[80px] items-center">
+                <!-- Clicked words will appear here -->
+            </div>
+        </div>
+
+        <!-- Word Bank Area -->
+        <div class="mb-8">
+            <h2 class="text-gray-600 font-semibold mb-2">Word Bank:</h2>
+            <div id="wordBankArea" class="flex flex-wrap gap-3 min-h-[60px]">
+                <!-- Draggable/Clickable words will appear here -->
+            </div>
+        </div>
+
+        <!-- Controls & Feedback -->
+        <div class="flex flex-col items-center gap-4">
+            <div id="feedbackMessage" class="text-xl font-bold h-8 text-center hidden"></div>
+            
+            <div class="flex gap-4">
+                <!-- Explicit type="button" added to prevent any form submission behaviors -->
+                <button type="button" id="checkBtn" onclick="checkAnswer()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition active:scale-95 text-lg">
+                    Check Answer
+                </button>
+                <button type="button" id="nextBtn" onclick="initGame()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition active:scale-95 text-lg hidden">
+                    Next Question
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Data Definitions ---
+        const subjects = [
+            { type: 'boy', file: 'boy1.jpg', pronoun: 'He' },
+            { type: 'boy', file: 'boy2.jpg', pronoun: 'He' },
+            { type: 'boy', file: 'boy3.jpg', pronoun: 'He' },
+            { type: 'girl', file: 'girl1.jpg', pronoun: 'She' },
+            { type: 'girl', file: 'girl2.jpg', pronoun: 'She' },
+            { type: 'girl', file: 'girl3.jpg', pronoun: 'She' }
+        ];
+
+        const stationeryItems = [
+            { file: 'book.jpg', name: 'book', plural: 'books' },
+            { file: 'coloured-pencil.jpg', name: 'coloured pencil', plural: 'coloured pencils' },
+            { file: 'eraser.jpg', name: 'eraser', plural: 'erasers' },
+            { file: 'glue-stick.jpg', name: 'glue stick', plural: 'glue sticks' },
+            { file: 'pen.jpg', name: 'pen', plural: 'pens' },
+            { file: 'pencil-case.jpg', name: 'pencil case', plural: 'pencil cases' },
+            { file: 'pencil.jpg', name: 'pencil', plural: 'pencils' },
+            { file: 'ruler.jpg', name: 'ruler', plural: 'rulers' },
+            { file: 'school-bag.jpg', name: 'school bag', plural: 'school bags' },
+            { file: 'sharpener.jpg', name: 'sharpener', plural: 'sharpeners' }
+        ];
+
+        // --- Game State ---
+        let currentSubject = null;
+        let currentAmount = 0;
+        let currentItem = null;
+        let builtSentence = [];
+        let score = 0;
+        let wordBankData = [];
+
+        // --- Utility Functions ---
+        const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
+        // --- Game Logic ---
+        function initGame() {
+            // Reset state
+            builtSentence = [];
+            hideFeedback();
+            document.getElementById('checkBtn').classList.remove('hidden');
+            document.getElementById('nextBtn').classList.add('hidden');
+            document.getElementById('sentenceArea').classList.remove('shake');
+
+            // 1. Pick Subject
+            currentSubject = getRandomElement(subjects);
+            document.getElementById('subjectImage').src = currentSubject.file;
+
+            // 2. Pick Amount
+            currentAmount = getRandomInt(1, 10);
+            document.getElementById('amountDisplay').textContent = currentAmount;
+
+            // 3. Pick Item
+            currentItem = getRandomElement(stationeryItems);
+            document.getElementById('itemImage').src = currentItem.file;
+
+            // 4. Generate Word Bank
+            generateWordBank();
+
+            // 5. Render
+            renderUI();
+        }
+
+        function generateWordBank() {
+            wordBankData = [];
+            
+            // Pronouns
+            wordBankData.push({ id: 'w_pro_he', text: 'He', type: 'pronoun' });
+            wordBankData.push({ id: 'w_pro_she', text: 'She', type: 'pronoun' });
+
+            // Verb
+            wordBankData.push({ id: 'w_verb_has', text: 'has', type: 'verb' });
+
+            // Numbers (Correct + 2 distractors)
+            let usedNumbers = new Set([currentAmount]);
+            wordBankData.push({ id: 'w_num_correct', text: currentAmount.toString(), type: 'number' });
+            
+            while(usedNumbers.size < 3) {
+                let rNum = getRandomInt(1, 10);
+                if (!usedNumbers.has(rNum)) {
+                    usedNumbers.add(rNum);
+                    wordBankData.push({ id: `w_num_${rNum}`, text: rNum.toString(), type: 'number' });
+                }
+            }
+
+            // Items
+            // Determine if correct item should be plural
+            let correctItemStr = currentAmount > 1 ? currentItem.plural : currentItem.name;
+            
+            // Add correct item with and without full stop
+            wordBankData.push({ id: 'w_item_correct_punc', text: correctItemStr + '.', type: 'item' });
+            wordBankData.push({ id: 'w_item_correct_nopunc', text: correctItemStr, type: 'item' });
+
+            // Pick a distractor item
+            let distractorItem = null;
+            do {
+                distractorItem = getRandomElement(stationeryItems);
+            } while (distractorItem.name === currentItem.name);
+
+            // Determine if distractor should be plural
+            let distractorItemStr = currentAmount > 1 ? distractorItem.plural : distractorItem.name;
+            
+            // Add distractor item with and without full stop
+            wordBankData.push({ id: 'w_item_dist_punc', text: distractorItemStr + '.', type: 'item' });
+            wordBankData.push({ id: 'w_item_dist_nopunc', text: distractorItemStr, type: 'item' });
+
+            // Shuffle the final word bank
+            shuffleArray(wordBankData);
+        }
+
+        function renderUI() {
+            const wordBankContainer = document.getElementById('wordBankArea');
+            const sentenceContainer = document.getElementById('sentenceArea');
+
+            // Clear containers
+            wordBankContainer.innerHTML = '';
+            sentenceContainer.innerHTML = '';
+
+            // Render Sentence
+            if (builtSentence.length === 0) {
+                sentenceContainer.innerHTML = '<span class="text-gray-400 italic">Construct your sentence here...</span>';
+            } else {
+                builtSentence.forEach((wordObj, index) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button'; // EXTREMELY IMPORTANT: Prevents form submission/page reload
+                    btn.className = 'word-btn bg-blue-100 text-blue-800 font-bold py-2 px-4 rounded-lg shadow cursor-pointer border border-blue-200';
+                    btn.textContent = wordObj.text;
+                    btn.onclick = () => removeWordFromSentence(index);
+                    sentenceContainer.appendChild(btn);
+                });
+            }
+
+            // Render Word Bank (only items not currently in the sentence)
+            const usedIds = builtSentence.map(w => w.id);
+            wordBankData.forEach(wordObj => {
+                if (!usedIds.includes(wordObj.id)) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button'; // EXTREMELY IMPORTANT: Prevents form submission/page reload
+                    btn.className = 'word-btn bg-white text-gray-800 font-bold py-2 px-4 rounded-lg shadow hover:bg-gray-50 border border-gray-200 cursor-pointer';
+                    btn.textContent = wordObj.text;
+                    btn.onclick = () => addWordToSentence(wordObj);
+                    wordBankContainer.appendChild(btn);
+                }
+            });
+        }
+
+        function addWordToSentence(wordObj) {
+            builtSentence.push(wordObj);
+            renderUI();
+        }
+
+        function removeWordFromSentence(index) {
+            builtSentence.splice(index, 1);
+            renderUI();
+        }
+
+        function checkAnswer() {
+            if (builtSentence.length === 0) return;
+
+            const expectedPronoun = currentSubject.pronoun;
+            const expectedVerb = 'has';
+            const expectedNumber = currentAmount.toString();
+            const expectedItem = (currentAmount > 1 ? currentItem.plural : currentItem.name) + '.';
+
+            let isCorrect = false;
+
+            // Check if sentence perfectly matches
+            if (builtSentence.length === 4) {
+                if (
+                    builtSentence[0].text === expectedPronoun &&
+                    builtSentence[1].text === expectedVerb &&
+                    builtSentence[2].text === expectedNumber &&
+                    builtSentence[3].text === expectedItem
+                ) {
+                    isCorrect = true;
+                }
+            }
+
+            if (isCorrect) {
+                showFeedback("Correct! Great job!", true);
+                score += 1;
+                document.getElementById('scoreDisplay').textContent = score;
+                document.getElementById('checkBtn').classList.add('hidden');
+                document.getElementById('nextBtn').classList.remove('hidden');
+            } else {
+                showFeedback("Not quite right. Try again!", false);
+                const sentenceArea = document.getElementById('sentenceArea');
+                
+                // Reset and trigger shake animation
+                sentenceArea.classList.remove('shake');
+                void sentenceArea.offsetWidth; // trigger reflow
+                sentenceArea.classList.add('shake');
+                
+                // Specific hint generation
+                if (builtSentence.length > 0) {
+                    let lastWord = builtSentence[builtSentence.length - 1].text;
+                    if (builtSentence.length === 4 && !lastWord.endsWith('.')) {
+                        setTimeout(() => showFeedback("Hint: Sentences end with a full stop (.).", false), 1500);
+                    } else if (builtSentence[0].text !== expectedPronoun && ['He', 'She'].includes(builtSentence[0].text)) {
+                         setTimeout(() => showFeedback(`Hint: Is it a boy or a girl?`, false), 1500);
+                    }
+                }
+            }
+        }
+
+        function showFeedback(message, isSuccess) {
+            const fb = document.getElementById('feedbackMessage');
+            fb.textContent = message;
+            fb.classList.remove('hidden', 'text-green-600', 'text-red-500');
+            
+            if (isSuccess) {
+                fb.classList.add('text-green-600', 'block');
+            } else {
+                fb.classList.add('text-red-500', 'block');
+            }
+        }
+
+        function hideFeedback() {
+            const fb = document.getElementById('feedbackMessage');
+            fb.classList.add('hidden');
+            fb.textContent = '';
+        }
+
+        // Initialize game once the DOM is fully loaded to prevent race conditions
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
