@@ -1,0 +1,1781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Idiom Island: IELTS Academic Pirate Adventure | mrmike.hk</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            parchment: '#f5e6c8',
+            parchmentDark: '#d9be8b',
+            parchmentDeep: '#23160c',
+            seaDeep: '#0d2838',
+            seaMid: '#164863',
+            seaCyan: '#427d9d',
+            goldCoin: '#f59e0b',
+            goldGlow: '#fbbf24',
+            pirateRed: '#b91c1c',
+            jungleGreen: '#15803d',
+            skullBone: '#fef3c7'
+          },
+          fontFamily: {
+            pirate: ['Georgia', 'serif'],
+            display: ['Trebuchet MS', 'Impact', 'sans-serif'],
+            body: ['Inter', 'system-ui', 'sans-serif']
+          },
+          boxShadow: {
+            parchmentShadow: '0 10px 25px -5px rgba(22, 13, 7, 0.7), inset 0 0 30px rgba(120, 53, 15, 0.3)',
+            goldGlow: '0 0 20px rgba(245, 158, 11, 0.65)',
+            shipGlow: '0 0 25px rgba(66, 125, 157, 0.8)'
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Google Fonts for antique parchment & naval expedition aesthetic -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Pirata+One&family=Cinzel:wght@600;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #081724;
+      background-image: radial-gradient(circle at 50% 30%, #153c55 0%, #0c2131 55%, #050d14 100%);
+      font-family: 'Cinzel', 'Georgia', serif;
+      color: #fdf6e2;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    /* Antique Parchment Texture & Burnished Edge */
+    .parchment-panel {
+      background: radial-gradient(circle, #f9edd4 0%, #ecd4a7 70%, #d4b47f 100%);
+      border: 4px solid #5a3818;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 50px rgba(101, 52, 12, 0.35);
+      position: relative;
+    }
+    .parchment-panel::before {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border: 1px dashed rgba(110, 55, 10, 0.4);
+      pointer-events: none;
+      border-radius: inherit;
+    }
+    /* Animated Nautical Sea Background Ripples */
+    .sea-wave {
+      position: absolute;
+      width: 200%;
+      height: 100%;
+      background: radial-gradient(ellipse at 50% 50%, rgba(66, 125, 157, 0.15) 0%, transparent 60%);
+      animation: driftWave 22s linear infinite alternate;
+      pointer-events: none;
+    }
+    @keyframes driftWave {
+      0% { transform: translate(-10%, -5%) rotate(-2deg); }
+      100% { transform: translate(5%, 5%) rotate(2deg); }
+    }
+    /* Compass Rose spin animation on trigger */
+    .compass-spin {
+      animation: spinRose 25s linear infinite;
+    }
+    @keyframes spinRose {
+      100% { transform: rotate(360deg); }
+    }
+    /* Ship Marker Floating Animation */
+    .ship-float {
+      animation: shipRock 3s ease-in-out infinite alternate;
+    }
+    @keyframes shipRock {
+      0% { transform: translateY(-4px) rotate(-3deg); }
+      100% { transform: translateY(4px) rotate(3deg); }
+    }
+    /* Region Node Pulsing */
+    .node-pulse {
+      animation: pulseGlow 2s infinite alternate;
+    }
+    @keyframes pulseGlow {
+      0% { filter: drop-shadow(0 0 3px #f59e0b); }
+      100% { filter: drop-shadow(0 0 14px #fbbf24); }
+    }
+    /* Screen Shake for Cannon Fire */
+    .cannon-shake {
+      animation: shakeScreen 0.35s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    @keyframes shakeScreen {
+      10%, 90% { transform: translate3d(-3px, 1px, 0); }
+      20%, 80% { transform: translate3d(4px, -2px, 0); }
+      30%, 50%, 70% { transform: translate3d(-5px, 3px, 0); }
+      40%, 60% { transform: translate3d(5px, -3px, 0); }
+    }
+  </style>
+</head>
+<body class="flex flex-col justify-between min-h-screen relative selection:bg-amber-700 selection:text-white">
+  <!-- Interactive Canvas for Floating Mist, Cannon Sparks & Doubloons -->
+  <canvas id="fxCanvas" class="fixed inset-0 pointer-events-none z-30"></canvas>
+  <div class="sea-wave"></div>
+
+  <!-- TOP MARITIME TELEMETRY HEADER -->
+  <header class="w-full bg-[#112330]/90 backdrop-blur-md border-b-2 border-amber-600/40 px-3 sm:px-6 py-2.5 z-20 sticky top-0 shadow-2xl">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <!-- Title & Helm Emblem -->
+      <div class="flex items-center space-x-3">
+        <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-amber-800 via-amber-600 to-amber-300 p-0.5 shadow-goldGlow flex items-center justify-center">
+          <div class="w-full h-full bg-[#0a1824] rounded-full flex items-center justify-center">
+            <!-- Ship Helm SVG -->
+            <svg class="w-6 h-6 text-amber-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2a1 1 0 0 1 1 1v1.07A8.003 8.003 0 0 1 19.93 11H21a1 1 0 1 1 0 2h-1.07A8.003 8.003 0 0 1 13 19.93V21a1 1 0 1 1-2 0v-1.07A8.003 8.003 0 0 1 4.07 13H3a1 1 0 1 1 0-2h1.07A8.003 8.003 0 0 1 11 4.07V3a1 1 0 0 1 1-1zm0 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm0 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/>
+            </svg>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-xl sm:text-2xl font-black tracking-widest uppercase text-amber-300" style="font-family: 'Pirata One', cursive; letter-spacing: 2px;">
+              IDIOM <span class="text-amber-500">ISLAND</span>
+            </h1>
+            <span class="text-[10px] font-bold uppercase bg-amber-950/80 border border-amber-500/70 text-amber-300 px-2 py-0.5 rounded tracking-widest shadow-inner">
+              IELTS Academic
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-300 font-sans tracking-wide">
+            mrmike.hk/games &bull; Speaking & Writing Register Expedition
+          </p>
+        </div>
+      </div>
+
+      <!-- Loot & Nautical Stats Bar -->
+      <div class="flex items-center space-x-3 sm:space-x-5">
+        <!-- Doubloons / Booty -->
+        <div class="bg-[#0b1b28] border border-amber-600/50 rounded-xl px-3 py-1 flex items-center space-x-2 shadow-inner">
+          <span class="text-lg">🪙</span>
+          <div>
+            <span class="block text-[8px] uppercase tracking-wider text-amber-200/70 font-sans font-bold">Gold Doubloons</span>
+            <span id="headerDoubloons" class="text-sm sm:text-base font-black text-amber-300 font-mono tracking-wider">0000</span>
+          </div>
+        </div>
+
+        <!-- Total Stars Earned -->
+        <div class="bg-[#0b1b28] border border-amber-600/50 rounded-xl px-3 py-1 flex items-center space-x-1.5 shadow-inner">
+          <span class="text-amber-400 text-base">⭐</span>
+          <div>
+            <span class="block text-[8px] uppercase tracking-wider text-amber-200/70 font-sans font-bold">Island Stars</span>
+            <span id="headerStars" class="text-sm sm:text-base font-black text-amber-300 font-mono">0 / 15</span>
+          </div>
+        </div>
+
+        <!-- Sound Toggle & Logbook -->
+        <div class="flex items-center space-x-2">
+          <button id="toggleAudioBtn" title="Toggle Ship Bells & Sea Shanty" class="p-2 rounded-xl bg-[#142838] hover:bg-[#1d384e] border border-amber-600/40 text-amber-300 transition">
+            <svg id="soundIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            </svg>
+          </button>
+          <button id="openParchmentAtlasBtn" title="View IELTS Idiom Logbook" class="px-3 py-1.5 rounded-xl bg-amber-900/60 hover:bg-amber-800 border border-amber-500/50 text-amber-200 text-xs font-bold transition flex items-center space-x-1.5">
+            <span>📜</span>
+            <span class="hidden sm:inline">Idiom Codex</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN ADVENTURE CONTAINER -->
+  <main id="gameWrapper" class="flex-1 max-w-5xl w-full mx-auto p-3 sm:p-5 flex flex-col justify-center relative z-10">
+
+    <!-- 1. CARIBBEAN TREASURE MAP VIEW (REGION SELECTION) -->
+    <div id="mapScreen" class="w-full parchment-panel rounded-3xl p-4 sm:p-6 shadow-2xl relative overflow-hidden transition-all duration-300">
+      <!-- Decorative Compass Rose in Corner -->
+      <div class="absolute -top-10 -right-10 w-44 h-44 opacity-25 pointer-events-none compass-spin">
+        <svg viewBox="0 0 100 100" fill="#5a3818">
+          <circle cx="50" cy="50" r="46" stroke="#5a3818" stroke-width="2" fill="none"/>
+          <path d="M50 4 L56 42 L96 50 L56 58 L50 96 L44 58 L4 50 L44 42 Z"/>
+          <circle cx="50" cy="50" r="6" fill="#8c4815"/>
+        </svg>
+      </div>
+
+      <!-- Sea Monster Sketch Watermark in Sea -->
+      <div class="absolute bottom-4 left-6 opacity-15 pointer-events-none text-6xl">
+        🐙
+      </div>
+
+      <!-- Map Header -->
+      <div class="text-center relative z-10 mb-4 sm:mb-6">
+        <span class="text-xs uppercase tracking-widest font-black text-amber-950/70 border-b border-amber-900/30 pb-0.5 inline-block">
+          &bull; The Archipelagos of Cambridge &bull;
+        </span>
+        <h2 class="text-2xl sm:text-4xl font-black text-amber-950 uppercase tracking-wider mt-1" style="font-family: 'Pirata One', cursive; letter-spacing: 1px;">
+          CHART THY EXPEDITION
+        </h2>
+        <p class="text-xs sm:text-sm text-amber-900/90 font-sans max-w-xl mx-auto mt-0.5 font-medium">
+          Sail between 5 uncharted islands. Master when idioms empower your <strong>Speaking Band 7–9</strong>, and what formal academic vocabulary to deploy in <strong>Writing Task 2</strong>.
+        </p>
+      </div>
+
+      <!-- INTERACTIVE MAP CANVAS & PATH SYSTEM -->
+      <div class="relative w-full aspect-[16/9] min-h-[360px] sm:min-h-[460px] rounded-2xl border-2 border-amber-900/50 bg-[#e7ce9e] overflow-hidden shadow-inner p-2 sm:p-4">
+        <!-- SVG Trajectory Dotted Trails -->
+        <svg id="mapTrailsSvg" class="absolute inset-0 w-full h-full pointer-events-none z-0">
+          <!-- Rendered via JS based on responsive coordinates -->
+        </svg>
+
+        <!-- Dynamic Animated Ship Marker -->
+        <div id="shipMarker" class="absolute z-20 w-12 h-12 -ml-6 -mt-8 pointer-events-none transition-all duration-700 ease-out ship-float" style="left: 10%; top: 78%;">
+          <div class="relative flex items-center justify-center">
+            <span class="text-3xl filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.5)]">⛵</span>
+            <div class="absolute -bottom-1 w-6 h-2 bg-amber-950/40 rounded-full blur-[1px]"></div>
+          </div>
+        </div>
+
+        <!-- 5 Unlockable Region Node Anchors (Placed Geographically on Parchment) -->
+        <div id="regionNodesContainer" class="relative w-full h-full z-10">
+          <!-- Region 1: Corsair's Cove -->
+          <div class="region-node absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2 text-center group" style="left: 12%; top: 78%;" data-region="1">
+            <div class="node-badge w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-b from-amber-600 to-amber-900 border-2 border-amber-300 p-1 shadow-lg group-hover:scale-110 transition flex items-center justify-center node-pulse">
+              <span class="text-2xl sm:text-3xl">🏝️</span>
+            </div>
+            <div class="mt-1 bg-amber-950/85 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-amber-500/60 shadow">
+              <span class="text-[10px] sm:text-xs font-black text-amber-300 whitespace-nowrap block">1. Corsair's Cove</span>
+              <span class="stars-display text-[9px] text-amber-400">☆☆☆</span>
+            </div>
+            <span class="text-[9px] font-bold text-amber-950 bg-amber-300/80 px-1.5 py-0.2 rounded mt-0.5 inline-block">Band 6.5–7.0</span>
+          </div>
+
+          <!-- Region 2: Smuggler's Straits -->
+          <div class="region-node absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2 text-center group" style="left: 32%; top: 38%;" data-region="2">
+            <div class="node-badge w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-b from-stone-600 to-stone-900 border-2 border-stone-400 p-1 shadow-lg group-hover:scale-110 transition flex items-center justify-center">
+              <span class="text-2xl sm:text-3xl">🛶</span>
+            </div>
+            <div class="mt-1 bg-amber-950/85 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-amber-500/60 shadow">
+              <span class="text-[10px] sm:text-xs font-black text-amber-300 whitespace-nowrap block">2. Smuggler's Straits</span>
+              <span class="stars-display text-[9px] text-amber-400">🔒 Locked</span>
+            </div>
+            <span class="text-[9px] font-bold text-amber-950 bg-amber-300/80 px-1.5 py-0.2 rounded mt-0.5 inline-block">Band 7.0–7.5</span>
+          </div>
+
+          <!-- Region 3: Siren's Reef -->
+          <div class="region-node absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2 text-center group" style="left: 54%; top: 72%;" data-region="3">
+            <div class="node-badge w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-b from-stone-600 to-stone-900 border-2 border-stone-400 p-1 shadow-lg group-hover:scale-110 transition flex items-center justify-center">
+              <span class="text-2xl sm:text-3xl">🧜‍♀️</span>
+            </div>
+            <div class="mt-1 bg-amber-950/85 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-amber-500/60 shadow">
+              <span class="text-[10px] sm:text-xs font-black text-amber-300 whitespace-nowrap block">3. Siren's Reef</span>
+              <span class="stars-display text-[9px] text-amber-400">🔒 Locked</span>
+            </div>
+            <span class="text-[9px] font-bold text-amber-950 bg-amber-300/80 px-1.5 py-0.2 rounded mt-0.5 inline-block">Band 7.5–8.0</span>
+          </div>
+
+          <!-- Region 4: Kraken's Trench -->
+          <div class="region-node absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2 text-center group" style="left: 74%; top: 28%;" data-region="4">
+            <div class="node-badge w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-b from-stone-600 to-stone-900 border-2 border-stone-400 p-1 shadow-lg group-hover:scale-110 transition flex items-center justify-center">
+              <span class="text-2xl sm:text-3xl">🦑</span>
+            </div>
+            <div class="mt-1 bg-amber-950/85 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-amber-500/60 shadow">
+              <span class="text-[10px] sm:text-xs font-black text-amber-300 whitespace-nowrap block">4. Kraken's Trench</span>
+              <span class="stars-display text-[9px] text-amber-400">🔒 Locked</span>
+            </div>
+            <span class="text-[9px] font-bold text-amber-950 bg-amber-300/80 px-1.5 py-0.2 rounded mt-0.5 inline-block">Band 8.0–8.5</span>
+          </div>
+
+          <!-- Region 5: Treasure Vault of El Dorado -->
+          <div class="region-node absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2 text-center group" style="left: 90%; top: 70%;" data-region="5">
+            <div class="node-badge w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-b from-stone-600 to-stone-900 border-2 border-stone-400 p-1 shadow-lg group-hover:scale-110 transition flex items-center justify-center">
+              <span class="text-2xl sm:text-3xl">👑</span>
+            </div>
+            <div class="mt-1 bg-amber-950/85 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-amber-500/60 shadow">
+              <span class="text-[10px] sm:text-xs font-black text-amber-300 whitespace-nowrap block">5. El Dorado Vault</span>
+              <span class="stars-display text-[9px] text-amber-400">🔒 Locked</span>
+            </div>
+            <span class="text-[9px] font-bold text-amber-950 bg-amber-300/80 px-1.5 py-0.2 rounded mt-0.5 inline-block">Band 9.0 Mastery</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Under Map -->
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-amber-950">
+        <div class="flex items-center space-x-2 text-xs font-sans">
+          <span class="font-bold">Captain's Advice:</span>
+          <span>Earn at least 2 stars on each island to chart coordinates to the next realm!</span>
+        </div>
+        <button id="quickVoyageBtn" class="px-5 py-2.5 bg-gradient-to-r from-amber-700 to-amber-900 hover:from-amber-600 hover:to-amber-800 text-amber-200 border-2 border-amber-400 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg transition">
+          Drop Anchor at Current Island
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. ACTIVE VOYAGE QUESTION STAGE (THE CARIBBEAN CHALLENGE) -->
+    <div id="battleStage" class="hidden w-full parchment-panel rounded-3xl p-4 sm:p-7 shadow-2xl relative">
+      <!-- Stage HUD Bar -->
+      <div class="flex flex-wrap items-center justify-between border-b-2 border-amber-900/30 pb-3 gap-2">
+        <div class="flex items-center space-x-3">
+          <button id="abandonVoyageBtn" class="p-1.5 px-3 rounded-lg bg-amber-950/70 hover:bg-amber-900 text-amber-200 border border-amber-700 text-xs font-bold transition flex items-center space-x-1">
+            <span>&larr;</span>
+            <span>Return to Map</span>
+          </button>
+          <div>
+            <span id="currentRegionLabel" class="text-[10px] uppercase font-black tracking-widest text-amber-800 block">REGION 1: CORSAIR'S COVE</span>
+            <span id="currentIELTSTarget" class="text-xs sm:text-sm font-black text-amber-950">IELTS Target: Speaking Fluency & Natural Nuance</span>
+          </div>
+        </div>
+
+        <!-- Question Counter & Live Doubloons -->
+        <div class="flex items-center space-x-3">
+          <div class="text-center px-2 py-0.5 bg-amber-900/10 rounded-lg border border-amber-900/20">
+            <span class="block text-[8px] uppercase font-bold text-amber-900">Encounter</span>
+            <span id="encounterProgress" class="text-xs sm:text-sm font-black text-amber-950 font-mono">1 / 5</span>
+          </div>
+          <!-- Heart Lives -->
+          <div id="voyageHearts" class="flex space-x-1 text-base text-red-600">
+            <span>❤️</span><span>❤️</span><span>❤️</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHALLENGE RETICLE PANEL -->
+      <div class="my-4 bg-[#f1e0be] border-2 border-amber-800/60 rounded-2xl p-4 sm:p-5 shadow-inner">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <!-- Challenge Type Pill -->
+          <span id="questionTypeBadge" class="text-[10px] font-black uppercase tracking-wider bg-amber-900 text-amber-200 px-2.5 py-0.5 rounded-full border border-amber-600 inline-flex items-center space-x-1">
+            <span>⚔️</span>
+            <span>MEANING MATCH</span>
+          </span>
+          <!-- Timer Bar Indicator -->
+          <div class="w-28 sm:w-40 flex items-center space-x-2">
+            <span class="text-[10px] font-bold text-amber-900 font-mono">SANDGLASS</span>
+            <div class="flex-1 bg-amber-950/20 h-2 rounded-full overflow-hidden border border-amber-900/30">
+              <div id="sandglassBar" class="h-full bg-amber-700 w-full transition-all duration-75"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Idiom / Prompt Display -->
+        <h3 id="idiomTitle" class="text-xl sm:text-3xl font-black text-amber-950 uppercase tracking-wide mt-1" style="font-family: 'Pirata One', cursive; letter-spacing: 1px;">
+          "THE TIP OF THE ICEBERG"
+        </h3>
+        <!-- Subtitle Prompt Context -->
+        <p id="promptContext" class="text-xs sm:text-sm text-amber-900 font-sans mt-1 leading-relaxed">
+          What is the authentic figurative meaning of this expression when addressing complex problems in IELTS Speaking Part 3?
+        </p>
+
+        <!-- IELTS Academic Register Alert Card (Visible depending on game mode) -->
+        <div id="registerInsightAlert" class="mt-3 bg-amber-900/10 border-l-4 border-amber-700 p-2.5 rounded-r-xl text-xs text-amber-950 font-sans">
+          <strong class="text-amber-900 font-bold block mb-0.5">💡 IELTS Register Examiner Alert:</strong>
+          <span id="registerInsightText">Idiomatic expressions are rewarded in IELTS Speaking (Lexical Resource Band 7+), but must NEVER be used informally in Academic Writing Task 2 essays!</span>
+        </div>
+      </div>
+
+      <!-- FOUR PIRATE CHEST OPTION BUTTONS -->
+      <div id="optionsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 my-2">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Pedagogical Post-Strike Debrief Box (Appears after answer is selected) -->
+      <div id="answerFeedbackBox" class="hidden mt-3 p-3.5 bg-amber-950 text-amber-100 rounded-xl border-2 border-amber-500 shadow-lg text-xs font-sans leading-relaxed flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex-1">
+          <div class="flex items-center space-x-2">
+            <span id="feedbackIcon" class="text-xl">✅</span>
+            <span id="feedbackVerdict" class="font-black text-amber-300 uppercase tracking-wide">SPLENDID NAVIGATION!</span>
+          </div>
+          <p id="feedbackExplanation" class="text-amber-200/90 mt-1">
+            "The tip of the iceberg" signifies only a small visible fraction of a far greater hidden dilemma.
+          </p>
+          <div id="formalAlternativeTag" class="mt-1 text-[11px] text-amber-400 font-medium">
+            <strong>Writing Task 2 Academic Alternative:</strong> <em>"A superficial manifestation of a systemic issue"</em> or <em>"Only an initial indicator"</em>.
+          </div>
+        </div>
+        <button id="nextEncounterBtn" class="w-full sm:w-auto px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-amber-950 font-black rounded-xl uppercase tracking-wider text-xs shadow transition flex-shrink-0 cursor-pointer">
+          Continue Voyage &rarr;
+        </button>
+      </div>
+    </div>
+
+    <!-- 3. ISLAND COMPLETION & BOUNTY SCREEN (HIGH IMPACT FACEBOOK SHARE) -->
+    <div id="victoryScreen" class="hidden w-full max-w-xl mx-auto my-auto z-20">
+      <!-- Pirate Bounty Parchment (Optimized for Facebook Screen Captures) -->
+      <div id="captainBountyParchment" class="parchment-panel rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden text-center text-amber-950">
+        <!-- Wax Seal Stamp in corner -->
+        <div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-red-700 to-red-950 rounded-full border-4 border-red-500/80 shadow-2xl flex items-center justify-center transform rotate-12 pointer-events-none">
+          <div class="w-16 h-16 border border-dashed border-red-300 rounded-full flex flex-col items-center justify-center text-red-200 font-bold text-[9px] uppercase tracking-tighter">
+            <span>OFFICIAL</span>
+            <span class="text-xs">SEAL</span>
+            <span>MRMIKE</span>
+          </div>
+        </div>
+
+        <!-- Certificate Header -->
+        <div class="border-b-2 border-amber-900/30 pb-3 mb-4">
+          <span class="text-[10px] font-black uppercase tracking-widest text-amber-800 block">&bull; ADMIRALTY OF IDIOM ISLAND &bull;</span>
+          <h2 class="text-3xl sm:text-4xl font-black text-amber-950 uppercase tracking-wider mt-1" style="font-family: 'Pirata One', cursive; letter-spacing: 1px;">
+            CAPTAIN'S BOUNTY LOG
+          </h2>
+          <span class="text-xs text-amber-900 font-sans font-bold">mrmike.hk/games &bull; Cambridge IELTS Expedition</span>
+        </div>
+
+        <!-- Captain Title & Rank -->
+        <div class="py-1">
+          <span class="text-xs uppercase font-bold text-amber-800 tracking-wider">Current Naval Command Rank</span>
+          <h3 id="captainRankTitle" class="text-2xl sm:text-3xl font-black text-amber-900 uppercase tracking-wide my-1" style="font-family: 'Pirata One', cursive;">
+            GRAND ADMIRAL OF THE ARCHIPELAGO
+          </h3>
+          <div id="ieltsBandRankPill" class="inline-block bg-amber-900 text-amber-200 border border-amber-600 px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow">
+            ESTIMATED IELTS SPEAKING: BAND 8.5
+          </div>
+        </div>
+
+        <!-- Stars Earned in Current Voyage -->
+        <div class="my-4">
+          <span class="text-xs text-amber-900 font-sans block mb-1 font-semibold">Voyage Mastery Score</span>
+          <div id="islandStarsRow" class="text-3xl sm:text-4xl text-amber-500 space-x-1 filter drop-shadow">
+            ⭐ ⭐ ⭐
+          </div>
+          <p id="islandDebriefRemark" class="text-xs sm:text-sm text-amber-950 font-sans max-w-md mx-auto mt-2 font-medium">
+            Flawless navigation through academic idioms and formal Task 2 register traps!
+          </p>
+        </div>
+
+        <!-- High-Contrast 3-Stat Matrix for Facebook Post Screencaps -->
+        <div class="grid grid-cols-3 gap-2.5 my-4 bg-amber-950/15 border border-amber-900/30 rounded-2xl p-3 shadow-inner">
+          <div class="border-r border-amber-900/30 pr-1">
+            <span class="block text-[9px] uppercase font-bold text-amber-900">Total Booty</span>
+            <span id="finalDoubloonsVal" class="text-lg sm:text-xl font-black text-amber-950 font-mono">1,250 🪙</span>
+          </div>
+          <div class="border-r border-amber-900/30 px-1">
+            <span class="block text-[9px] uppercase font-bold text-amber-900">Accuracy</span>
+            <span id="finalAccuracyVal" class="text-lg sm:text-xl font-black text-amber-950 font-mono">100%</span>
+          </div>
+          <div class="pl-1">
+            <span class="block text-[9px] uppercase font-bold text-amber-900">IELTS Islands</span>
+            <span id="finalIslandsUnlockedVal" class="text-lg sm:text-xl font-black text-amber-950 font-mono">3 / 5</span>
+          </div>
+        </div>
+
+        <!-- Facebook Challenge Hook Watermark -->
+        <div class="bg-amber-900 text-amber-200 rounded-xl p-2.5 mb-5 flex items-center justify-between text-left text-xs">
+          <div>
+            <span class="text-[9px] font-black uppercase tracking-wider text-amber-300 block">Can ye claim this pirate bounty?</span>
+            <span class="font-bold">Sail free at mrmike.hk/games</span>
+          </div>
+          <span class="text-2xl">🏴‍☠️</span>
+        </div>
+
+        <!-- 3 Quick Action Buttons: Download Certificate Canvas, Copy Text, Return -->
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <button id="downloadBountyCardBtn" class="flex-1 py-3 px-3 rounded-xl bg-amber-700 hover:bg-amber-600 text-amber-100 font-black uppercase text-xs tracking-wider shadow-lg transition flex items-center justify-center space-x-1.5 cursor-pointer border border-amber-400">
+            <span>📥</span>
+            <span>Save Bounty Poster (FB)</span>
+          </button>
+          <button id="copyPirateShareBtn" class="flex-1 py-3 px-3 rounded-xl bg-amber-950 hover:bg-black text-amber-300 font-black uppercase text-xs tracking-wider shadow-lg transition flex items-center justify-center space-x-1.5 cursor-pointer border border-amber-600">
+            <span>📋</span>
+            <span>Copy Facebook Brag</span>
+          </button>
+          <button id="returnToMapAfterVictoryBtn" class="py-3 px-4 rounded-xl bg-amber-200 hover:bg-amber-300 text-amber-950 font-black uppercase text-xs tracking-wider border border-amber-700 transition cursor-pointer">
+            Island Map
+          </button>
+        </div>
+
+        <!-- Copy Confirmation Toast -->
+        <p id="shareStatusToast" class="text-xs text-amber-900 mt-2.5 h-4 opacity-0 transition-opacity font-bold">
+          Bounty log copied to clipboard! Paste directly into your Facebook post!
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 4. IDIOM CODEX / IELTS STUDY LOGBOOK MODAL -->
+  <div id="codexModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+    <div class="parchment-panel rounded-3xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl flex flex-col max-h-[90vh] text-amber-950">
+      <div class="flex items-center justify-between pb-3 border-b-2 border-amber-900/30">
+        <div>
+          <div class="flex items-center space-x-2">
+            <h3 class="text-xl sm:text-2xl font-black uppercase" style="font-family: 'Pirata One', cursive;">The Captain's Idiom Codex</h3>
+            <span class="text-xs bg-amber-900 text-amber-200 px-2 py-0.5 rounded font-mono font-bold">5 Regions &bull; 25 Key Idioms</span>
+          </div>
+          <p class="text-xs text-amber-900 font-sans mt-0.5">IELTS Speaking Band 7–9 Idioms vs Formal Academic Writing Task 2 Alternatives.</p>
+        </div>
+        <button id="closeCodexBtn" class="text-amber-900 hover:text-red-700 p-2 text-2xl font-black cursor-pointer">✕</button>
+      </div>
+
+      <!-- Filter by Island -->
+      <div class="py-2.5 flex items-center space-x-2 text-xs">
+        <span class="font-bold text-amber-900">Region:</span>
+        <select id="codexRegionFilter" class="bg-amber-100 border border-amber-800/60 rounded-lg p-1.5 text-xs text-amber-950 font-sans focus:outline-none">
+          <option value="all">All 5 Archipelago Regions</option>
+          <option value="1">Region 1: Corsair's Cove (Band 6.5–7.0)</option>
+          <option value="2">Region 2: Smuggler's Straits (Band 7.0–7.5)</option>
+          <option value="3">Region 3: Siren's Reef (Band 7.5–8.0)</option>
+          <option value="4">Region 4: Kraken's Trench (Band 8.0–8.5)</option>
+          <option value="5">Region 5: El Dorado Vault (Band 9.0)</option>
+        </select>
+      </div>
+
+      <!-- Scrollable Idiom List -->
+      <div id="codexListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1 my-1">
+        <!-- Rendered via JS -->
+      </div>
+
+      <div class="pt-3 border-t-2 border-amber-900/30 flex justify-between items-center text-xs">
+        <span class="text-amber-900 font-sans">Essential for avoiding informal idiom deductions in Task 2!</span>
+        <button id="closeCodexBtn2" class="px-5 py-2 bg-amber-900 text-amber-200 font-bold rounded-xl uppercase">
+          Back to Helm
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Canvas for Facebook 1200x630 Image Export -->
+  <canvas id="bountyCanvas" width="1200" height="630" class="hidden"></canvas>
+
+  <!-- FOOTER -->
+  <footer class="w-full text-center py-2 text-[11px] text-slate-400 font-sans border-t border-slate-900 z-10 bg-[#06111a]/90">
+    Designed for <a href="https://mrmike.hk" target="_blank" class="text-amber-400 hover:underline">mrmike.hk</a> English learners &bull; Idiom Island &bull; IELTS Academic Speaking & Writing Strategy
+  </footer>
+
+  <!-- SCRIPT ENGINE -->
+  <script>
+    /* =====================================================================
+       1. EXTENSIVE IELTS ACADEMIC IDIOM DATABASE (5 REGIONS / 25 KEY IDIOMS)
+       ===================================================================== */
+    const IDIOM_DATABASE = {
+      1: {
+        name: "Corsair's Cove",
+        bandRange: "Band 6.5 - 7.0",
+        theme: "Everyday Analytical & Discussion Idioms",
+        coords: { x: 12, y: 78 },
+        items: [
+          {
+            idiom: "THE TIP OF THE ICEBERG",
+            type: "meaning",
+            prompt: "In IELTS Speaking Part 3, when discussing urban pollution, a candidate states: 'Smog is only the tip of the iceberg.' What does this mean?",
+            options: [
+              "A small, noticeable part of a much larger, concealed crisis.",
+              "An extremely cold weather phenomenon impacting coastal cities.",
+              "A minor grievance that can be readily dismissed by authorities.",
+              "The most dangerous and unpreventable catastrophic disaster."
+            ],
+            correct: 0,
+            formalAlternative: "A superficial manifestation of a deeper structural dilemma.",
+            speakingContext: "Speaking Part 3: 'Traffic congestion is just the tip of the iceberg; the real dilemma is municipal housing.'"
+          },
+          {
+            idiom: "A DOUBLE-EDGED SWORD",
+            type: "register",
+            prompt: "Is 'a double-edged sword' appropriate in IELTS Writing Task 2, and what formal academic alternative should be used?",
+            options: [
+              "Yes in Speaking, but in Writing Task 2 use: 'A phenomenon possessing both advantageous and adverse ramifications'.",
+              "It is strictly prohibited in both Speaking and Writing because it sounds too aggressive.",
+              "It is perfectly acceptable in Academic Writing Task 2 as a formal Latin idiom.",
+              "It should only ever be used when discussing military conflict."
+            ],
+            correct: 0,
+            formalAlternative: "Possessing dual and opposing ramifications / Having paradoxical consequences.",
+            speakingContext: "Speaking Part 3: 'Tourism is a double-edged sword—it generates wealth but strains local heritage.'"
+          },
+          {
+            idiom: "SEE EYE TO EYE",
+            type: "context",
+            prompt: "Complete the IELTS Speaking Part 1 answer: 'Although my parents and I have different career perspectives, we generally ________ on core moral values.'",
+            options: [
+              "see eye to eye",
+              "hit the ceiling",
+              "break the bank",
+              "turn a blind eye"
+            ],
+            correct: 0,
+            formalAlternative: "Concur / Share mutual consensus / Exhibit concord.",
+            speakingContext: "Speaking Part 1: 'My siblings and I don't always see eye to eye, but we remain very close.'"
+          },
+          {
+            idiom: "PLAY DEVIL'S ADVOCATE",
+            type: "meaning",
+            prompt: "In an analytical seminar or IELTS Speaking Part 3 discussion, what does it mean to 'play devil's advocate'?",
+            options: [
+              "Argue against an idea purely to provoke discussion and test its validity.",
+              "Maliciously attempt to sabotage an opponent's academic credibility.",
+              "Support immoral government legislation for personal financial benefit.",
+              "Refuse to take any firm stand in a controversial societal debate."
+            ],
+            correct: 0,
+            formalAlternative: "Adopt a counter-argumentative stance for dialectical rigor.",
+            speakingContext: "Speaking Part 3: 'To play devil's advocate, one could argue that automation generates higher productivity.'"
+          },
+          {
+            idiom: "IN THE LONG RUN",
+            type: "register",
+            prompt: "In Task 2 Writing essays, candidates frequently write 'in the long run'. What formal academic phrasing earns higher lexical resource?",
+            options: [
+              "Replace with: 'Over an extended temporal horizon' or 'In the foreseeable future'.",
+              "Replace with: 'When the chickens come home to roost'.",
+              "Keep 'in the long run' because examiners consider it high-tier Latin vocabulary.",
+              "Replace with: 'Down the winding road of destiny'."
+            ],
+            correct: 0,
+            formalAlternative: "Ultimately / In the long term / Over an extended duration.",
+            speakingContext: "Speaking Part 3: 'Investing in early childhood schooling pays immense social dividends in the long run.'"
+          }
+        ]
+      },
+      2: {
+        name: "Smuggler's Straits",
+        bandRange: "Band 7.0 - 7.5",
+        theme: "Nuance, Trade-offs & Argumentation Idioms",
+        coords: { x: 32, y: 38 },
+        items: [
+          {
+            idiom: "WEIGH THE PROS AND CONS",
+            type: "register",
+            prompt: "A candidate writes: 'Governments must weigh the pros and cons of AI.' How should this be upgraded for IELTS Writing Task 2?",
+            options: [
+              "'Assess the respective merits and liabilities / Evaluate countervailing factors'.",
+              "'Look at both sides of the coin and flip it'.",
+              "'Calculate the good stuff and bad stuff meticulously'.",
+              "Leave it unchanged; 'pros and cons' is standard Academic Task 2 terminology."
+            ],
+            correct: 0,
+            formalAlternative: "Evaluate the merits and drawbacks / Assess competing ramifications.",
+            speakingContext: "Speaking Part 3: 'Consumers must weigh the pros and cons before committing to lifelong mortgages.'"
+          },
+          {
+            idiom: "TAKE WITH A GRAIN OF SALT",
+            type: "meaning",
+            prompt: "What does an IELTS candidate mean by saying: 'Statistical claims published by sponsored interest groups must be taken with a grain of salt'?",
+            options: [
+              "Approached with skepticism and subjected to critical verification.",
+              "Added into culinary recipes during informal family dinners.",
+              "Believed completely without questioning because salt represents truth.",
+              "Rejected immediately without reading the accompanying methodologies."
+            ],
+            correct: 0,
+            formalAlternative: "Viewed with critical skepticism / Subjected to rigorous empirical scrutiny.",
+            speakingContext: "Speaking Part 3: 'Social media testimonials should always be taken with a grain of salt.'"
+          },
+          {
+            idiom: "OFF THE BEATEN TRACK",
+            type: "context",
+            prompt: "Complete this IELTS Speaking Part 2 travel monologue: 'Rather than visiting tourist traps like crowded beaches, I prefer traveling ________ to observe authentic village traditions.'",
+            options: [
+              "off the beaten track",
+              "under the weather",
+              "out of the blue",
+              "against the clock"
+            ],
+            correct: 0,
+            formalAlternative: "To secluded and non-commercialized destinations / In remote hinterlands.",
+            speakingContext: "Speaking Part 2: 'My hometown features several historic monasteries that lie completely off the beaten track.'"
+          },
+          {
+            idiom: "TOUCH AND GO",
+            type: "meaning",
+            prompt: "What does the expression 'touch and go' describe when recounting a tense research project or surgical outcome?",
+            options: [
+              "An uncertain, precarious outcome where success is balanced on a knife-edge.",
+              "A rapid physical contact sport involving sudden tag mechanics.",
+              "A dependable, guaranteed success that requires no further supervision.",
+              "A project that was canceled due to total lack of government interest."
+            ],
+            correct: 0,
+            formalAlternative: "Highly precarious / Marked by extreme uncertainty.",
+            speakingContext: "Speaking Part 1: 'During the pandemic, the survival of small independent cafes was touch and go.'"
+          },
+          {
+            idiom: "BITE THE BULLET",
+            type: "register",
+            prompt: "In IELTS Speaking, 'bite the bullet' is a high-level idiom. What is its exact meaning, and what is its formal Task 2 equivalent?",
+            options: [
+              "Endure an inevitable hardship courageously. In Writing: 'Confront an unavoidable necessity'.",
+              "Purchase ammunition for target practice. In Writing: 'Execute military protocol'.",
+              "Refuse to answer an examiner's question. In Writing: 'Decline to elaborate'.",
+              "Make a thoughtless impulse decision. In Writing: 'Act with rash impetuosity'."
+            ],
+            correct: 0,
+            formalAlternative: "Undertake an inevitable, arduous measure.",
+            speakingContext: "Speaking Part 2: 'I didn't want to relocate abroad, but I had to bite the bullet to advance my career.'"
+          }
+        ]
+      },
+      3: {
+        name: "Siren's Reef",
+        bandRange: "Band 7.5 - 8.0",
+        theme: "Critical Evaluation & Rhetorical Metaphors",
+        coords: { x: 54, y: 72 },
+        items: [
+          {
+            idiom: "A SLIPPERY SLOPE",
+            type: "meaning",
+            prompt: "What logical or rhetorical concept is implied by 'a slippery slope' during an IELTS Speaking Part 3 debate on censorship?",
+            options: [
+              "A minor initial concession that inevitably triggers a chain of catastrophic events.",
+              "A physically slick hillside requiring specialized hiking gear.",
+              "A well-structured academic thesis that flows effortlessly between paragraphs.",
+              "An easily resolvable misunderstanding between two international negotiators."
+            ],
+            correct: 0,
+            formalAlternative: "A precipitous trajectory toward systemic degradation.",
+            speakingContext: "Speaking Part 3: 'Restricting freedom of expression can be a slippery slope toward authoritarianism.'"
+          },
+          {
+            idiom: "RED TAPE",
+            type: "register",
+            prompt: "Can 'red tape' be used in Writing Task 2, or is there a higher-register academic alternative?",
+            options: [
+              "While common, in Task 2 use: 'Excessive administrative impediments / Bureaucratic encumbrances'.",
+              "'Red tape' is required in Task 2 whenever discussing legal documentation.",
+              "Replace with 'crimson ribbon' to make it sound more sophisticated.",
+              "Neither Speaking nor Writing accepts the term under any circumstances."
+            ],
+            correct: 0,
+            formalAlternative: "Excessive bureaucratic encumbrance / Administrative inertia.",
+            speakingContext: "Speaking Part 3: 'Aspiring entrepreneurs are often discouraged by endless bureaucratic red tape.'"
+          },
+          {
+            idiom: "PUT THE CART BEFORE THE HORSE",
+            type: "context",
+            prompt: "Complete the critical thought: 'Implementing punitive emissions taxes without first funding affordable public transit is simply ________.'",
+            options: [
+              "putting the cart before the horse",
+              "barking up the wrong tree",
+              "letting the cat out of the bag",
+              "burning bridges behind us"
+            ],
+            correct: 0,
+            formalAlternative: "Reversing logical prerequisites / Preempting essential foundational steps.",
+            speakingContext: "Speaking Part 3: 'Demanding immediate results without providing educational infrastructure is putting the cart before the horse.'"
+          },
+          {
+            idiom: "AT THE EXPENSE OF",
+            type: "meaning",
+            prompt: "In an academic discussion of economic growth, what is meant by 'pursuing industrial expansion at the expense of ecological stability'?",
+            options: [
+              "Damaging or sacrificing the environment in order to achieve industrial growth.",
+              "Charging factories high monetary penalties for using recycled materials.",
+              "Ensuring ecological balance pays for municipal infrastructure loans.",
+              "Achieving total harmony between forest conservation and mining profits."
+            ],
+            correct: 0,
+            formalAlternative: "To the detriment of / Compromising the integrity of.",
+            speakingContext: "Speaking Part 3: 'Rapid GDP gains often occur at the expense of public health.'"
+          },
+          {
+            idiom: "AVENUE OF INQUIRY",
+            type: "meaning",
+            prompt: "What does the formal figurative idiom 'explore every avenue of inquiry' convey in academic research?",
+            options: [
+              "Exhaustively investigate all possible methodologies and theoretical approaches.",
+              "Walk along municipal streets asking random pedestrians for survey answers.",
+              "Limit the research study to one single, narrow laboratory experiment.",
+              "Terminate a project because the hypotheses were proven contradictory."
+            ],
+            correct: 0,
+            formalAlternative: "Exhaustively examine all plausible analytical pathways.",
+            speakingContext: "Speaking Part 3: 'Climatologists must explore every avenue of inquiry before arriving at decisive models.'"
+          }
+        ]
+      },
+      4: {
+        name: "Kraken's Trench",
+        bandRange: "Band 8.0 - 8.5",
+        theme: "Advanced Figurative Metaphors & Nuance",
+        coords: { x: 74, y: 28 },
+        items: [
+          {
+            idiom: "THE ELEPHANT IN THE ROOM",
+            type: "register",
+            prompt: "In IELTS Speaking Part 3, 'the elephant in the room' demonstrates Band 8+ idiomatic flexibility. What is its Task 2 formal counterpart?",
+            options: [
+              "'A conspicuous yet deliberately disregarded issue / A salient unacknowledged reality'.",
+              "'A gargantuan wild animal trampling municipal council chambers'.",
+              "'A minor nuisance that will resolve itself without government intervention'.",
+              "Use 'the mammoth in the corridor' for higher lexical marks in writing."
+            ],
+            correct: 0,
+            formalAlternative: "A salient yet conspicuously unaddressed dilemma.",
+            speakingContext: "Speaking Part 3: 'Wealth disparity is the elephant in the room during modern economic summits.'"
+          },
+          {
+            idiom: "WATER UNDER THE BRIDGE",
+            type: "meaning",
+            prompt: "When discussing historical disputes or past career mistakes in IELTS Speaking Part 1 or 2, what does 'water under the bridge' denote?",
+            options: [
+              "Past disagreements or misfortunes that have been forgiven and no longer matter.",
+              "A flash flood that has overwhelmed city stormwater drainage canals.",
+              "A lingering grudge that must be resolved through official legal arbitration.",
+              "An ongoing crisis that continues to escalate day after day."
+            ],
+            correct: 0,
+            formalAlternative: "Irrevocable past events that no longer exert contemporary influence.",
+            speakingContext: "Speaking Part 1: 'My former roommate and I argued frequently, but that is all water under the bridge now.'"
+          },
+          {
+            idiom: "PLAY FAST AND LOOSE",
+            type: "meaning",
+            prompt: "What does it signify when an analyst remarks that corporate executives 'played fast and loose with regulatory guidelines'?",
+            options: [
+              "Acted irresponsibly or deceitfully by disregarding moral and legal rules.",
+              "Worked at high speed in order to win a competitive industrial patent.",
+              "Invested money prudently into government-backed treasury bonds.",
+              "Maintained strict, unwavering compliance with the law."
+            ],
+            correct: 0,
+            formalAlternative: "Disregarded ethical standards with reckless impunity.",
+            speakingContext: "Speaking Part 3: 'Financial firms that play fast and loose with capital reserves risk triggering recessions.'"
+          },
+          {
+            idiom: "SHIFT THE GOALPOSTS",
+            type: "context",
+            prompt: "Complete the critical response: 'Every time the university fulfills the audit standards, the committee changes the criteria; they keep ________.'",
+            options: [
+              "shifting the goalposts",
+              "beating around the bush",
+              "spilling the beans",
+              "skating on thin ice"
+            ],
+            correct: 0,
+            formalAlternative: "Arbitrarily altering benchmarks / Imposing moving parameters.",
+            speakingContext: "Speaking Part 3: 'Job seekers feel disillusioned when employers shift the goalposts by demanding ever more experience.'"
+          },
+          {
+            idiom: "SWALLOW A BITTER PILL",
+            type: "meaning",
+            prompt: "What does 'swallow a bitter pill' denote in the context of government austerity or university admissions rejection?",
+            options: [
+              "Forced to accept an unpleasant or humiliating truth or circumstance.",
+              "Taking poorly formulated medical prescriptions without food.",
+              "Winning an unexpected scholarship after failing the preliminary test.",
+              "Declining an attractive offer because of ethical reservations."
+            ],
+            correct: 0,
+            formalAlternative: "Resignedly accept an unpalatable yet inevitable reality.",
+            speakingContext: "Speaking Part 2: 'Failing my initial driving test was a bitter pill to swallow, but it motivated me to practice.'"
+          }
+        ]
+      },
+      5: {
+        name: "El Dorado Vault",
+        bandRange: "Band 9.0 Mastery",
+        theme: "Native-Level Idiomatic Precision & Stylistic Flair",
+        coords: { x: 90, y: 70 },
+        items: [
+          {
+            idiom: "AT THE DROP OF A HAT",
+            type: "meaning",
+            prompt: "What does an IELTS Speaking candidate demonstrate by saying: 'Thanks to high-speed rail, I can travel to the provincial capital at the drop of a hat'?",
+            options: [
+              "Instantly and without hesitation; with complete spontaneity.",
+              "Only when one has misplaced their personal headwear.",
+              "With immense reluctance and heavy financial compensation.",
+              "Under strict contractual duress from an employer."
+            ],
+            correct: 0,
+            formalAlternative: "With instantaneous promptness / Without preliminary hesitation.",
+            speakingContext: "Speaking Part 1: 'In metropolitan cities, people can order groceries at the drop of a hat.'"
+          },
+          {
+            idiom: "READ BETWEEN THE LINES",
+            type: "register",
+            prompt: "In Academic Writing Task 2, instead of stating 'examiners must read between the lines of data', what represents Band 9 academic register?",
+            options: [
+              "'Discern implicit nuances / Infer unstated implications from underlying evidence'.",
+              "'Look through the cracks in the paper sheet with a magnifying glass'.",
+              "'Read between the margins and footnotes continuously'.",
+              "Keep 'read between the lines'; Cambridge examiners consider it formal syntax."
+            ],
+            correct: 0,
+            formalAlternative: "Deduce underlying implications / Discern implicit semantics.",
+            speakingContext: "Speaking Part 3: 'When analyzing political speeches, citizens must read between the lines.'"
+          },
+          {
+            idiom: "STEM THE TIDE",
+            type: "meaning",
+            prompt: "In a discussion on marine plastic contamination, what does 'to stem the tide' convey?",
+            options: [
+              "To halt or reverse the progression of a destructive and burgeoning trend.",
+              "To monitor oceanic tidal currents using satellite radar buoys.",
+              "To encourage higher production of single-use non-biodegradable polymers.",
+              "To abandon coastal villages in anticipation of typhoon floods."
+            ],
+            correct: 0,
+            formalAlternative: "Arrest the burgeoning proliferation / Curtail an escalating phenomenon.",
+            speakingContext: "Speaking Part 3: 'Strict customs quotas are vital to stem the tide of illicit wildlife trafficking.'"
+          },
+          {
+            idiom: "REST ON ONE'S LAURELS",
+            type: "context",
+            prompt: "Complete the advice for Band 9 IELTS aspirants: 'Even after achieving Band 8.0 on your mock exam, you cannot afford to ________; daily practice is mandatory.'",
+            options: [
+              "rest on your laurels",
+              "cry over spilled milk",
+              "throw in the towel",
+              "bark up the wrong tree"
+            ],
+            correct: 0,
+            formalAlternative: "Succumb to complacent self-satisfaction / Stagnate in past achievements.",
+            speakingContext: "Speaking Part 3: 'Leading tech conglomerates cannot rest on their laurels due to rapid disruptive innovation.'"
+          },
+          {
+            idiom: "THE ACID TEST",
+            type: "meaning",
+            prompt: "What is 'the acid test' when evaluating the true effectiveness of educational reform or newly introduced AI software?",
+            options: [
+              "A decisive, rigorous trial that definitively proves true value or authenticity.",
+              "A chemical laboratory experiment testing water pH levels.",
+              "A subjective opinion poll distributed to social media users.",
+              "A minor preliminary quiz given before the official semester begins."
+            ],
+            correct: 0,
+            formalAlternative: "The definitive criterion of efficacy / The ultimate empirical trial.",
+            speakingContext: "Speaking Part 3: 'Surviving an economic downturn is the acid test for any newly launched enterprise.'"
+          }
+        ]
+      }
+    };
+
+    /* =====================================================================
+       2. SYNTHESIZED WEB AUDIO PIRATE SOUND ENGINE (No External Audio Assets)
+       ===================================================================== */
+    class PirateAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      toggleMute() {
+        this.muted = !this.muted;
+        return this.muted;
+      }
+      // Cannon Fire Boom (Bass shockwave)
+      playCannon() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(140, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.4);
+          gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.4);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.4);
+        } catch(e){}
+      }
+      // Gold Coin Doubloon Chime
+      playCoin() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const freqs = [987.77, 1318.51]; // B5 to E6 chime
+          freqs.forEach((f, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(f, this.ctx.currentTime + (idx * 0.08));
+            gain.gain.setValueAtTime(0.18, this.ctx.currentTime + (idx * 0.08));
+            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + (idx * 0.08) + 0.25);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(this.ctx.currentTime + (idx * 0.08));
+            osc.stop(this.ctx.currentTime + (idx * 0.08) + 0.28);
+          });
+        } catch(e){}
+      }
+      // Sea Shanty Accordion Chime on Island Clear
+      playShantyFanfare() {
+        if (this.muted || !this.ctx) return;
+        try {
+          // Classic pirate jig notes (D - F - A - D - C - A - F - D)
+          const notes = [293.66, 349.23, 440.00, 587.33, 523.25, 440.00, 349.23, 293.66];
+          notes.forEach((f, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(f, this.ctx.currentTime + (idx * 0.12));
+            gain.gain.setValueAtTime(0.12, this.ctx.currentTime + (idx * 0.12));
+            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + (idx * 0.12) + 0.2);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(this.ctx.currentTime + (idx * 0.12));
+            osc.stop(this.ctx.currentTime + (idx * 0.12) + 0.22);
+          });
+        } catch(e){}
+      }
+      // Ship Bell Ring
+      playShipBell() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1760, this.ctx.currentTime); // A6
+          gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.8);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.8);
+        } catch(e){}
+      }
+    }
+    const audio = new PirateAudioEngine();
+
+    /* =====================================================================
+       3. CANVAS PARTICLE FX ENGINE (GOLD COINS, CANNON SMOKE, WATER SPRAYS)
+       ===================================================================== */
+    const fxCanvas = document.getElementById('fxCanvas');
+    const fxCtx = fxCanvas.getContext('2d');
+    let particles = [];
+
+    function resizeFX() {
+      fxCanvas.width = window.innerWidth;
+      fxCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeFX);
+    resizeFX();
+
+    class Particle {
+      constructor(x, y, color, isCoin = false) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.isCoin = isCoin;
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 6 + 1.5;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed - (isCoin ? 3 : 0);
+        this.life = 1.0;
+        this.decay = Math.random() * 0.03 + 0.015;
+        this.size = isCoin ? Math.random() * 6 + 4 : Math.random() * 4 + 2;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.12; // gravity
+        this.life -= this.decay;
+      }
+      draw(c) {
+        c.save();
+        c.globalAlpha = Math.max(0, this.life);
+        c.fillStyle = this.color;
+        c.beginPath();
+        if (this.isCoin) {
+          c.shadowColor = '#f59e0b';
+          c.shadowBlur = 8;
+          c.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          c.fill();
+          c.strokeStyle = '#78350f';
+          c.lineWidth = 1;
+          c.stroke();
+        } else {
+          c.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          c.fill();
+        }
+        c.restore();
+      }
+    }
+
+    function spawnCannonSparks(x, y) {
+      for (let i = 0; i < 25; i++) {
+        particles.push(new Particle(x, y, '#f59e0b', false));
+        particles.push(new Particle(x, y, '#ffffff', false));
+      }
+    }
+
+    function spawnCoinBurst(x, y) {
+      for (let i = 0; i < 18; i++) {
+        particles.push(new Particle(x, y, '#fbbf24', true));
+      }
+    }
+
+    function fxLoop() {
+      fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+      for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        particles[i].draw(fxCtx);
+        if (particles[i].life <= 0) particles.splice(i, 1);
+      }
+      requestAnimationFrame(fxLoop);
+    }
+    requestAnimationFrame(fxLoop);
+
+    /* =====================================================================
+       4. GAME STATE, PROGRESSION & LOCAL STORAGE
+       ===================================================================== */
+    let islandSaveData = JSON.parse(localStorage.getItem('mrmike_idiom_island')) || {
+      unlockedRegions: 1, // 1 to 5
+      doubloons: 0,
+      stars: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+      currentRegion: 1
+    };
+
+    let sessionVoyage = {
+      regionIndex: 1,
+      currentQuestionIndex: 0,
+      questions: [],
+      score: 0,
+      correctCount: 0,
+      lives: 3,
+      timerId: null,
+      timeLimit: 14000,
+      startTime: 0,
+      isAnswerLocked: false
+    };
+
+    // UI Element References
+    const headerDoubloons = document.getElementById('headerDoubloons');
+    const headerStars = document.getElementById('headerStars');
+    const shipMarker = document.getElementById('shipMarker');
+    const mapTrailsSvg = document.getElementById('mapTrailsSvg');
+    const mapScreen = document.getElementById('mapScreen');
+    const battleStage = document.getElementById('battleStage');
+    const victoryScreen = document.getElementById('victoryScreen');
+
+    function saveGame() {
+      localStorage.setItem('mrmike_idiom_island', JSON.stringify(islandSaveData));
+      updateHeaderStats();
+    }
+
+    function updateHeaderStats() {
+      headerDoubloons.innerText = String(islandSaveData.doubloons).padStart(4, '0');
+      let totalStars = 0;
+      for (let r = 1; r <= 5; r++) {
+        totalStars += (islandSaveData.stars[r] || 0);
+      }
+      headerStars.innerText = `${totalStars} / 15`;
+    }
+    updateHeaderStats();
+
+    /* Draw Dotted Shipping Lanes on Map */
+    function renderMapTrails() {
+      const container = document.getElementById('regionNodesContainer');
+      const rect = container.getBoundingClientRect();
+      const W = rect.width;
+      const H = rect.height;
+
+      mapTrailsSvg.innerHTML = '';
+
+      let pathD = '';
+      for (let r = 1; r <= 5; r++) {
+        const c = IDIOM_DATABASE[r].coords;
+        const px = (c.x / 100) * W;
+        const py = (c.y / 100) * H;
+        if (r === 1) pathD += `M ${px} ${py} `;
+        else pathD += `L ${px} ${py} `;
+      }
+
+      // Background path glow
+      const pathBg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      pathBg.setAttribute('d', pathD);
+      pathBg.setAttribute('fill', 'none');
+      pathBg.setAttribute('stroke', '#78350f');
+      pathBg.setAttribute('stroke-width', '4');
+      pathBg.setAttribute('stroke-dasharray', '8,8');
+      pathBg.setAttribute('opacity', '0.45');
+      mapTrailsSvg.appendChild(pathBg);
+
+      // Gold path for unlocked
+      let unlockedD = '';
+      for (let r = 1; r <= islandSaveData.unlockedRegions; r++) {
+        const c = IDIOM_DATABASE[r].coords;
+        const px = (c.x / 100) * W;
+        const py = (c.y / 100) * H;
+        if (r === 1) unlockedD += `M ${px} ${py} `;
+        else unlockedD += `L ${px} ${py} `;
+      }
+      if (islandSaveData.unlockedRegions > 1) {
+        const pathFg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        pathFg.setAttribute('d', unlockedD);
+        pathFg.setAttribute('fill', 'none');
+        pathFg.setAttribute('stroke', '#f59e0b');
+        pathFg.setAttribute('stroke-width', '4');
+        pathFg.setAttribute('stroke-dasharray', '6,6');
+        mapTrailsSvg.appendChild(pathFg);
+      }
+    }
+    window.addEventListener('resize', renderMapTrails);
+
+    /* Update Node Display & Ship Location */
+    function updateMapDisplay() {
+      renderMapTrails();
+
+      document.querySelectorAll('.region-node').forEach(node => {
+        const r = parseInt(node.dataset.region, 10);
+        const starsBadge = node.querySelector('.stars-display');
+        const badgeDiv = node.querySelector('.node-badge');
+
+        if (r <= islandSaveData.unlockedRegions) {
+          // Unlocked
+          badgeDiv.classList.remove('from-stone-600', 'to-stone-900', 'border-stone-400');
+          badgeDiv.classList.add('from-amber-600', 'to-amber-900', 'border-amber-300', 'shadow-goldGlow');
+          const starCount = islandSaveData.stars[r] || 0;
+          let starsStr = '';
+          for (let s = 1; s <= 3; s++) {
+            starsStr += s <= starCount ? '★' : '☆';
+          }
+          starsBadge.innerHTML = `<span class="text-amber-400 font-bold">${starsStr}</span>`;
+        } else {
+          // Locked
+          badgeDiv.classList.add('from-stone-600', 'to-stone-900', 'border-stone-400');
+          badgeDiv.classList.remove('from-amber-600', 'to-amber-900', 'border-amber-300', 'shadow-goldGlow');
+          starsBadge.innerText = '🔒 Locked';
+        }
+      });
+
+      // Position Ship
+      const currentC = IDIOM_DATABASE[islandSaveData.currentRegion].coords;
+      shipMarker.style.left = `${currentC.x}%`;
+      shipMarker.style.top = `${currentC.y}%`;
+    }
+
+    /* =====================================================================
+       5. VOYAGE EXECUTION & ENCOUNTER ENGINE
+       ===================================================================== */
+    function embarkVoyage(regionNum) {
+      if (regionNum > islandSaveData.unlockedRegions) {
+        audio.playCannon();
+        alert(`Arrr! This uncharted island is locked. Complete Region ${regionNum - 1} with at least 2 stars to earn navigation charts!`);
+        return;
+      }
+
+      audio.init();
+      audio.playShipBell();
+
+      islandSaveData.currentRegion = regionNum;
+      saveGame();
+
+      // Setup session
+      sessionVoyage.regionIndex = regionNum;
+      sessionVoyage.currentQuestionIndex = 0;
+      sessionVoyage.questions = [...IDIOM_DATABASE[regionNum].items].sort(() => 0.5 - Math.random());
+      sessionVoyage.score = 0;
+      sessionVoyage.correctCount = 0;
+      sessionVoyage.lives = 3;
+      sessionVoyage.isAnswerLocked = false;
+
+      // Animate ship moving to node
+      updateMapDisplay();
+
+      setTimeout(() => {
+        mapScreen.classList.add('hidden');
+        victoryScreen.classList.add('hidden');
+        battleStage.classList.remove('hidden');
+
+        document.getElementById('currentRegionLabel').innerText = `REGION ${regionNum}: ${IDIOM_DATABASE[regionNum].name.toUpperCase()}`;
+        document.getElementById('currentIELTSTarget').innerText = `Target: ${IDIOM_DATABASE[regionNum].theme} (${IDIOM_DATABASE[regionNum].bandRange})`;
+
+        updateHearts();
+        renderEncounter();
+      }, 400);
+    }
+
+    function updateHearts() {
+      const box = document.getElementById('voyageHearts');
+      box.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const heart = document.createElement('span');
+        heart.innerText = i < sessionVoyage.lives ? '❤️' : '🖤';
+        box.appendChild(heart);
+      }
+    }
+
+    function renderEncounter() {
+      sessionVoyage.isAnswerLocked = false;
+      document.getElementById('answerFeedbackBox').classList.add('hidden');
+
+      const currentQ = sessionVoyage.questions[sessionVoyage.currentQuestionIndex];
+      document.getElementById('encounterProgress').innerText = `${sessionVoyage.currentQuestionIndex + 1} / ${sessionVoyage.questions.length}`;
+
+      // Badge type
+      const badge = document.getElementById('questionTypeBadge');
+      if (currentQ.type === 'meaning') {
+        badge.innerHTML = '<span>⚔️</span><span>MEANING MATCH</span>';
+        badge.className = "text-[10px] font-black uppercase tracking-wider bg-amber-900 text-amber-200 px-2.5 py-0.5 rounded-full border border-amber-600 inline-flex items-center space-x-1";
+      } else if (currentQ.type === 'register') {
+        badge.innerHTML = '<span>⚖️</span><span>REGISTER RADAR (SPEAKING vs WRITING)</span>';
+        badge.className = "text-[10px] font-black uppercase tracking-wider bg-red-950 text-red-200 px-2.5 py-0.5 rounded-full border border-red-600 inline-flex items-center space-x-1";
+      } else {
+        badge.innerHTML = '<span>🧭</span><span>ACADEMIC CONTEXT IN ACTION</span>';
+        badge.className = "text-[10px] font-black uppercase tracking-wider bg-emerald-950 text-emerald-200 px-2.5 py-0.5 rounded-full border border-emerald-600 inline-flex items-center space-x-1";
+      }
+
+      document.getElementById('idiomTitle').innerText = `"${currentQ.idiom}"`;
+      document.getElementById('promptContext').innerText = currentQ.prompt;
+
+      // Render 4 Chest Option Cards
+      const container = document.getElementById('optionsContainer');
+      container.innerHTML = '';
+
+      currentQ.options.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "group relative w-full min-h-[64px] p-3.5 bg-amber-950/10 hover:bg-amber-900/20 border-2 border-amber-900/40 hover:border-amber-700 rounded-xl flex items-center space-x-3 text-left transition cursor-pointer shadow-sm";
+        btn.dataset.index = idx;
+
+        btn.innerHTML = `
+          <div class="w-8 h-8 rounded-lg bg-amber-900/30 border border-amber-700/60 flex items-center justify-center font-bold text-amber-900 text-xs group-hover:bg-amber-900 group-hover:text-amber-200 transition flex-shrink-0">
+            ${String.fromCharCode(65 + idx)}
+          </div>
+          <span class="text-xs sm:text-sm font-semibold text-amber-950 leading-snug">${optText}</span>
+        `;
+
+        btn.addEventListener('click', (e) => handleAnswerSelection(btn, idx, currentQ, e));
+        container.appendChild(btn);
+      });
+
+      startSandglassTimer();
+    }
+
+    function startSandglassTimer() {
+      clearInterval(sessionVoyage.timerId);
+      const bar = document.getElementById('sandglassBar');
+      sessionVoyage.startTime = Date.now();
+      const dur = sessionVoyage.timeLimit;
+
+      sessionVoyage.timerId = setInterval(() => {
+        const elapsed = Date.now() - sessionVoyage.startTime;
+        const remain = Math.max(0, dur - elapsed);
+        const pct = (remain / dur) * 100;
+        bar.style.width = `${pct}%`;
+
+        if (remain <= 0) {
+          clearInterval(sessionVoyage.timerId);
+          handleTimeExpiry();
+        }
+      }, 50);
+    }
+
+    function handleAnswerSelection(buttonEl, selectedIdx, questionData, event) {
+      if (sessionVoyage.isAnswerLocked) return;
+      sessionVoyage.isAnswerLocked = true;
+      clearInterval(sessionVoyage.timerId);
+
+      const isCorrect = selectedIdx === questionData.correct;
+      const rect = buttonEl.getBoundingClientRect();
+      const x = event && event.clientX ? event.clientX : (rect.left + rect.width / 2);
+      const y = event && event.clientY ? event.clientY : (rect.top + rect.height / 2);
+
+      const feedbackBox = document.getElementById('answerFeedbackBox');
+      const feedbackIcon = document.getElementById('feedbackIcon');
+      const feedbackVerdict = document.getElementById('feedbackVerdict');
+      const feedbackExplanation = document.getElementById('feedbackExplanation');
+      const formalTag = document.getElementById('formalAlternativeTag');
+
+      if (isCorrect) {
+        sessionVoyage.correctCount++;
+        sessionVoyage.score += 250;
+        islandSaveData.doubloons += 250;
+        saveGame();
+
+        audio.playCoin();
+        spawnCoinBurst(x, y);
+
+        buttonEl.classList.add('bg-emerald-900/30', 'border-emerald-700');
+        feedbackIcon.innerText = "🪙";
+        feedbackVerdict.innerText = "MAGNIFICENT SHOT! +250 DOUBLOONS";
+        feedbackVerdict.className = "font-black text-amber-300 uppercase tracking-wide";
+      } else {
+        sessionVoyage.lives--;
+        updateHearts();
+        audio.playCannon();
+        spawnCannonSparks(x, y);
+        triggerScreenShake();
+
+        buttonEl.classList.add('bg-red-950/40', 'border-red-700');
+        feedbackIcon.innerText = "💥";
+        feedbackVerdict.innerText = "BROADSIDE DAMAGE! SHROUD BREACHED";
+        feedbackVerdict.className = "font-black text-red-400 uppercase tracking-wide";
+      }
+
+      feedbackExplanation.innerText = questionData.speakingContext;
+      formalTag.innerHTML = `<strong>Writing Task 2 Academic Formal Alternative:</strong> <em>"${questionData.formalAlternative}"</em>`;
+      feedbackBox.classList.remove('hidden');
+
+      // Scroll smoothly to feedback if on small mobile screen
+      feedbackBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function handleTimeExpiry() {
+      sessionVoyage.isAnswerLocked = true;
+      sessionVoyage.lives--;
+      updateHearts();
+      audio.playCannon();
+      triggerScreenShake();
+
+      const feedbackBox = document.getElementById('answerFeedbackBox');
+      document.getElementById('feedbackIcon').innerText = "⌛";
+      document.getElementById('feedbackVerdict').innerText = "THE SANDS RAN DRY! -1 LIFE";
+      document.getElementById('feedbackExplanation').innerText = "Time expired before answering. Keep sharp when evaluating figurative nuance under pressure!";
+      feedbackBox.classList.remove('hidden');
+    }
+
+    function triggerScreenShake() {
+      const wrap = document.getElementById('battleStage');
+      wrap.classList.remove('cannon-shake');
+      void wrap.offsetWidth;
+      wrap.classList.add('cannon-shake');
+      setTimeout(() => wrap.classList.remove('cannon-shake'), 350);
+    }
+
+    /* Advance to Next Encounter or Conclude Island */
+    document.getElementById('nextEncounterBtn').addEventListener('click', () => {
+      if (sessionVoyage.lives <= 0) {
+        alert("Your vessel sustained too many broadside strikes! Returning to port to refit thy sails.");
+        returnToMap();
+        return;
+      }
+
+      sessionVoyage.currentQuestionIndex++;
+      if (sessionVoyage.currentQuestionIndex < sessionVoyage.questions.length) {
+        renderEncounter();
+      } else {
+        concludeIslandVoyage();
+      }
+    });
+
+    /* Conclude Voyage & Award Bounty Stars */
+    function concludeIslandVoyage() {
+      clearInterval(sessionVoyage.timerId);
+      audio.playShantyFanfare();
+
+      battleStage.classList.add('hidden');
+      victoryScreen.classList.remove('hidden');
+
+      const totalQ = sessionVoyage.questions.length;
+      const correct = sessionVoyage.correctCount;
+      const pct = Math.round((correct / totalQ) * 100);
+
+      // Star calculation
+      let stars = 1;
+      if (correct >= 5) stars = 3;
+      else if (correct >= 3) stars = 2;
+
+      // Save stars if higher
+      const r = sessionVoyage.regionIndex;
+      if (stars > (islandSaveData.stars[r] || 0)) {
+        islandSaveData.stars[r] = stars;
+      }
+
+      // Unlock next region if 2+ stars earned
+      if (stars >= 2 && islandSaveData.unlockedRegions === r && r < 5) {
+        islandSaveData.unlockedRegions = r + 1;
+      }
+      saveGame();
+
+      // UI population
+      document.getElementById('islandStarsRow').innerHTML = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+      document.getElementById('finalDoubloonsVal').innerText = `${islandSaveData.doubloons} 🪙`;
+      document.getElementById('finalAccuracyVal').innerText = `${pct}%`;
+      document.getElementById('finalIslandsUnlockedVal').innerText = `${islandSaveData.unlockedRegions} / 5`;
+
+      // Dynamic Admiralty Rank Title
+      const rankTitle = document.getElementById('captainRankTitle');
+      const bandPill = document.getElementById('ieltsBandRankPill');
+      const remark = document.getElementById('islandDebriefRemark');
+
+      if (r === 5 && stars === 3) {
+        rankTitle.innerText = "LORD HIGH ADMIRAL OF EL DORADO";
+        bandPill.innerText = "ESTIMATED IELTS SPEAKING: BAND 9.0";
+        remark.innerText = "Native-like precision in idiomatic cadence and academic register discretion!";
+      } else if (r >= 4) {
+        rankTitle.innerText = "COMMODORE OF THE KRAKEN TRENCH";
+        bandPill.innerText = "ESTIMATED IELTS SPEAKING: BAND 8.5";
+        remark.innerText = "Formidable mastery of advanced figurative metaphors and Task 2 formal nuance!";
+      } else if (r >= 3) {
+        rankTitle.innerText = "CORSAIR CAPTAIN OF SIREN'S REEF";
+        bandPill.innerText = "ESTIMATED IELTS SPEAKING: BAND 8.0";
+        remark.innerText = "Exceptional avoidance of informal register traps in analytical discussions.";
+      } else if (r >= 2) {
+        rankTitle.innerText = "NAVIGATOR OF SMUGGLER'S STRAITS";
+        bandPill.innerText = "ESTIMATED IELTS SPEAKING: BAND 7.5";
+        remark.innerText = "Solid balance of academic idioms and formal writing equivalents.";
+      } else {
+        rankTitle.innerText = "BUCCANEER CADET";
+        bandPill.innerText = "ESTIMATED IELTS SPEAKING: BAND 7.0";
+        remark.innerText = "Good initial footing! Continue practicing to distinguish informal idioms from formal prose.";
+      }
+
+      spawnCoinBurst(window.innerWidth / 2, window.innerHeight / 2);
+    }
+
+    function returnToMap() {
+      clearInterval(sessionVoyage.timerId);
+      battleStage.classList.add('hidden');
+      victoryScreen.classList.add('hidden');
+      mapScreen.classList.remove('hidden');
+      updateMapDisplay();
+    }
+
+    /* =====================================================================
+       6. 1200x630 HIGH-RESOLUTION PIRATE BOUNTY CERTIFICATE GENERATOR
+       ===================================================================== */
+    function generateBountyCanvas() {
+      const exp = document.getElementById('bountyCanvas');
+      const ctx = exp.getContext('2d');
+      const W = exp.width;
+      const H = exp.height;
+
+      // 1. Antique Parchment Background Texture
+      const grad = ctx.createRadialGradient(W/2, H/2, 50, W/2, H/2, 600);
+      grad.addColorStop(0, '#faecd4');
+      grad.addColorStop(0.7, '#e4c490');
+      grad.addColorStop(1, '#b58c54');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+
+      // 2. Burnished Antique Map Border & Inset
+      ctx.strokeStyle = '#5a3818';
+      ctx.lineWidth = 14;
+      ctx.strokeRect(15, 15, W - 30, H - 30);
+
+      ctx.strokeStyle = 'rgba(120, 53, 15, 0.4)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([12, 8]);
+      ctx.strokeRect(32, 32, W - 64, H - 64);
+      ctx.setLineDash([]); // reset
+
+      // 3. Compass Rose Watermark in Background
+      ctx.save();
+      ctx.translate(W - 140, 140);
+      ctx.strokeStyle = 'rgba(101, 52, 12, 0.2)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(0, 0, 80, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      // 4. Header Titles
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#6e380f';
+      ctx.font = "bold 20px 'Cinzel', Georgia, serif";
+      ctx.fillText("⚡ OFFICIAL ADMIRALTY OF IDIOM ISLAND ⚡", W / 2, 80);
+
+      ctx.fillStyle = '#321908';
+      ctx.font = "900 46px 'Cinzel', Georgia, serif";
+      ctx.fillText("CAPTAIN'S BOUNTY & REGISTER CERTIFICATE", W / 2, 135);
+
+      // Watermark Branding
+      ctx.fillStyle = '#8c4815';
+      ctx.font = "bold 20px 'Inter', sans-serif";
+      ctx.fillText("mrmike.hk/games • Cambridge IELTS Academic Expedition", W / 2, 170);
+
+      // 5. Huge Band Result Banner
+      const rankTitle = document.getElementById('captainRankTitle').innerText;
+      const bandTag = document.getElementById('ieltsBandRankPill').innerText;
+
+      ctx.fillStyle = '#5a3818';
+      ctx.beginPath();
+      ctx.roundRect(W / 2 - 380, 205, 760, 68, [34]);
+      ctx.fill();
+
+      ctx.fillStyle = '#fde68a';
+      ctx.font = "900 30px 'Cinzel', Georgia, serif";
+      ctx.fillText(rankTitle, W / 2, 250);
+
+      ctx.fillStyle = '#261407';
+      ctx.font = "bold 22px 'Inter', sans-serif";
+      ctx.fillText(bandTag, W / 2, 315);
+
+      // 6. Stars & Remark
+      ctx.fillStyle = '#d97706';
+      ctx.font = "48px serif";
+      const starString = document.getElementById('islandStarsRow').innerText;
+      ctx.fillText(starString, W / 2, 375);
+
+      ctx.fillStyle = '#451a03';
+      ctx.font = "italic 20px Georgia, serif";
+      ctx.fillText(`"Mastered when to use idioms in IELTS Speaking vs formal vocabulary in Writing Task 2"`, W / 2, 420);
+
+      // 7. Stats Matrix Box
+      const boxY = 460;
+      const boxW = 1000;
+      const boxH = 90;
+      const boxX = (W - boxW) / 2;
+
+      ctx.fillStyle = 'rgba(90, 56, 24, 0.15)';
+      ctx.strokeStyle = '#6e380f';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.roundRect(boxX, boxY, boxW, boxH, [16]);
+      ctx.fill();
+      ctx.stroke();
+
+      const colW = boxW / 3;
+      const metrics = [
+        { label: "TOTAL BOOTY", val: `${islandSaveData.doubloons} DOUBLOONS`, col: '#78350f' },
+        { label: "VOYAGE ACCURACY", val: document.getElementById('finalAccuracyVal').innerText, col: '#78350f' },
+        { label: "ISLANDS UNLOCKED", val: `${islandSaveData.unlockedRegions} / 5 REALMS`, col: '#78350f' }
+      ];
+
+      metrics.forEach((m, idx) => {
+        const cx = boxX + (colW * idx) + (colW / 2);
+        ctx.fillStyle = '#6e380f';
+        ctx.font = "bold 15px 'Inter', sans-serif";
+        ctx.fillText(m.label, cx, boxY + 34);
+
+        ctx.fillStyle = '#361b09';
+        ctx.font = "900 32px 'Cinzel', Georgia, serif";
+        ctx.fillText(m.val, cx, boxY + 72);
+      });
+
+      // 8. Official Red Wax Seal in Bottom Right
+      ctx.save();
+      ctx.translate(W - 120, H - 95);
+      ctx.fillStyle = '#991b1b';
+      ctx.beginPath();
+      ctx.arc(0, 0, 50, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.fillStyle = '#fef2f2';
+      ctx.font = "bold 13px 'Cinzel', serif";
+      ctx.fillText("SEALED", 0, -4);
+      ctx.font = "bold 10px 'Inter', sans-serif";
+      ctx.fillText("MRMIKE.HK", 0, 14);
+      ctx.restore();
+
+      // 9. Bottom Challenge Hook
+      ctx.fillStyle = '#6e380f';
+      ctx.font = "bold 18px 'Inter', sans-serif";
+      ctx.fillText("Can your followers unlock the Vault of El Dorado? Play free at mrmike.hk/games", W / 2, 595);
+
+      // Trigger automatic PNG download
+      const link = document.createElement('a');
+      link.download = `IdiomIsland-Captain-Bounty-${islandSaveData.doubloons}G.png`;
+      link.href = exp.toDataURL('image/png');
+      link.click();
+
+      showToast("Pirate Bounty Poster downloaded! Ready for Facebook upload!");
+    }
+
+    /* Copy Facebook Post Text */
+    function copyFacebookBrag() {
+      const rank = document.getElementById('captainRankTitle').innerText;
+      const band = document.getElementById('ieltsBandRankPill').innerText;
+      const acc = document.getElementById('finalAccuracyVal').innerText;
+
+      const text = `🏴‍☠️ Ahoy! Just conquered IDIOM ISLAND for IELTS Academic!
+📜 Rank: ${rank} (${band})
+🪙 Loot: ${islandSaveData.doubloons} Gold Doubloons | Accuracy: ${acc}
+🏝️ Conquered ${islandSaveData.unlockedRegions} / 5 Archipelago Regions!
+
+Trained when to speak idioms naturally in IELTS Speaking, and what formal academic vocabulary to write in Task 2 essays! 
+
+Can ye beat my score? Sail free at 👉 mrmike.hk/games`;
+
+      const t = document.createElement('textarea');
+      t.value = text;
+      document.body.appendChild(t);
+      t.select();
+      document.execCommand('copy');
+      document.body.removeChild(t);
+
+      showToast("Facebook brag caption copied with pirate emojis!");
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('shareStatusToast');
+      el.innerText = msg;
+      el.style.opacity = '1';
+      setTimeout(() => { el.style.opacity = '0'; }, 3500);
+    }
+
+    /* =====================================================================
+       7. IDIOM CODEX & STUDY LOGBOOK MODAL
+       ===================================================================== */
+    const codexModal = document.getElementById('codexModal');
+    const codexListContainer = document.getElementById('codexListContainer');
+    const codexRegionFilter = document.getElementById('codexRegionFilter');
+
+    function renderCodex(filterRegion = 'all') {
+      codexListContainer.innerHTML = '';
+
+      for (let r = 1; r <= 5; r++) {
+        if (filterRegion !== 'all' && parseInt(filterRegion, 10) !== r) continue;
+
+        const regData = IDIOM_DATABASE[r];
+
+        const headerDiv = document.createElement('div');
+        headerDiv.className = "bg-amber-950/20 p-2 rounded-lg font-black text-xs text-amber-950 uppercase border-l-4 border-amber-800 flex justify-between";
+        headerDiv.innerHTML = `<span>Region ${r}: ${regData.name}</span><span class="text-amber-800">${regData.bandRange}</span>`;
+        codexListContainer.appendChild(headerDiv);
+
+        regData.items.forEach(item => {
+          const card = document.createElement('div');
+          card.className = "bg-amber-100/70 p-3 rounded-xl border border-amber-900/30 text-xs text-amber-950 space-y-1";
+          card.innerHTML = `
+            <div class="flex items-center justify-between">
+              <strong class="text-sm font-black text-amber-900">"${item.idiom}"</strong>
+              <span class="text-[10px] font-bold text-amber-800 bg-amber-200/80 px-2 py-0.5 rounded">Speaking &bull; Task 2 Formal</span>
+            </div>
+            <p class="text-amber-900 font-sans"><strong>Speaking Example:</strong> <em>${item.speakingContext}</em></p>
+            <div class="bg-amber-900/10 p-2 rounded border-l-2 border-amber-700 text-[11px] font-sans">
+              <strong class="text-amber-950">Writing Task 2 Academic Alternative:</strong> 
+              <span class="text-amber-900 font-semibold">${item.formalAlternative}</span>
+            </div>
+          `;
+          codexListContainer.appendChild(card);
+        });
+      }
+    }
+
+    codexRegionFilter.addEventListener('change', (e) => {
+      renderCodex(e.target.value);
+    });
+
+    document.getElementById('openParchmentAtlasBtn').addEventListener('click', () => {
+      renderCodex(codexRegionFilter.value);
+      codexModal.classList.remove('hidden');
+    });
+    document.getElementById('closeCodexBtn').addEventListener('click', () => codexModal.classList.add('hidden'));
+    document.getElementById('closeCodexBtn2').addEventListener('click', () => codexModal.classList.add('hidden'));
+
+    /* =====================================================================
+       8. BUTTON EVENT HANDLERS & INITIALIZATION
+       ===================================================================== */
+    // Node Click Handlers
+    document.querySelectorAll('.region-node').forEach(node => {
+      node.addEventListener('click', () => {
+        const r = parseInt(node.dataset.region, 10);
+        embarkVoyage(r);
+      });
+    });
+
+    document.getElementById('quickVoyageBtn').addEventListener('click', () => {
+      embarkVoyage(islandSaveData.currentRegion);
+    });
+
+    document.getElementById('abandonVoyageBtn').addEventListener('click', returnToMap);
+    document.getElementById('returnToMapAfterVictoryBtn').addEventListener('click', returnToMap);
+    document.getElementById('downloadBountyCardBtn').addEventListener('click', generateBountyCanvas);
+    document.getElementById('copyPirateShareBtn').addEventListener('click', copyFacebookBrag);
+
+    // Audio Mute Toggle
+    document.getElementById('toggleAudioBtn').addEventListener('click', () => {
+      audio.init();
+      const isMuted = audio.toggleMute();
+      document.getElementById('soundIcon').style.opacity = isMuted ? '0.35' : '1';
+    });
+
+    // Initialize Map on Load
+    window.addEventListener('load', () => {
+      updateMapDisplay();
+      renderMapTrails();
+    });
+  </script>
+</body>
+</html>
