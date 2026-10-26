@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countable & Uncountable Foods</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 1rem;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.1); opacity: 0; }
+            60% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-15px); }
+            20%, 40%, 60%, 80% { transform: translateX(15px); }
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .animate-bounce-in { animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.26, 1.55) forwards; }
+        .animate-shake { animation: shake 0.5s; }
+        .animate-pop { animation: pop 0.4s ease-in-out; }
+
+        .game-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+
+        .emoji-display {
+            font-size: 7rem;
+            line-height: 1.1;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.15));
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div id="app" class="game-card rounded-3xl p-6 sm:p-10 max-w-4xl w-full text-center relative overflow-hidden transition-colors duration-300">
+        
+        <!-- MAIN MENU -->
+        <div id="main-menu" class="flex flex-col items-center py-10">
+            <div class="text-6xl mb-4">🍎🍞</div>
+            <h1 class="text-5xl font-bold text-indigo-600 tracking-wide mb-4">Food Sort!</h1>
+            <p class="text-xl text-gray-500 mb-12">Practice Countable vs Uncountable Nouns</p>
+            
+            <div class="flex flex-col sm:flex-row gap-6 w-full max-w-lg">
+                <button onclick="startSinglePlayer()" class="flex-1 bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white text-2xl font-bold py-6 px-4 rounded-3xl shadow-lg transform transition active:scale-95 border-b-8 border-blue-800">
+                    👤 Single Player
+                </button>
+                <button onclick="showTeamSetup()" class="flex-1 bg-gradient-to-r from-pink-400 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white text-2xl font-bold py-6 px-4 rounded-3xl shadow-lg transform transition active:scale-95 border-b-8 border-pink-800">
+                    👥 Two Teams
+                </button>
+            </div>
+        </div>
+
+        <!-- SETUP SCREEN (Two Teams) -->
+        <div id="setup-screen" class="hidden flex-col items-center py-8">
+            <h2 class="text-4xl font-bold text-indigo-600 tracking-wide mb-2">Team Setup</h2>
+            <p class="text-lg text-gray-500 mb-8">Who is playing today?</p>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-2xl mb-12">
+                <div class="flex flex-col items-center bg-blue-50 p-6 rounded-2xl border-4 border-blue-200">
+                    <label class="text-2xl font-bold text-blue-600 mb-4">Team 1</label>
+                    <input type="text" id="team1-input" value="Boys" class="text-center text-3xl font-bold p-3 rounded-xl border-2 border-blue-300 w-full focus:outline-none focus:border-blue-500 text-gray-700">
+                </div>
+                <div class="flex flex-col items-center bg-pink-50 p-6 rounded-2xl border-4 border-pink-200">
+                    <label class="text-2xl font-bold text-pink-600 mb-4">Team 2</label>
+                    <input type="text" id="team2-input" value="Girls" class="text-center text-3xl font-bold p-3 rounded-xl border-2 border-pink-300 w-full focus:outline-none focus:border-pink-500 text-gray-700">
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="showMainMenu()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 text-2xl font-bold py-4 px-8 rounded-full shadow-md transform transition active:scale-95 border-b-4 border-gray-500">
+                    Back
+                </button>
+                <button onclick="startTeamGame()" class="bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-lg transform transition hover:scale-105 active:scale-95 border-b-8 border-green-800">
+                    Start Match 🚀
+                </button>
+            </div>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="game-screen" class="hidden flex-col w-full">
+            
+            <!-- SINGLE PLAYER SCOREBOARD -->
+            <div id="sp-scoreboard" class="hidden justify-center items-center mb-6 bg-gray-100 p-4 rounded-2xl border-2 border-gray-200 max-w-md mx-auto w-full">
+                <div class="flex flex-col items-center px-8 border-r-4 border-gray-200 w-1/2">
+                    <span class="text-gray-400 font-bold uppercase tracking-widest text-sm mb-1">Score</span>
+                    <span id="sp-score-val" class="text-4xl font-bold text-blue-600">0</span>
+                </div>
+                <div class="flex flex-col items-center px-8 w-1/2">
+                    <span class="text-gray-400 font-bold uppercase tracking-widest text-sm mb-1">Round</span>
+                    <span id="sp-round-counter" class="text-4xl font-bold text-gray-600">1/20</span>
+                </div>
+            </div>
+
+            <!-- TWO TEAMS SCOREBOARD -->
+            <div id="tp-scoreboard" class="hidden justify-between items-center mb-4 bg-gray-100 p-4 rounded-2xl border-2 border-gray-200">
+                <div class="flex flex-col items-center w-1/3">
+                    <span id="score-name-1" class="text-2xl font-bold text-blue-600 truncate w-full text-center">Boys</span>
+                    <span id="score-val-1" class="text-4xl font-bold text-blue-700">0</span>
+                </div>
+                
+                <div class="flex flex-col items-center w-1/3 border-x-4 border-gray-200 px-4">
+                    <span class="text-gray-400 font-bold uppercase tracking-widest text-sm mb-1">Round</span>
+                    <span id="tp-round-counter" class="text-2xl font-bold text-gray-600">1 / 20</span>
+                </div>
+
+                <div class="flex flex-col items-center w-1/3">
+                    <span id="score-name-2" class="text-2xl font-bold text-pink-600 truncate w-full text-center">Girls</span>
+                    <span id="score-val-2" class="text-4xl font-bold text-pink-700">0</span>
+                </div>
+            </div>
+
+            <!-- Turn Indicator (Only for Team Mode) -->
+            <div id="turn-indicator-container" class="hidden mb-4">
+                <div id="turn-indicator" class="text-2xl font-bold py-2 px-8 rounded-full inline-block mx-auto shadow-md">
+                    Team Turn
+                </div>
+            </div>
+
+            <!-- Flashcard -->
+            <div id="food-container" class="min-h-[250px] flex flex-col justify-center items-center mb-6 bg-white rounded-3xl p-6 border-4 border-dashed border-gray-300">
+                <div id="food-emoji" class="emoji-display mb-4 animate-bounce-in">🍎</div>
+                <h2 id="food-name" class="text-5xl font-bold text-gray-800 lowercase">apple</h2>
+            </div>
+
+            <!-- Feedback Message -->
+            <div id="feedback" class="h-12 mb-6 text-2xl font-bold rounded-xl flex items-center justify-center opacity-0 transition-opacity mx-auto px-8 w-full max-w-lg">
+                <!-- Feedback text appears here -->
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-2 gap-4 max-w-2xl mx-auto w-full">
+                <button onclick="checkAnswer('countable')" id="btn-countable" class="bg-gradient-to-b from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white text-3xl font-bold py-5 px-4 rounded-3xl shadow-lg transform transition active:scale-95 border-b-8 border-blue-800">
+                    Countable
+                </button>
+                <button onclick="checkAnswer('uncountable')" id="btn-uncountable" class="bg-gradient-to-b from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 text-white text-3xl font-bold py-5 px-4 rounded-3xl shadow-lg transform transition active:scale-95 border-b-8 border-orange-800">
+                    Uncountable
+                </button>
+            </div>
+        </div>
+
+        <!-- END SCREEN -->
+        <div id="end-screen" class="hidden flex-col items-center justify-center py-10">
+            <h2 class="text-5xl font-bold text-indigo-600 mb-6 uppercase tracking-wider">Game Over!</h2>
+            
+            <div class="text-7xl mb-6" id="end-emoji">🏆</div>
+            
+            <!-- Dynamic Result Area -->
+            <div id="end-result-area" class="w-full mb-10">
+                <!-- Populated by JS based on mode -->
+            </div>
+            
+            <div class="flex gap-4">
+                <button onclick="showMainMenu()" class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-2xl font-bold py-4 px-10 rounded-full shadow-xl transform transition hover:scale-105 active:scale-95 border-b-8 border-pink-800">
+                    Main Menu 🏠
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Full Food Database (31 Items)
+        const allFoods = [
+            // Countable Foods
+            { name: "Strawberry", emoji: "🍓", type: "countable" },
+            { name: "Watermelon", emoji: "🍉", type: "countable" },
+            { name: "Apple", emoji: "🍎", type: "countable" },
+            { name: "Onion", emoji: "🧅", type: "countable" },
+            { name: "Egg", emoji: "🥚", type: "countable" },
+            { name: "Steak", emoji: "🥩", type: "countable" },
+            { name: "Lemon", emoji: "🍋", type: "countable" },
+            { name: "Grape", emoji: "🍇", type: "countable" },
+            { name: "Hamburger", emoji: "🍔", type: "countable" },
+            { name: "Sandwich", emoji: "🥪", type: "countable" },
+            { name: "Orange", emoji: "🍊", type: "countable" },
+            
+            // Uncountable Foods
+            { name: "Juice", emoji: "🧃", type: "uncountable" },
+            { name: "Milk", emoji: "🥛", type: "uncountable" },
+            { name: "Ham", emoji: "🍖", type: "uncountable" },
+            { name: "Meat", emoji: "🥩", type: "uncountable" },
+            { name: "Pasta", emoji: "🍝", type: "uncountable" },
+            { name: "Sugar", emoji: "🧂", type: "uncountable" }, 
+            { name: "Flour", emoji: "🌾", type: "uncountable" },
+            { name: "Oil", emoji: "🍾", type: "uncountable" },
+            { name: "Cheese", emoji: "🧀", type: "uncountable" },
+            { name: "Rice", emoji: "🍚", type: "uncountable" },
+            { name: "Fish", emoji: "🐟", type: "uncountable" },
+            { name: "Spinach", emoji: "🥬", type: "uncountable" },
+            { name: "Bread", emoji: "🍞", type: "uncountable" },
+            { name: "Cereal", emoji: "🥣", type: "uncountable" },
+            { name: "Coffee", emoji: "☕", type: "uncountable" },
+            { name: "Tea", emoji: "🍵", type: "uncountable" },
+            { name: "Salt", emoji: "🧂", type: "uncountable" },
+            { name: "Butter", emoji: "🧈", type: "uncountable" },
+            { name: "Chocolate", emoji: "🍫", type: "uncountable" },
+            { name: "Jam", emoji: "🍯", type: "uncountable" }
+        ];
+
+        // Game State Variables
+        let gameMode = 'single'; // 'single' or 'team'
+        let singleScore = 0;
+        let team1Name = "Boys";
+        let team2Name = "Girls";
+        let team1Score = 0;
+        let team2Score = 0;
+        let currentTurn = 1; 
+        let currentQuestionIndex = 0;
+        const totalQuestions = 20; 
+        let currentRoundFoods = [];
+        let isWaiting = false;
+
+        // Screens
+        const screenMain = document.getElementById('main-menu');
+        const screenSetup = document.getElementById('setup-screen');
+        const screenGame = document.getElementById('game-screen');
+        const screenEnd = document.getElementById('end-screen');
+        
+        // UI Elements
+        const elSpScoreboard = document.getElementById('sp-scoreboard');
+        const elTpScoreboard = document.getElementById('tp-scoreboard');
+        const elTurnContainer = document.getElementById('turn-indicator-container');
+        const elTurnIndicator = document.getElementById('turn-indicator');
+        
+        const elSpScoreVal = document.getElementById('sp-score-val');
+        const elSpRoundCounter = document.getElementById('sp-round-counter');
+        
+        const elScoreName1 = document.getElementById('score-name-1');
+        const elScoreVal1 = document.getElementById('score-val-1');
+        const elScoreName2 = document.getElementById('score-name-2');
+        const elScoreVal2 = document.getElementById('score-val-2');
+        const elTpRoundCounter = document.getElementById('tp-round-counter');
+        
+        const elFoodEmoji = document.getElementById('food-emoji');
+        const elFoodName = document.getElementById('food-name');
+        const elFeedback = document.getElementById('feedback');
+        const elFoodContainer = document.getElementById('food-container');
+        const btnCountable = document.getElementById('btn-countable');
+        const btnUncountable = document.getElementById('btn-uncountable');
+
+        function hideAllScreens() {
+            [screenMain, screenSetup, screenGame, screenEnd].forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('flex');
+            });
+        }
+
+        function showMainMenu() {
+            hideAllScreens();
+            screenMain.classList.remove('hidden');
+            screenMain.classList.add('flex');
+        }
+
+        function showTeamSetup() {
+            hideAllScreens();
+            screenSetup.classList.remove('hidden');
+            screenSetup.classList.add('flex');
+        }
+
+        function initGameData() {
+            currentQuestionIndex = 0;
+            isWaiting = false;
+            // Pick random foods for this session
+            const shuffled = [...allFoods].sort(() => 0.5 - Math.random());
+            currentRoundFoods = shuffled.slice(0, totalQuestions);
+            hideAllScreens();
+            screenGame.classList.remove('hidden');
+            screenGame.classList.add('flex');
+        }
+
+        function startSinglePlayer() {
+            gameMode = 'single';
+            singleScore = 0;
+            initGameData();
+            
+            // Setup Single Player UI
+            elSpScoreboard.classList.remove('hidden');
+            elSpScoreboard.classList.add('flex');
+            elTpScoreboard.classList.add('hidden');
+            elTpScoreboard.classList.remove('flex');
+            elTurnContainer.classList.add('hidden');
+            
+            elSpScoreVal.innerText = singleScore;
+            
+            loadQuestion();
+        }
+
+        function startTeamGame() {
+            gameMode = 'team';
+            team1Score = 0;
+            team2Score = 0;
+            currentTurn = 1;
+            
+            team1Name = document.getElementById('team1-input').value.trim() || "Team 1";
+            team2Name = document.getElementById('team2-input').value.trim() || "Team 2";
+
+            initGameData();
+            
+            // Setup Team UI
+            elTpScoreboard.classList.remove('hidden');
+            elTpScoreboard.classList.add('flex');
+            elSpScoreboard.classList.add('hidden');
+            elSpScoreboard.classList.remove('flex');
+            elTurnContainer.classList.remove('hidden');
+
+            elScoreName1.innerText = team1Name;
+            elScoreName2.innerText = team2Name;
+            elScoreVal1.innerText = team1Score;
+            elScoreVal2.innerText = team2Score;
+
+            loadQuestion();
+        }
+
+        function updateTurnUI() {
+            if (gameMode !== 'team') return;
+            
+            if (currentTurn === 1) {
+                elTurnIndicator.innerText = `${team1Name}'s Turn!`;
+                elTurnIndicator.className = "text-2xl font-bold py-2 px-8 rounded-full inline-block mx-auto shadow-md bg-blue-100 text-blue-700 border-2 border-blue-300 transition-colors";
+            } else {
+                elTurnIndicator.innerText = `${team2Name}'s Turn!`;
+                elTurnIndicator.className = "text-2xl font-bold py-2 px-8 rounded-full inline-block mx-auto shadow-md bg-pink-100 text-pink-700 border-2 border-pink-300 transition-colors";
+            }
+        }
+
+        function loadQuestion() {
+            const currentFood = currentRoundFoods[currentQuestionIndex];
+            
+            // Strictly enforce lowercase for display
+            elFoodEmoji.innerText = currentFood.emoji;
+            elFoodName.innerText = currentFood.name.toLowerCase();
+            
+            updateTurnUI();
+            
+            // Reset visual states
+            elFoodContainer.style.borderColor = '#d1d5db'; 
+            elFoodContainer.style.backgroundColor = '#ffffff';
+            
+            elFoodEmoji.classList.remove('animate-bounce-in');
+            void elFoodEmoji.offsetWidth; // trigger reflow
+            elFoodEmoji.classList.add('animate-bounce-in');
+            
+            elFeedback.style.opacity = '0';
+            
+            const roundText = `${currentQuestionIndex + 1} / ${totalQuestions}`;
+            elSpRoundCounter.innerText = roundText;
+            elTpRoundCounter.innerText = roundText;
+
+            // Re-enable buttons
+            isWaiting = false;
+            btnCountable.disabled = false;
+            btnUncountable.disabled = false;
+            btnCountable.classList.remove('opacity-50', 'cursor-not-allowed');
+            btnUncountable.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        function checkAnswer(selectedType) {
+            if (isWaiting) return; 
+            isWaiting = true;
+            
+            // Disable buttons immediately
+            btnCountable.disabled = true;
+            btnUncountable.disabled = true;
+            btnCountable.classList.add('opacity-50', 'cursor-not-allowed');
+            btnUncountable.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const currentFood = currentRoundFoods[currentQuestionIndex];
+            const isCorrect = (selectedType === currentFood.type);
+
+            elFeedback.style.opacity = '1';
+            
+            if (isCorrect) {
+                // Success visuals & Scoring
+                elFeedback.innerText = "✨ Correct! ✨";
+                elFeedback.className = "h-12 mb-6 text-2xl font-bold rounded-xl flex items-center justify-center text-green-700 bg-green-100 px-8 w-full max-w-lg transition-opacity border-2 border-green-300";
+                elFoodContainer.style.borderColor = '#4ade80';
+                elFoodContainer.style.backgroundColor = '#f0fdf4';
+
+                if (gameMode === 'single') {
+                    singleScore++;
+                    elSpScoreVal.innerText = singleScore;
+                    animateScore(elSpScoreVal);
+                } else {
+                    if (currentTurn === 1) {
+                        team1Score++;
+                        elScoreVal1.innerText = team1Score;
+                        animateScore(elScoreVal1);
+                    } else {
+                        team2Score++;
+                        elScoreVal2.innerText = team2Score;
+                        animateScore(elScoreVal2);
+                    }
+                }
+            } else {
+                // Fail visuals
+                elFoodEmoji.classList.add('animate-shake');
+                setTimeout(() => elFoodEmoji.classList.remove('animate-shake'), 500);
+                
+                elFeedback.innerText = `Oops! It's ${currentFood.type}.`;
+                elFeedback.className = "h-12 mb-6 text-2xl font-bold rounded-xl flex items-center justify-center text-red-700 bg-red-100 px-8 w-full max-w-lg transition-opacity border-2 border-red-300";
+                elFoodContainer.style.borderColor = '#f87171'; 
+                elFoodContainer.style.backgroundColor = '#fef2f2';
+            }
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < totalQuestions) {
+                    if (gameMode === 'team') {
+                        currentTurn = currentTurn === 1 ? 2 : 1;
+                    }
+                    loadQuestion();
+                } else {
+                    endGame();
+                }
+            }, 1800); 
+        }
+
+        function animateScore(element) {
+            element.parentElement.classList.add('animate-pop');
+            setTimeout(() => element.parentElement.classList.remove('animate-pop'), 400);
+        }
+
+        function endGame() {
+            hideAllScreens();
+            screenEnd.classList.remove('hidden');
+            screenEnd.classList.add('flex');
+
+            const resultArea = document.getElementById('end-result-area');
+            const elEmoji = document.getElementById('end-emoji');
+            resultArea.innerHTML = '';
+
+            if (gameMode === 'single') {
+                elEmoji.innerText = singleScore >= 15 ? "🌟" : "👍";
+                resultArea.innerHTML = `
+                    <p class="text-3xl text-gray-600 mb-2">Final Score</p>
+                    <p class="text-7xl font-bold text-blue-600 mb-6">${singleScore} / ${totalQuestions}</p>
+                `;
+            } else {
+                let winnerHtml = "";
+                if (team1Score > team2Score) {
+                    elEmoji.innerText = "🎉";
+                    winnerHtml = `<p class="text-5xl font-bold text-blue-600 mb-8">${team1Name} Wins!</p>`;
+                } else if (team2Score > team1Score) {
+                    elEmoji.innerText = "🎊";
+                    winnerHtml = `<p class="text-5xl font-bold text-pink-600 mb-8">${team2Name} Wins!</p>`;
+                } else {
+                    elEmoji.innerText = "🤝";
+                    winnerHtml = `<p class="text-5xl font-bold text-purple-600 mb-8">It's a Tie!</p>`;
+                }
+
+                resultArea.innerHTML = `
+                    ${winnerHtml}
+                    <div class="flex justify-center gap-6 w-full max-w-lg mx-auto">
+                        <div class="bg-blue-100 p-4 rounded-2xl border-4 border-blue-300 w-1/2">
+                            <p class="text-xl font-bold text-blue-600 mb-1">${team1Name}</p>
+                            <p class="text-5xl font-bold text-blue-800">${team1Score}</p>
+                        </div>
+                        <div class="bg-pink-100 p-4 rounded-2xl border-4 border-pink-300 w-1/2">
+                            <p class="text-xl font-bold text-pink-600 mb-1">${team2Name}</p>
+                            <p class="text-5xl font-bold text-pink-800">${team2Score}</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
