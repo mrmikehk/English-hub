@@ -273,6 +273,51 @@
     #win-banner h2 { color: var(--success); }
     #lose-banner h2 { color: var(--error); }
 
+    /* Info Section Styles */
+    .info-section {
+      background: var(--card-bg);
+      padding: 2rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      width: 100%;
+      max-width: 900px;
+      margin-top: 3rem;
+      color: var(--text);
+    }
+
+    .info-section h2 {
+      color: var(--primary);
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .info-section h2:not(:first-child) {
+      margin-top: 2rem;
+    }
+
+    .info-section p {
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      color: #475569;
+    }
+
+    .info-section ol {
+      padding-left: 1.5rem;
+      line-height: 1.6;
+      color: #475569;
+    }
+
+    .info-section li {
+      margin-bottom: 0.75rem;
+    }
+
+    .info-section strong {
+      color: var(--text);
+    }
+
     @media (max-width: 768px) {
       .game-container {
         grid-template-columns: 1fr;
@@ -336,6 +381,20 @@
   <div id="lose-banner" class="banner">
     <h2>⏳ Time's Up! Game Over</h2>
     <p>Try again to match them all faster!</p>
+  </div>
+
+  <!-- Game Instructions and Description -->
+  <div class="info-section">
+    <h2>About the Game</h2>
+    <p>This speed-based matching game helps primary English learners practice recognizing and pairing numerals (1–10) with their corresponding written sight words. It is designed to align with the Space Town Unit 2 curriculum, reinforcing early numeracy vocabulary under engaging, timed conditions.</p>
+    
+    <h2>How to Play</h2>
+    <ol>
+      <li><strong>Select a Time Limit:</strong> Choose a difficulty of 45, 60, or 90 seconds from the control panel.</li>
+      <li><strong>Start the Timer:</strong> Click the "Start Game" button to reveal the board and begin the countdown.</li>
+      <li><strong>Make a Match:</strong> Click a number card on the left side, then find and click the matching word card on the right side.</li>
+      <li><strong>Beat the Clock:</strong> Successfully pair all 10 numbers before the time runs out to win the round!</li>
+    </ol>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
