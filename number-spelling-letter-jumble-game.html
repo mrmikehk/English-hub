@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game with Fullscreen Controls</title>
+  <title>Game with Visible Fullscreen Button</title>
   <style>
     * {
       box-sizing: border-box;
@@ -12,99 +12,123 @@
     }
 
     body {
-      background-color: #1a1a1a;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      background-color: #121212;
+      color: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 10px;
     }
 
-    /* Container holding canvas and UI controls */
+    /* The root container that enters full-screen mode */
     #game-container {
       position: relative;
       width: 100%;
       max-width: 800px;
-      aspect-ratio: 4 / 3;
-      background-color: #000;
-      overflow: hidden;
       display: flex;
-      justify-content: center;
-      align-items: center;
+      flex-direction: column;
+      background-color: #1e1e1e;
+      border: 2px solid #333333;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     }
 
-    /* Native Fullscreen adjustments */
+    /* Native Fullscreen style override */
     #game-container:fullscreen {
       width: 100vw;
       height: 100vh;
       max-width: none;
-      aspect-ratio: auto;
+      border: none;
+      border-radius: 0;
     }
 
-    /* Vendor prefix support */
     #game-container:-webkit-full-screen {
       width: 100vw;
       height: 100vh;
       max-width: none;
-      aspect-ratio: auto;
+      border: none;
+      border-radius: 0;
     }
 
-    /* Canvas scales automatically to fit */
+    /* Visible persistent top bar */
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #262626;
+      padding: 10px 16px;
+      border-bottom: 2px solid #333333;
+      z-index: 50;
+    }
+
+    .game-title {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* Highlighted Fullscreen Button */
+    .fullscreen-trigger-btn {
+      background-color: #2563eb;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.15s, transform 0.1s;
+      user-select: none;
+    }
+
+    .fullscreen-trigger-btn:hover {
+      background-color: #1d4ed8;
+    }
+
+    .fullscreen-trigger-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Canvas play area */
+    .viewport {
+      position: relative;
+      width: 100%;
+      flex: 1;
+      background-color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+    }
+
     #game-canvas {
       width: 100%;
       height: 100%;
-      object-fit: contain;
       display: block;
+      object-fit: contain;
     }
 
-    /* Floating UI layer - pointer-events: none lets clicks reach the game canvas if needed */
-    #game-ui {
+    /* On-screen controls placed over the canvas */
+    #game-controls {
       position: absolute;
-      inset: 0;
-      pointer-events: none;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 16px;
-      z-index: 10;
-    }
-
-    /* Top bar for utility actions like fullscreen */
-    .top-bar {
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    /* Bottom overlay for movement / action controls */
-    .controls-bar {
+      bottom: 20px;
+      left: 0;
+      right: 0;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      width: 100%;
+      padding: 0 24px;
+      pointer-events: none; /* Let canvas capture other clicks */
+      z-index: 40;
     }
 
-    /* Shared button styles - pointer-events: auto re-enables click/touch */
-    .game-btn {
-      pointer-events: auto;
-      background: rgba(255, 255, 255, 0.85);
-      border: 1px solid rgba(0, 0, 0, 0.15);
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      padding: 10px 16px;
-      cursor: pointer;
-      user-select: none;
-      -webkit-user-select: none;
-      touch-action: manipulation;
-      transition: background 0.15s, transform 0.1s;
-    }
-
-    .game-btn:active {
-      background: rgba(255, 255, 255, 1);
-      transform: scale(0.95);
-    }
-
-    /* D-pad layout */
     .dpad {
       display: flex;
       flex-direction: column;
@@ -117,49 +141,78 @@
       gap: 6px;
     }
 
-    .dpad-btn {
-      width: 48px;
-      height: 48px;
-      padding: 0;
+    .control-btn {
+      pointer-events: auto; /* Buttons accept touch and click */
+      background: rgba(255, 255, 255, 0.85);
+      color: #111111;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      transition: background-color 0.1s;
+    }
+
+    .control-btn:active {
+      background: #ffffff;
+    }
+
+    .dir-btn {
+      width: 50px;
+      height: 50px;
+      font-size: 1.25rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+    }
+
+    .action-btn {
+      min-width: 80px;
+      height: 50px;
+      font-size: 1rem;
+      padding: 0 16px;
     }
   </style>
 </head>
 <body>
 
+  <!-- Game Wrapper -->
   <div id="game-container">
-    <!-- Game display surface -->
-    <canvas id="game-canvas" width="800" height="600"></canvas>
+    
+    <!-- Top Bar with Visible Fullscreen Button -->
+    <header class="top-header">
+      <span class="game-title">Canvas Game</span>
+      <button id="fullscreen-btn" class="fullscreen-trigger-btn" type="button">
+        ⛶ Fullscreen
+      </button>
+    </header>
 
-    <!-- Overlay UI and Controls -->
-    <div id="game-ui">
-      <div class="top-bar">
-        <button id="fullscreen-btn" class="game-btn">⛶ Fullscreen</button>
-      </div>
+    <!-- Canvas Area -->
+    <main class="viewport">
+      <canvas id="game-canvas" width="800" height="500"></canvas>
 
-      <div class="controls-bar">
-        <!-- Directional controls (D-Pad) -->
+      <!-- Persistent On-Screen Controls -->
+      <nav id="game-controls" aria-label="Game Controls">
         <div class="dpad">
-          <button id="btn-up" class="game-btn dpad-btn" aria-label="Up">▲</button>
+          <button id="btn-up" class="control-btn dir-btn" aria-label="Up">▲</button>
           <div class="dpad-row">
-            <button id="btn-left" class="game-btn dpad-btn" aria-label="Left">◀</button>
-            <button id="btn-down" class="game-btn dpad-btn" aria-label="Down">▼</button>
-            <button id="btn-right" class="game-btn dpad-btn" aria-label="Right">▶</button>
+            <button id="btn-left" class="control-btn dir-btn" aria-label="Left">◀</button>
+            <button id="btn-down" class="control-btn dir-btn" aria-label="Down">▼</button>
+            <button id="btn-right" class="control-btn dir-btn" aria-label="Right">▶</button>
           </div>
         </div>
 
-        <!-- Action button -->
-        <button id="btn-action" class="game-btn" style="min-width: 64px; height: 48px;">Action</button>
-      </div>
-    </div>
+        <button id="btn-action" class="control-btn action-btn">Action</button>
+      </nav>
+    </main>
+
   </div>
 
   <script>
     // --- Fullscreen Toggle Logic ---
-    const gameContainer = document.getElementById('game-container');
+    const container = document.getElementById('game-container');
     const fullscreenBtn = document.getElementById('fullscreen-btn');
 
     fullscreenBtn.addEventListener('click', toggleFullscreen);
@@ -168,10 +221,10 @@
       const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
 
       if (!isFullscreen) {
-        if (gameContainer.requestFullscreen) {
-          gameContainer.requestFullscreen();
-        } else if (gameContainer.webkitRequestFullscreen) {
-          gameContainer.webkitRequestFullscreen();
+        if (container.requestFullscreen) {
+          container.requestFullscreen();
+        } else if (container.webkitRequestFullscreen) {
+          container.webkitRequestFullscreen();
         }
       } else {
         if (document.exitFullscreen) {
@@ -182,41 +235,43 @@
       }
     }
 
-    function updateFullscreenButtonState() {
+    function syncFullscreenButton() {
       const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
-      fullscreenBtn.textContent = isFullscreen ? '✖ Exit' : '⛶ Fullscreen';
+      if (isFullscreen) {
+        fullscreenBtn.textContent = '✖ Exit Fullscreen';
+        fullscreenBtn.style.backgroundColor = '#dc2626'; // Red for exit
+      } else {
+        fullscreenBtn.textContent = '⛶ Fullscreen';
+        fullscreenBtn.style.backgroundColor = '#2563eb'; // Blue for enter
+      }
     }
 
-    document.addEventListener('fullscreenchange', updateFullscreenButtonState);
-    document.addEventListener('webkitfullscreenchange', updateFullscreenButtonState);
+    document.addEventListener('fullscreenchange', syncFullscreenButton);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenButton);
 
-    // --- Simple Canvas Game Demo Loop ---
+    // --- Simple Canvas Game Loop ---
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
 
-    // Player position and state
-    const player = { x: 375, y: 275, size: 50, speed: 5 };
+    const player = { x: 375, y: 225, size: 40, speed: 5 };
     const keys = { up: false, down: false, left: false, right: false };
 
-    // Button event helper to support both mouse and touch
-    function bindControl(buttonId, directionKey) {
-      const btn = document.getElementById(buttonId);
-      const press = (e) => { e.preventDefault(); keys[directionKey] = true; };
-      const release = (e) => { e.preventDefault(); keys[directionKey] = false; };
+    function bindTouchControl(id, dir) {
+      const el = document.getElementById(id);
+      const setPressed = (val) => (e) => { e.preventDefault(); keys[dir] = val; };
 
-      btn.addEventListener('mousedown', press);
-      btn.addEventListener('mouseup', release);
-      btn.addEventListener('mouseleave', release);
-      btn.addEventListener('touchstart', press, { passive: false });
-      btn.addEventListener('touchend', release, { passive: false });
+      el.addEventListener('mousedown', setPressed(true));
+      el.addEventListener('mouseup', setPressed(false));
+      el.addEventListener('mouseleave', setPressed(false));
+      el.addEventListener('touchstart', setPressed(true), { passive: false });
+      el.addEventListener('touchend', setPressed(false), { passive: false });
     }
 
-    bindControl('btn-up', 'up');
-    bindControl('btn-down', 'down');
-    bindControl('btn-left', 'left');
-    bindControl('btn-right', 'right');
+    bindTouchControl('btn-up', 'up');
+    bindTouchControl('btn-down', 'down');
+    bindTouchControl('btn-left', 'left');
+    bindTouchControl('btn-right', 'right');
 
-    // Keyboard support
     window.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowUp' || e.key === 'w') keys.up = true;
       if (e.key === 'ArrowDown' || e.key === 's') keys.down = true;
@@ -231,26 +286,34 @@
       if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
     });
 
-    // Render loop
-    function gameLoop() {
-      // Movement update
+    function loop() {
       if (keys.up && player.y > 0) player.y -= player.speed;
       if (keys.down && player.y + player.size < canvas.height) player.y += player.speed;
       if (keys.left && player.x > 0) player.x -= player.speed;
       if (keys.right && player.x + player.size < canvas.width) player.x += player.speed;
 
-      // Draw background
-      ctx.fillStyle = '#1e293b';
+      // Background
+      ctx.fillStyle = '#0f172a';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw player box
+      // Grid Pattern
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < canvas.width; x += 40) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += 40) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+
+      // Player
       ctx.fillStyle = '#38bdf8';
       ctx.fillRect(player.x, player.y, player.size, player.size);
 
-      requestAnimationFrame(gameLoop);
+      requestAnimationFrame(loop);
     }
 
-    requestAnimationFrame(gameLoop);
+    requestAnimationFrame(loop);
   </script>
 </body>
 </html>
