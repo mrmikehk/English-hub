@@ -2,17 +2,27 @@
 <html lang="en">
 <head>
   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-QK9TJVW1KW"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-QK9TJVW1KW');
-</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QK9TJVW1KW"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-QK9TJVW1KW');
+  </script>
+  
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Spaxe Town Smartboard Color Battle - Head-to-Head</title>
+  
+  <!-- SEO Optimization Meta Tags -->
+  <title>Space Town Head-to-Head Color Battle | mrmike.hk Primary English Games</title>
+  <meta name="description" content="An interactive head-to-head Smartboard game for Primary 1 English classrooms. Students race to tap the correct colors on scrambled 3x3 grids.">
+  <meta name="keywords" content="Space Town, color matcher, ESL games, interactive smartboard game, primary english, Mr. Mike, vocabulary game, head-to-head">
+  <meta name="author" content="Mr. Mike">
+  
+  <!-- Open Graph / Social Tags -->
+  <meta property="og:title" content="Space Town Head-to-Head Color Battle">
+  <meta property="og:description" content="Race to touch the correct color in this fast-paced vocabulary game for primary classrooms.">
+  <meta property="og:type" content="website">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -33,8 +43,8 @@
     body {
       font-family: 'Fredoka', 'Nunito', sans-serif;
       background: radial-gradient(circle at 50% 20%, #fefce8 0%, #e0f2fe 50%, #dbeafe 100%);
-      overflow: hidden;
-      height: 100vh;
+      overflow-x: hidden;
+      min-height: 100vh;
       width: 100vw;
     }
 
@@ -119,14 +129,13 @@
       gap: 0.6rem;
       width: 100%;
       height: 100%;
-      max-height: calc(100vh - 250px);
+      min-height: 400px;
       aspect-ratio: 1 / 1;
     }
 
     @media (min-height: 800px) {
       .arena-grid {
         gap: 0.85rem;
-        max-height: calc(100vh - 260px);
       }
     }
 
@@ -144,10 +153,10 @@
   </style>
 </head>
 
-<body class="flex flex-col items-center justify-between p-2 sm:p-4 select-none">
+<body class="flex flex-col items-center p-2 sm:p-4 select-none">
 
   <!-- Header Navigation & Classroom Tools -->
-  <header class="w-full max-w-7xl flex items-center justify-between bg-white/95 backdrop-blur-md px-4 sm:px-6 py-2 rounded-2xl sm:rounded-3xl shadow-md border-2 border-amber-200">
+  <header class="w-full max-w-7xl flex items-center justify-between bg-white/95 backdrop-blur-md px-4 sm:px-6 py-2 rounded-2xl sm:rounded-3xl shadow-md border-2 border-amber-200 mt-2 mb-4">
     <div class="flex items-center gap-2">
       <span class="text-2xl sm:text-3xl">⚔️</span>
       <div>
@@ -182,8 +191,8 @@
     </div>
   </header>
 
-  <!-- Big Target Callout Prompt Banner (Centered above the two boards) -->
-  <section class="w-full max-w-4xl my-2 flex items-center justify-center relative">
+  <!-- Big Target Callout Prompt Banner -->
+  <section class="w-full max-w-4xl mb-4 flex items-center justify-center relative">
     <div class="bg-white px-6 sm:px-10 py-2 sm:py-3.5 rounded-3xl shadow-lg border-4 border-amber-300 flex items-center gap-3 sm:gap-4 z-20">
       <span class="text-2xl sm:text-3xl animate-bounce">👉</span>
       <span class="text-lg sm:text-2xl font-extrabold text-slate-600 uppercase tracking-wide">Touch the:</span>
@@ -199,11 +208,11 @@
     </div>
   </section>
 
-  <!-- Main Head-to-Head Split Arena (Side-by-Side for Smartboards) -->
-  <main class="w-full max-w-7xl flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 items-center px-1">
+  <!-- Main Head-to-Head Split Arena -->
+  <main class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 items-center px-1 mb-8">
     
     <!-- LEFT SIDE: TEAM 1 -->
-    <div class="h-full flex flex-col items-center justify-between bg-sky-50/80 rounded-3xl p-3 sm:p-4 border-4 border-sky-300 shadow-lg relative overflow-hidden">
+    <div class="flex flex-col items-center justify-between bg-sky-50/80 rounded-3xl p-3 sm:p-4 border-4 border-sky-300 shadow-lg relative overflow-hidden">
       <!-- Team 1 Banner Header -->
       <div class="w-full flex items-center justify-between mb-2 px-2">
         <div class="flex items-center gap-2 cursor-pointer group" id="team1NameContainer" title="Click to rename team">
@@ -218,13 +227,13 @@
       </div>
 
       <!-- Team 1 3x3 Card Grid -->
-      <div class="flex-1 flex items-center justify-center w-full">
+      <div class="w-full">
         <div id="team1Grid" class="arena-grid"></div>
       </div>
     </div>
 
     <!-- RIGHT SIDE: TEAM 2 -->
-    <div class="h-full flex flex-col items-center justify-between bg-pink-50/80 rounded-3xl p-3 sm:p-4 border-4 border-pink-300 shadow-lg relative overflow-hidden">
+    <div class="flex flex-col items-center justify-between bg-pink-50/80 rounded-3xl p-3 sm:p-4 border-4 border-pink-300 shadow-lg relative overflow-hidden">
       <!-- Team 2 Banner Header -->
       <div class="w-full flex items-center justify-between mb-2 px-2">
         <div class="flex items-center gap-2 cursor-pointer group" id="team2NameContainer" title="Click to rename team">
@@ -239,19 +248,50 @@
       </div>
 
       <!-- Team 2 3x3 Card Grid -->
-      <div class="flex-1 flex items-center justify-center w-full">
+      <div class="w-full">
         <div id="team2Grid" class="arena-grid"></div>
       </div>
     </div>
   </main>
 
   <!-- Footer Actions -->
-  <footer class="w-full max-w-7xl py-1 flex items-center justify-between text-slate-500 text-xs sm:text-sm font-semibold px-2">
-    <span>💡 Tip: Tap team names to rename them anytime! Positions are scrambled on both boards.</span>
+  <footer class="w-full max-w-7xl py-2 flex flex-col sm:flex-row items-center justify-between text-slate-500 text-xs sm:text-sm font-semibold px-2 mb-6">
+    <span class="mb-2 sm:mb-0">💡 Tip: Tap team names to rename them anytime! Positions are scrambled on both boards.</span>
     <div class="flex items-center gap-4">
       <button id="resetMatchBtn" class="hover:text-red-600 underline font-bold transition">Reset Match (0 - 0)</button>
     </div>
   </footer>
+
+  <!-- Game Description & Instructions Section -->
+  <section class="w-full max-w-7xl bg-white/80 backdrop-blur-md rounded-3xl shadow-sm border-2 border-slate-200 p-6 sm:p-8 mb-8 text-slate-800">
+    <h2 class="text-2xl font-black text-indigo-700 mb-4">About Space Town Color Battle</h2>
+    <p class="text-base font-semibold mb-6 text-slate-600">
+      This interactive head-to-head Smartboard game helps primary students practice color vocabulary through fast-paced, competitive gameplay. Two teams race against each other, and the first team to touch the correct color on their 3x3 grid wins the point[cite: 1].
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div>
+        <h3 class="text-xl font-black text-indigo-600 mb-3">How to Play</h3>
+        <ul class="list-disc list-inside space-y-2 font-medium text-slate-600">
+          <li>Listen to the spoken color or read the target color displayed in the center banner[cite: 1].</li>
+          <li>One player from each team races to touch the correct color on their side's grid[cite: 1].</li>
+          <li>The first team to tap the correct color scores a point and triggers celebratory confetti[cite: 1].</li>
+          <li>Tapping an incorrect color causes the card to shake and temporarily turn red[cite: 1].</li>
+          <li>The first team to reach the target score (default is 10) wins the match[cite: 1].</li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-xl font-black text-indigo-600 mb-3">Teacher Controls & Customization</h3>
+        <ul class="list-disc list-inside space-y-2 font-medium text-slate-600">
+          <li><strong>Rename Teams:</strong> Tap the default team names ("Boys" and "Girls") to rename them at any time[cite: 1].</li>
+          <li><strong>Match Settings:</strong> Click the ⚙️ Settings gear icon to change the race goal to first to 5, 10, 15, or 20[cite: 1].</li>
+          <li><strong>Vocabulary Settings:</strong> In the settings menu, toggle color names on/off or add custom hex colors[cite: 1].</li>
+          <li><strong>Audio Controls:</strong> Use the 🔊 button to repeat the target color and the 🔔 button to toggle sound effects[cite: 1].</li>
+        </ul>
+      </div>
+    </div>
+  </section>
 
   <!-- Rename Team Inline Modal -->
   <div id="renameModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
