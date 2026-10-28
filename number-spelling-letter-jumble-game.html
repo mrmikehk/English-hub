@@ -1,230 +1,319 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game with Visible Fullscreen Button</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QK9TJVW1KW"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-QK9TJVW1KW');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO Metadata -->
+  <title>Number Spell Jumble! - Free Online Number Words Spelling Game</title>
+  <meta name="description" content="Play Number Spell Jumble, an interactive educational spelling game for primary students. Unscramble lowercase letter tiles to spell number words from one to ten." />
+  <meta name="keywords" content="number spelling game, number words, phonics games, KS1 english, primary 1 english, word scramble, interactive learning games" />
+  <link rel="canonical" href="https://mrmike.hk/games/number-spelling-letter-jumble-game.html" />
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:title" content="Number Spell Jumble! - Online Spelling Game" />
+  <meta property="og:description" content="Practice spelling number words 1 to 10 with interactive drag-and-drop tiles and instant audio feedback." />
+  <meta property="og:type" content="website" />
+
+  <!-- Schema.org Educational Web Application -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Number Spell Jumble",
+    "applicationCategory": "EducationalGame",
+    "operatingSystem": "Any",
+    "description": "An interactive number spelling puzzle designed for primary learners to practice spelling words for numbers 1 to 10."
+  }
+  </script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Fredoka & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti for winning celebrations -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
-      background-color: #121212;
-      color: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 10px;
-    }
-
-    /* The root container that enters full-screen mode */
-    #game-container {
-      position: relative;
-      width: 100%;
-      max-width: 800px;
-      display: flex;
-      flex-direction: column;
-      background-color: #1e1e1e;
-      border: 2px solid #333333;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-    }
-
-    /* Native Fullscreen style override */
-    #game-container:fullscreen {
-      width: 100vw;
-      height: 100vh;
-      max-width: none;
-      border: none;
-      border-radius: 0;
-    }
-
-    #game-container:-webkit-full-screen {
-      width: 100vw;
-      height: 100vh;
-      max-width: none;
-      border: none;
-      border-radius: 0;
-    }
-
-    /* Visible persistent top bar */
-    .top-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: #262626;
-      padding: 10px 16px;
-      border-bottom: 2px solid #333333;
-      z-index: 50;
-    }
-
-    .game-title {
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-
-    /* Highlighted Fullscreen Button */
-    .fullscreen-trigger-btn {
-      background-color: #2563eb;
-      color: #ffffff;
-      border: none;
-      border-radius: 6px;
-      padding: 8px 16px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background-color 0.15s, transform 0.1s;
-      user-select: none;
-    }
-
-    .fullscreen-trigger-btn:hover {
-      background-color: #1d4ed8;
-    }
-
-    .fullscreen-trigger-btn:active {
-      transform: scale(0.96);
-    }
-
-    /* Canvas play area */
-    .viewport {
-      position: relative;
-      width: 100%;
-      flex: 1;
-      background-color: #0f172a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 400px;
-    }
-
-    #game-canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: contain;
-    }
-
-    /* On-screen controls placed over the canvas */
-    #game-controls {
-      position: absolute;
-      bottom: 20px;
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      padding: 0 24px;
-      pointer-events: none; /* Let canvas capture other clicks */
-      z-index: 40;
-    }
-
-    .dpad {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .dpad-row {
-      display: flex;
-      gap: 6px;
-    }
-
-    .control-btn {
-      pointer-events: auto; /* Buttons accept touch and click */
-      background: rgba(255, 255, 255, 0.85);
-      color: #111111;
-      border: 1px solid rgba(0, 0, 0, 0.2);
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
+      font-family: 'Fredoka', 'Inter', cursive, sans-serif;
       user-select: none;
       -webkit-user-select: none;
       touch-action: manipulation;
-      transition: background-color 0.1s;
     }
 
-    .control-btn:active {
-      background: #ffffff;
-    }
-
-    .dir-btn {
-      width: 50px;
-      height: 50px;
-      font-size: 1.25rem;
+    /* Container Fullscreen Styling */
+    #gameAppContainer:fullscreen {
+      width: 100vw;
+      height: 100vh;
+      max-width: none;
+      padding: 1rem;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-y: auto;
+      background: linear-gradient(to bottom, #e0f2fe, #fef3c7, #e0e7ff);
+    }
+    #gameAppContainer:-webkit-full-screen {
+      width: 100vw;
+      height: 100vh;
+      max-width: none;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-y: auto;
+      background: linear-gradient(to bottom, #e0f2fe, #fef3c7, #e0e7ff);
     }
 
-    .action-btn {
-      min-width: 80px;
-      height: 50px;
-      font-size: 1rem;
-      padding: 0 16px;
+    /* 3D bouncy tile styling */
+    .tile-3d {
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.2s;
+    }
+    .tile-3d:active, .tile-3d.active-press {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    /* Dragging ghost styling */
+    .dragging-ghost {
+      opacity: 0.45;
+      transform: scale(0.95);
+    }
+    .touch-dragging {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%) scale(1.1);
+      box-shadow: 0 16px 24px rgba(0,0,0,0.25);
+      transition: none !important;
+    }
+
+    /* Slot hover highlight */
+    .slot-hover {
+      border-color: #6366f1 !important;
+      background-color: #e0e7ff !important;
+      transform: scale(1.06);
+    }
+
+    /* Keyframe animations */
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      20% { transform: rotate(-8deg); }
+      40% { transform: rotate(8deg); }
+      60% { transform: rotate(-5deg); }
+      80% { transform: rotate(5deg); }
+    }
+    .animate-wiggle {
+      animation: wiggle 0.45s ease-in-out;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.6); opacity: 0; }
+      70% { transform: scale(1.12); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    .animate-pop {
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+    .animate-float {
+      animation: floaty 3s ease-in-out infinite;
     }
   </style>
 </head>
-<body>
 
-  <!-- Game Wrapper -->
-  <div id="game-container">
+<body class="bg-gradient-to-b from-sky-100 via-amber-50 to-indigo-100 min-h-screen text-slate-800 flex flex-col justify-between p-3 sm:p-5 overflow-x-hidden">
+
+  <!-- WRAPPER TARGETED FOR FULLSCREEN -->
+  <div id="gameAppContainer" class="w-full flex flex-col items-center flex-1">
     
-    <!-- Top Bar with Visible Fullscreen Button -->
-    <header class="top-header">
-      <span class="game-title">Canvas Game</span>
-      <button id="fullscreen-btn" class="fullscreen-trigger-btn" type="button">
-        ⛶ Fullscreen
-      </button>
+    <!-- TOP APP BAR / SCOREBOARD WITH FULLSCREEN BUTTON -->
+    <header class="max-w-2xl mx-auto w-full flex items-center justify-between bg-white/90 backdrop-blur-md rounded-2xl px-3 sm:px-4 py-2.5 shadow-md border border-white/60 mb-2">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl sm:text-3xl">🎯</span>
+        <div>
+          <h1 class="text-base sm:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent leading-none">
+            Number Spell Jumble
+          </h1>
+          <p class="text-xs text-slate-500 font-medium">Spell the number!</p>
+        </div>
+      </div>
+
+      <!-- Controls & Stats: Fullscreen, Streak, Score, Sound -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5">
+        <!-- Fullscreen Button -->
+        <button id="fullscreenToggle" class="flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2.5 py-1.5 rounded-xl text-indigo-700 text-xs sm:text-sm font-bold shadow-sm transition-colors" title="Toggle Fullscreen">
+          <span id="fullscreenIcon">⛶</span>
+          <span id="fullscreenLabel" class="hidden xs:inline sm:inline">Fullscreen</span>
+        </button>
+
+        <div class="flex items-center gap-1 bg-amber-50 border border-amber-200 px-2.5 py-1.5 rounded-xl text-amber-800 text-xs sm:text-sm font-bold shadow-sm">
+          <span>⭐</span>
+          <span id="scoreDisplay">0</span>
+        </div>
+        <div class="flex items-center gap-1 bg-rose-50 border border-rose-200 px-2.5 py-1.5 rounded-xl text-rose-700 text-xs sm:text-sm font-bold shadow-sm">
+          <span>🔥</span>
+          <span id="streakDisplay">0</span>
+        </div>
+        <!-- Audio Toggle -->
+        <button id="soundToggle" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-sm sm:text-base transition-colors" title="Toggle Sound">
+          🔊
+        </button>
+      </div>
     </header>
 
-    <!-- Canvas Area -->
-    <main class="viewport">
-      <canvas id="game-canvas" width="800" height="500"></canvas>
-
-      <!-- Persistent On-Screen Controls -->
-      <nav id="game-controls" aria-label="Game Controls">
-        <div class="dpad">
-          <button id="btn-up" class="control-btn dir-btn" aria-label="Up">▲</button>
-          <div class="dpad-row">
-            <button id="btn-left" class="control-btn dir-btn" aria-label="Left">◀</button>
-            <button id="btn-down" class="control-btn dir-btn" aria-label="Down">▼</button>
-            <button id="btn-right" class="control-btn dir-btn" aria-label="Right">▶</button>
+    <!-- MAIN GAME AREA -->
+    <main class="max-w-2xl mx-auto w-full flex-1 flex flex-col justify-center items-center gap-4 py-2">
+      
+      <!-- TOP SECTION: BIG NUMERAL & VISUAL COUNTER -->
+      <div class="w-full flex flex-col items-center">
+        <div class="animate-float relative flex flex-col items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-3xl p-4 sm:p-6 shadow-xl border-4 border-white text-white w-48 sm:w-56 text-center">
+          <div class="absolute -top-3 bg-yellow-400 text-yellow-950 text-xs px-3 py-0.5 rounded-full font-bold shadow uppercase tracking-wider">
+            Target Number
           </div>
+          <span id="numeralDisplay" class="text-6xl sm:text-7xl font-extrabold tracking-tight drop-shadow-md">
+            7
+          </span>
+          <div id="counterIcons" class="flex flex-wrap justify-center gap-1 mt-2 max-w-[200px]"></div>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-600 mt-2 font-medium">
+          Listen & spell the number word using the tiles below!
+        </p>
+      </div>
+
+      <!-- MIDDLE SECTION: ANSWER SLOTS -->
+      <section class="w-full bg-white/80 backdrop-blur-md rounded-2xl p-4 sm:p-5 shadow-lg border border-white flex flex-col items-center">
+        <div class="text-xs font-semibold text-slate-400 tracking-wider uppercase mb-2">
+          Drop or Tap Letters Here (<span id="letterCountGoal">5</span> letters)
         </div>
 
-        <button id="btn-action" class="control-btn action-btn">Action</button>
-      </nav>
-    </main>
+        <div id="slotsContainer" class="flex flex-wrap justify-center gap-2 sm:gap-3 py-2 min-h-[72px] sm:min-h-[84px] items-center"></div>
 
+        <div id="feedbackText" class="text-xs sm:text-sm font-bold min-h-[20px] text-center mt-1 text-slate-500 transition-all">
+          Tap or drag letters into the boxes!
+        </div>
+      </section>
+
+      <!-- BOTTOM SECTION: 8 LETTER TILES POOL -->
+      <section class="w-full bg-indigo-50/70 border border-indigo-100 rounded-2xl p-3 sm:p-4 shadow-inner flex flex-col items-center">
+        <div class="text-xs font-semibold text-indigo-700 tracking-wider uppercase mb-2.5">
+          Letter Pool (8 Letters)
+        </div>
+
+        <div id="poolContainer" class="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-2.5 w-full justify-items-center"></div>
+      </section>
+
+      <!-- ACTION BUTTONS TOOLBAR -->
+      <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 w-full">
+        <button id="hintBtn" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold shadow-md tile-3d text-sm sm:text-base">
+          <span>💡</span> Hint
+        </button>
+
+        <button id="resetBtn" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold shadow-md tile-3d text-sm sm:text-base">
+          <span>↺</span> Clear
+        </button>
+
+        <button id="checkBtn" class="flex items-center gap-1.5 px-6 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold shadow-md tile-3d text-sm sm:text-base">
+          <span>✓</span> Check
+        </button>
+
+        <button id="nextBtn" class="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-md tile-3d text-sm sm:text-base">
+          <span>Next ➔</span>
+        </button>
+      </div>
+
+    </main>
   </div>
 
+  <!-- SEARCH OPTIMIZED DESCRIPTION & INSTRUCTIONS SECTION -->
+  <section class="max-w-2xl mx-auto w-full mt-8 mb-4 bg-white/90 backdrop-blur-sm rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-sm text-left">
+    <h2 class="text-base sm:text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+      <span>📖</span> About Number Spell Jumble
+    </h2>
+    <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+      <strong>Number Spell Jumble</strong> is a free interactive web game built for primary school learners and early readers. It reinforces number-word recognition and phonics foundations by connecting cardinal numerals (1–10) with their lowercase word spellings. Whether on a tablet, smartboard, or desktop, learners develop spelling confidence with immediate audio feedback, visual counting anchors, and interactive tile controls.
+    </p>
+
+    <h3 class="text-sm sm:text-base font-bold text-slate-700 mb-2 flex items-center gap-2">
+      <span>🎮</span> How to Play
+    </h3>
+    <ol class="list-decimal list-inside text-xs sm:text-sm text-slate-600 space-y-1.5 leading-relaxed">
+      <li><strong>Check the target number:</strong> Look at the large numeral and count icons displayed inside the badge at the top.</li>
+      <li><strong>Pick your letters:</strong> Tap or drag lowercase letter tiles from the bottom 8-letter pool into the answer slots.</li>
+      <li><strong>Make adjustments:</strong> Tap any placed letter in the answer boxes to return it to the pool, or press <em>Clear</em> to restart the word.</li>
+      <li><strong>Check or Hint:</strong> When all slots are filled, tap <em>Check</em> (or press Enter) to verify your spelling. Need a clue? Tap <em>Hint</em> to automatically place the next letter.</li>
+      <li><strong>Enter Fullscreen:</strong> Tap the <em>Fullscreen</em> button in the top navigation bar anytime for focused play in the classroom or on mobile devices.</li>
+    </ol>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="max-w-2xl mx-auto w-full text-center py-2 text-xs text-slate-400 font-medium">
+    Designed for GitHub Pages • Tap or drag to spell • Web Audio powered
+  </footer>
+
+  <!-- SCRIPT LOGIC -->
   <script>
-    // --- Fullscreen Toggle Logic ---
-    const container = document.getElementById('game-container');
-    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    /* ==========================================================
+       1. DATA DEFINITIONS & GAME STATE
+       ========================================================== */
+    const NUMBERS_DICT = [
+      { num: 1, word: "one", icon: "⭐" },
+      { num: 2, word: "two", icon: "🍎" },
+      { num: 3, word: "three", icon: "🌸" },
+      { num: 4, word: "four", icon: "🚗" },
+      { num: 5, word: "five", icon: "🎈" },
+      { num: 6, word: "six", icon: "🍕" },
+      { num: 7, word: "seven", icon: "🚀" },
+      { num: 8, word: "eight", icon: "🍇" },
+      { num: 9, word: "nine", icon: "⚽" },
+      { num: 10, word: "ten", icon: "💎" }
+    ];
 
-    fullscreenBtn.addEventListener('click', toggleFullscreen);
+    const ALPHABET = "abcdefghijklmnopqrstuvwxyz";
 
-    function toggleFullscreen() {
+    let state = {
+      currentNumberObj: null,
+      targetWord: "",
+      poolTiles: [],
+      slots: [],
+      score: 0,
+      streak: 0,
+      soundEnabled: true,
+      roundSolved: false
+    };
+
+    /* ==========================================================
+       2. FULLSCREEN MANAGEMENT
+       ========================================================== */
+    const gameAppContainer = document.getElementById('gameAppContainer');
+    const fullscreenToggle = document.getElementById('fullscreenToggle');
+    const fullscreenIcon = document.getElementById('fullscreenIcon');
+    const fullscreenLabel = document.getElementById('fullscreenLabel');
+
+    function toggleAppFullscreen() {
       const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
-
       if (!isFullscreen) {
-        if (container.requestFullscreen) {
-          container.requestFullscreen();
-        } else if (container.webkitRequestFullscreen) {
-          container.webkitRequestFullscreen();
+        if (gameAppContainer.requestFullscreen) {
+          gameAppContainer.requestFullscreen();
+        } else if (gameAppContainer.webkitRequestFullscreen) {
+          gameAppContainer.webkitRequestFullscreen();
         }
       } else {
         if (document.exitFullscreen) {
@@ -235,85 +324,604 @@
       }
     }
 
-    function syncFullscreenButton() {
+    function syncFullscreenUI() {
       const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
       if (isFullscreen) {
-        fullscreenBtn.textContent = '✖ Exit Fullscreen';
-        fullscreenBtn.style.backgroundColor = '#dc2626'; // Red for exit
+        fullscreenIcon.textContent = '✖';
+        if (fullscreenLabel) fullscreenLabel.textContent = 'Exit';
       } else {
-        fullscreenBtn.textContent = '⛶ Fullscreen';
-        fullscreenBtn.style.backgroundColor = '#2563eb'; // Blue for enter
+        fullscreenIcon.textContent = '⛶';
+        if (fullscreenLabel) fullscreenLabel.textContent = 'Fullscreen';
       }
     }
 
-    document.addEventListener('fullscreenchange', syncFullscreenButton);
-    document.addEventListener('webkitfullscreenchange', syncFullscreenButton);
+    fullscreenToggle.addEventListener('click', toggleAppFullscreen);
+    document.addEventListener('fullscreenchange', syncFullscreenUI);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenUI);
 
-    // --- Simple Canvas Game Loop ---
-    const canvas = document.getElementById('game-canvas');
-    const ctx = canvas.getContext('2d');
+    /* ==========================================================
+       3. WEB AUDIO SYNTHESIZER
+       ========================================================== */
+    let audioCtx = null;
 
-    const player = { x: 375, y: 225, size: 40, speed: 5 };
-    const keys = { up: false, down: false, left: false, right: false };
-
-    function bindTouchControl(id, dir) {
-      const el = document.getElementById(id);
-      const setPressed = (val) => (e) => { e.preventDefault(); keys[dir] = val; };
-
-      el.addEventListener('mousedown', setPressed(true));
-      el.addEventListener('mouseup', setPressed(false));
-      el.addEventListener('mouseleave', setPressed(false));
-      el.addEventListener('touchstart', setPressed(true), { passive: false });
-      el.addEventListener('touchend', setPressed(false), { passive: false });
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
     }
 
-    bindTouchControl('btn-up', 'up');
-    bindTouchControl('btn-down', 'down');
-    bindTouchControl('btn-left', 'left');
-    bindTouchControl('btn-right', 'right');
-
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'w') keys.up = true;
-      if (e.key === 'ArrowDown' || e.key === 's') keys.down = true;
-      if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
-      if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
-    });
-
-    window.addEventListener('keyup', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'w') keys.up = false;
-      if (e.key === 'ArrowDown' || e.key === 's') keys.down = false;
-      if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
-      if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
-    });
-
-    function loop() {
-      if (keys.up && player.y > 0) player.y -= player.speed;
-      if (keys.down && player.y + player.size < canvas.height) player.y += player.speed;
-      if (keys.left && player.x > 0) player.x -= player.speed;
-      if (keys.right && player.x + player.size < canvas.width) player.x += player.speed;
-
-      // Background
-      ctx.fillStyle = '#0f172a';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Grid Pattern
-      ctx.strokeStyle = '#1e293b';
-      ctx.lineWidth = 1;
-      for (let x = 0; x < canvas.width; x += 40) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    const soundEffects = {
+      click() {
+        if (!state.soundEnabled) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(700, ctx.currentTime + 0.06);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.07);
+      },
+      returnTile() {
+        if (!state.soundEnabled) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(500, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(280, ctx.currentTime + 0.07);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.08);
+      },
+      success() {
+        if (!state.soundEnabled) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.09);
+          gain.gain.setValueAtTime(0.18, ctx.currentTime + idx * 0.09);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.09 + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + idx * 0.09);
+          osc.stop(ctx.currentTime + idx * 0.09 + 0.36);
+        });
+      },
+      error() {
+        if (!state.soundEnabled) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(190, ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(140, ctx.currentTime + 0.18);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.23);
+      },
+      hint() {
+        if (!state.soundEnabled) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.16);
       }
-      for (let y = 0; y < canvas.height; y += 40) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    };
+
+    /* ==========================================================
+       4. GAME CORE SETUP & GENERATOR
+       ========================================================== */
+    function initRound() {
+      state.roundSolved = false;
+
+      let candidate;
+      do {
+        candidate = NUMBERS_DICT[Math.floor(Math.random() * NUMBERS_DICT.length)];
+      } while (state.currentNumberObj && candidate.num === state.currentNumberObj.num && NUMBERS_DICT.length > 1);
+
+      state.currentNumberObj = candidate;
+      state.targetWord = candidate.word.toLowerCase();
+
+      state.slots = new Array(state.targetWord.length).fill(null);
+
+      const neededLetters = state.targetWord.split('');
+      const distractorsNeeded = 8 - neededLetters.length;
+      const poolChars = [...neededLetters];
+
+      for (let i = 0; i < distractorsNeeded; i++) {
+        const randLetter = ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+        poolChars.push(randLetter);
       }
 
-      // Player
-      ctx.fillStyle = '#38bdf8';
-      ctx.fillRect(player.x, player.y, player.size, player.size);
+      for (let i = poolChars.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [poolChars[i], poolChars[j]] = [poolChars[j], poolChars[i]];
+      }
 
-      requestAnimationFrame(loop);
+      state.poolTiles = poolChars.map((char, idx) => ({
+        id: `tile-${idx}-${Date.now()}`,
+        char: char,
+        inSlotIndex: null
+      }));
+
+      setFeedback("Tap or drag letters to spell the number word!", "text-slate-500");
+      renderGame();
     }
 
-    requestAnimationFrame(loop);
+    function setFeedback(msg, colorClass) {
+      const fb = document.getElementById('feedbackText');
+      fb.className = `text-xs sm:text-sm font-bold min-h-[20px] text-center mt-1 transition-all ${colorClass}`;
+      fb.innerText = msg;
+    }
+
+    /* ==========================================================
+       5. DOM RENDERING
+       ========================================================== */
+    function renderGame() {
+      const numeralEl = document.getElementById('numeralDisplay');
+      numeralEl.innerText = state.currentNumberObj.num;
+
+      const counterContainer = document.getElementById('counterIcons');
+      counterContainer.innerHTML = '';
+      for (let i = 0; i < state.currentNumberObj.num; i++) {
+        const span = document.createElement('span');
+        span.className = 'text-base sm:text-lg animate-pop';
+        span.style.animationDelay = `${i * 0.04}s`;
+        span.innerText = state.currentNumberObj.icon;
+        counterContainer.appendChild(span);
+      }
+
+      document.getElementById('letterCountGoal').innerText = state.targetWord.length;
+
+      const slotsContainer = document.getElementById('slotsContainer');
+      slotsContainer.innerHTML = '';
+
+      state.slots.forEach((tileId, slotIndex) => {
+        const slotEl = document.createElement('div');
+        slotEl.dataset.slotIndex = slotIndex;
+        slotEl.className = "slot relative w-12 h-14 sm:w-14 sm:h-16 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/70 flex items-center justify-center transition-all duration-150";
+
+        if (tileId !== null) {
+          const tile = state.poolTiles.find(t => t.id === tileId);
+          if (tile) {
+            slotEl.classList.remove('border-dashed', 'border-slate-300', 'bg-slate-50/70');
+            slotEl.classList.add('border-indigo-400', 'bg-white', 'shadow-md');
+
+            const tileInner = document.createElement('div');
+            tileInner.className = `w-full h-full rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-extrabold text-indigo-700 bg-gradient-to-b from-indigo-100 to-indigo-200 border-2 border-indigo-400 tile-3d cursor-pointer select-none animate-pop`;
+            tileInner.innerText = tile.char;
+            tileInner.title = "Click to return to bottom pool";
+
+            tileInner.addEventListener('click', (e) => {
+              e.stopPropagation();
+              returnTileToPool(tile.id);
+            });
+
+            slotEl.appendChild(tileInner);
+          }
+        } else {
+          const dot = document.createElement('div');
+          dot.className = 'w-3 h-3 rounded-full bg-slate-200 pointer-events-none';
+          slotEl.appendChild(dot);
+        }
+
+        slotEl.addEventListener('dragover', handleDragOver);
+        slotEl.addEventListener('dragleave', handleDragLeave);
+        slotEl.addEventListener('drop', handleDrop);
+
+        slotEl.addEventListener('click', () => {
+          if (state.slots[slotIndex] === null) {
+            const firstAvailable = state.poolTiles.find(t => t.inSlotIndex === null);
+            if (firstAvailable) {
+              placeTileInSlot(firstAvailable.id, slotIndex);
+            }
+          }
+        });
+
+        slotsContainer.appendChild(slotEl);
+      });
+
+      const poolContainer = document.getElementById('poolContainer');
+      poolContainer.innerHTML = '';
+
+      state.poolTiles.forEach((tile) => {
+        const tileWrapper = document.createElement('div');
+        tileWrapper.className = 'w-12 h-14 sm:w-14 sm:h-16 flex items-center justify-center';
+
+        if (tile.inSlotIndex === null) {
+          const btn = document.createElement('div');
+          btn.id = tile.id;
+          btn.dataset.char = tile.char;
+          btn.draggable = true;
+          btn.className = `w-12 h-14 sm:w-14 sm:h-16 rounded-2xl bg-gradient-to-b from-amber-200 via-amber-300 to-amber-400 text-amber-950 border-2 border-amber-400/80 font-bold text-2xl sm:text-3xl flex items-center justify-center cursor-grab active:cursor-grabbing tile-3d select-none transform transition-transform hover:scale-105 active:scale-95`;
+          btn.innerText = tile.char;
+
+          btn.addEventListener('click', () => {
+            placeInFirstOpenSlot(tile.id);
+          });
+
+          btn.addEventListener('dragstart', handleDragStart);
+          btn.addEventListener('dragend', handleDragEnd);
+
+          attachTouchDragEvents(btn, tile.id);
+
+          tileWrapper.appendChild(btn);
+        } else {
+          const emptyPlaceholder = document.createElement('div');
+          emptyPlaceholder.className = 'w-12 h-14 sm:w-14 sm:h-16 rounded-2xl border-2 border-dashed border-indigo-200 bg-white/40 flex items-center justify-center';
+          tileWrapper.appendChild(emptyPlaceholder);
+        }
+
+        poolContainer.appendChild(tileWrapper);
+      });
+
+      document.getElementById('scoreDisplay').innerText = state.score;
+      document.getElementById('streakDisplay').innerText = state.streak;
+    }
+
+    /* ==========================================================
+       6. GAME INTERACTIONS & SLOT LOGIC
+       ========================================================== */
+    function placeInFirstOpenSlot(tileId) {
+      if (state.roundSolved) return;
+      const firstOpenIndex = state.slots.findIndex(s => s === null);
+      if (firstOpenIndex !== -1) {
+        placeTileInSlot(tileId, firstOpenIndex);
+      } else {
+        setFeedback("All boxes are full! Click 'Check' or tap a letter to remove it.", "text-amber-600");
+        soundEffects.error();
+      }
+    }
+
+    function placeTileInSlot(tileId, slotIndex) {
+      if (state.roundSolved) return;
+
+      const tile = state.poolTiles.find(t => t.id === tileId);
+      if (!tile) return;
+
+      if (state.slots[slotIndex] !== null) {
+        const oldTileId = state.slots[slotIndex];
+        const oldTile = state.poolTiles.find(t => t.id === oldTileId);
+        if (oldTile) oldTile.inSlotIndex = null;
+      }
+
+      if (tile.inSlotIndex !== null) {
+        state.slots[tile.inSlotIndex] = null;
+      }
+
+      state.slots[slotIndex] = tile.id;
+      tile.inSlotIndex = slotIndex;
+
+      soundEffects.click();
+      renderGame();
+
+      if (!state.slots.includes(null)) {
+        checkCurrentAnswer(false);
+      }
+    }
+
+    function returnTileToPool(tileId) {
+      if (state.roundSolved) return;
+      const tile = state.poolTiles.find(t => t.id === tileId);
+      if (!tile) return;
+
+      if (tile.inSlotIndex !== null) {
+        state.slots[tile.inSlotIndex] = null;
+        tile.inSlotIndex = null;
+      }
+
+      soundEffects.returnTile();
+      renderGame();
+    }
+
+    function resetAllSlots() {
+      if (state.roundSolved) return;
+      state.poolTiles.forEach(tile => {
+        tile.inSlotIndex = null;
+      });
+      state.slots = new Array(state.targetWord.length).fill(null);
+      soundEffects.returnTile();
+      setFeedback("Letters cleared! Try again.", "text-slate-500");
+      renderGame();
+    }
+
+    function provideHint() {
+      if (state.roundSolved) return;
+
+      const targetChars = state.targetWord.split('');
+      const incorrectIndices = [];
+
+      targetChars.forEach((char, idx) => {
+        const currentTileId = state.slots[idx];
+        if (!currentTileId) {
+          incorrectIndices.push(idx);
+        } else {
+          const currentTile = state.poolTiles.find(t => t.id === currentTileId);
+          if (!currentTile || currentTile.char !== char) {
+            incorrectIndices.push(idx);
+          }
+        }
+      });
+
+      if (incorrectIndices.length === 0) {
+        setFeedback("You've already placed all correct letters! Tap Check.", "text-indigo-600");
+        return;
+      }
+
+      const hintSlotIndex = incorrectIndices[0];
+      const neededChar = targetChars[hintSlotIndex];
+
+      let candidateTile = state.poolTiles.find(t => {
+        if (t.char !== neededChar) return false;
+        if (t.inSlotIndex !== null && state.targetWord[t.inSlotIndex] === t.char) {
+          return false;
+        }
+        return true;
+      });
+
+      if (!candidateTile) {
+        candidateTile = state.poolTiles.find(t => t.char === neededChar);
+      }
+
+      if (candidateTile) {
+        placeTileInSlot(candidateTile.id, hintSlotIndex);
+        soundEffects.hint();
+        setFeedback(`Hint: Placed letter '${neededChar}'!`, "text-amber-700");
+      }
+    }
+
+    function checkCurrentAnswer(isManualCheck = true) {
+      if (state.roundSolved) return;
+
+      let spelledWord = "";
+      let hasEmpty = false;
+
+      for (let i = 0; i < state.slots.length; i++) {
+        const tileId = state.slots[i];
+        if (!tileId) {
+          hasEmpty = true;
+          break;
+        }
+        const tile = state.poolTiles.find(t => t.id === tileId);
+        spelledWord += tile ? tile.char : "";
+      }
+
+      if (hasEmpty) {
+        if (isManualCheck) {
+          setFeedback("Fill in all boxes first!", "text-rose-500");
+          soundEffects.error();
+          shakeSlots();
+        }
+        return;
+      }
+
+      if (spelledWord === state.targetWord) {
+        state.roundSolved = true;
+        state.score += 10;
+        state.streak += 1;
+        soundEffects.success();
+        triggerConfetti();
+
+        setFeedback(`🎉 Fantastic! You spelled "${state.targetWord.toUpperCase()}"!`, "text-emerald-600");
+        renderGame();
+
+        const slots = document.querySelectorAll('.slot');
+        slots.forEach(slot => {
+          slot.classList.remove('border-indigo-400');
+          slot.classList.add('border-emerald-500', 'bg-emerald-50');
+        });
+
+        setTimeout(() => {
+          if (state.roundSolved) {
+            initRound();
+          }
+        }, 2200);
+
+      } else {
+        if (state.streak > 0) state.streak = 0;
+        soundEffects.error();
+        shakeSlots();
+        setFeedback("Oops, not quite! Try rearranging the letters.", "text-rose-500");
+        renderGame();
+      }
+    }
+
+    function shakeSlots() {
+      const container = document.getElementById('slotsContainer');
+      container.classList.add('animate-wiggle');
+      setTimeout(() => {
+        container.classList.remove('animate-wiggle');
+      }, 500);
+    }
+
+    function triggerConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 50,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+
+    /* ==========================================================
+       7. DRAG & DROP IMPLEMENTATION
+       ========================================================== */
+    let draggedTileId = null;
+
+    function handleDragStart(e) {
+      if (state.roundSolved) return;
+      draggedTileId = this.id;
+      e.dataTransfer.setData('text/plain', this.id);
+      this.classList.add('dragging-ghost');
+    }
+
+    function handleDragEnd() {
+      this.classList.remove('dragging-ghost');
+      draggedTileId = null;
+      document.querySelectorAll('.slot').forEach(s => s.classList.remove('slot-hover'));
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      this.classList.add('slot-hover');
+    }
+
+    function handleDragLeave() {
+      this.classList.remove('slot-hover');
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      this.classList.remove('slot-hover');
+      const tileId = e.dataTransfer.getData('text/plain') || draggedTileId;
+      const targetSlotIndex = parseInt(this.dataset.slotIndex, 10);
+
+      if (tileId && !isNaN(targetSlotIndex)) {
+        placeTileInSlot(tileId, targetSlotIndex);
+      }
+    }
+
+    function attachTouchDragEvents(element, tileId) {
+      let touchClone = null;
+      let startX, startY;
+      let isDragging = false;
+
+      element.addEventListener('touchstart', (e) => {
+        if (state.roundSolved) return;
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        isDragging = false;
+      }, { passive: true });
+
+      element.addEventListener('touchmove', (e) => {
+        if (state.roundSolved) return;
+        const touch = e.touches[0];
+        const dist = Math.hypot(touch.clientX - startX, touch.clientY - startY);
+
+        if (dist > 8 && !isDragging) {
+          isDragging = true;
+          touchClone = element.cloneNode(true);
+          touchClone.id = 'touch-clone-active';
+          touchClone.classList.add('touch-dragging');
+          touchClone.style.left = `${touch.clientX}px`;
+          touchClone.style.top = `${touch.clientY}px`;
+          document.body.appendChild(touchClone);
+          element.classList.add('dragging-ghost');
+        }
+
+        if (isDragging && touchClone) {
+          e.preventDefault();
+          touchClone.style.left = `${touch.clientX}px`;
+          touchClone.style.top = `${touch.clientY}px`;
+
+          const elemUnder = document.elementFromPoint(touch.clientX, touch.clientY);
+          const slot = elemUnder ? elemUnder.closest('.slot') : null;
+          document.querySelectorAll('.slot').forEach(s => s.classList.remove('slot-hover'));
+          if (slot) {
+            slot.classList.add('slot-hover');
+          }
+        }
+      }, { passive: false });
+
+      element.addEventListener('touchend', (e) => {
+        if (isDragging) {
+          if (touchClone && touchClone.parentNode) {
+            touchClone.parentNode.removeChild(touchClone);
+          }
+          element.classList.remove('dragging-ghost');
+          document.querySelectorAll('.slot').forEach(s => s.classList.remove('slot-hover'));
+
+          const touch = e.changedTouches[0];
+          const elemUnder = document.elementFromPoint(touch.clientX, touch.clientY);
+          const targetSlot = elemUnder ? elemUnder.closest('.slot') : null;
+
+          if (targetSlot && targetSlot.dataset.slotIndex !== undefined) {
+            const slotIdx = parseInt(targetSlot.dataset.slotIndex, 10);
+            placeTileInSlot(tileId, slotIdx);
+          }
+          isDragging = false;
+        }
+      });
+    }
+
+    /* ==========================================================
+       8. EVENT LISTENERS SETUP
+       ========================================================== */
+    window.onload = function () {
+      const soundBtn = document.getElementById('soundToggle');
+      soundBtn.addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled;
+        soundBtn.innerText = state.soundEnabled ? '🔊' : '🔇';
+        soundBtn.classList.toggle('opacity-50', !state.soundEnabled);
+      });
+
+      document.getElementById('hintBtn').addEventListener('click', () => {
+        getAudioContext();
+        provideHint();
+      });
+
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        getAudioContext();
+        resetAllSlots();
+      });
+
+      document.getElementById('checkBtn').addEventListener('click', () => {
+        getAudioContext();
+        checkCurrentAnswer(true);
+      });
+
+      document.getElementById('nextBtn').addEventListener('click', () => {
+        getAudioContext();
+        initRound();
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          checkCurrentAnswer(true);
+        } else if (e.key === 'Escape') {
+          resetAllSlots();
+        }
+      });
+
+      initRound();
+    };
   </script>
 </body>
 </html>
