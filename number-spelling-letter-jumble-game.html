@@ -2,31 +2,72 @@
 <html lang="en">
 <head>
   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-QK9TJVW1KW"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QK9TJVW1KW"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
 
-  gtag('config', 'G-QK9TJVW1KW');
-</script>
+    gtag('config', 'G-QK9TJVW1KW');
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Number Spell Jumble! 🌟</title>
+  <title>Number Spell Jumble! 🌟 | Free Online Number Spelling & Word Scramble Game for Kids</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Play Number Spell Jumble, an interactive online spelling game for kids. Drag and drop scrambled letters to spell numbers 1 to 10. Learn spelling, phonics, and number recognition!" />
+  <meta name="keywords" content="number spelling game, word scramble for kids, spell numbers, kindergarten math game, phonics game, educational spelling puzzle, learn to spell numbers" />
+  <meta name="robots" content="index, follow" />
+  
+  <!-- Schema.org Structured Data for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "name": "Number Spell Jumble",
+        "applicationCategory": "EducationalGame",
+        "operatingSystem": "All modern browsers",
+        "description": "An interactive educational spelling game that teaches children how to spell numbers 1 through 10 by unscrambling letter tiles."
+      },
+      {
+        "@type": "HowTo",
+        "name": "How to Play Number Spell Jumble",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Check the Target Number",
+            "text": "Look at the large numeral card and count the fun visual counters to identify the target number."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Unscramble and Place Letters",
+            "text": "Select the correct letters from the 8-letter pool by dragging them or tapping them into the empty word slots."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Check Your Answer and Advance",
+            "text": "Press Check to verify your spelling, earn points, and build your win streak!"
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts: Fredoka & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Canvas Confetti for winning celebrations -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
     body {
       font-family: 'Fredoka', 'Inter', cursive, sans-serif;
-      user-select: none;
-      -webkit-user-select: none;
       touch-action: manipulation;
     }
 
@@ -98,27 +139,27 @@
   <!-- TOP APP BAR / SCOREBOARD -->
   <header class="max-w-2xl mx-auto w-full flex items-center justify-between bg-white/90 backdrop-blur-md rounded-2xl px-4 py-2.5 shadow-md border border-white/60 mb-2">
     <div class="flex items-center gap-2">
-      <span class="text-2xl sm:text-3xl">🎯</span>
+      <span class="text-2xl sm:text-3xl" aria-hidden="true">🎯</span>
       <div>
         <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent leading-none">
-          Word Scramble
+          Number Spell Jumble
         </h1>
-        <p class="text-xs text-slate-500 font-medium">Spell the number!</p>
+        <p class="text-xs text-slate-500 font-medium">Spell the number word!</p>
       </div>
     </div>
 
     <!-- Stats: Streak & Score -->
     <div class="flex items-center gap-3">
-      <div class="flex items-center gap-1 bg-amber-50 border border-amber-200 px-3 py-1 rounded-xl text-amber-800 text-sm font-bold shadow-sm">
+      <div class="flex items-center gap-1 bg-amber-50 border border-amber-200 px-3 py-1 rounded-xl text-amber-800 text-sm font-bold shadow-sm" aria-label="Current Score">
         <span>⭐</span>
         <span id="scoreDisplay">Score: 0</span>
       </div>
-      <div class="flex items-center gap-1 bg-rose-50 border border-rose-200 px-3 py-1 rounded-xl text-rose-700 text-sm font-bold shadow-sm">
+      <div class="flex items-center gap-1 bg-rose-50 border border-rose-200 px-3 py-1 rounded-xl text-rose-700 text-sm font-bold shadow-sm" aria-label="Streak Counter">
         <span>🔥</span>
         <span id="streakDisplay">0</span>
       </div>
       <!-- Audio Toggle -->
-      <button id="soundToggle" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-base transition-colors" title="Toggle Sound">
+      <button id="soundToggle" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-base transition-colors" title="Toggle Sound" aria-label="Toggle Sound Effects">
         🔊
       </button>
     </div>
@@ -139,17 +180,17 @@
           7
         </span>
         <!-- Graphical Object Count -->
-        <div id="counterIcons" class="flex flex-wrap justify-center gap-1 mt-2 max-w-[200px]">
+        <div id="counterIcons" class="flex flex-wrap justify-center gap-1 mt-2 max-w-[200px]" aria-hidden="true">
           <!-- Dynamic count items (stars/circles) injected here -->
         </div>
       </div>
       <p class="text-xs sm:text-sm text-slate-600 mt-2 font-medium">
-        Listen & spell the number word using the tiles below!
+        Listen &amp; spell the number word using the tiles below!
       </p>
     </div>
 
     <!-- MIDDLE SECTION: ANSWER SLOTS -->
-    <section class="w-full bg-white/80 backdrop-blur-md rounded-2xl p-4 sm:p-5 shadow-lg border border-white flex flex-col items-center">
+    <section class="w-full bg-white/80 backdrop-blur-md rounded-2xl p-4 sm:p-5 shadow-lg border border-white flex flex-col items-center" aria-label="Word Target Area">
       <div class="text-xs font-semibold text-slate-400 tracking-wider uppercase mb-2">
         Drop or Tap Letters Here (<span id="letterCountGoal">5</span> letters)
       </div>
@@ -160,13 +201,13 @@
       </div>
 
       <!-- Live status / encouragement message -->
-      <div id="feedbackText" class="text-xs sm:text-sm font-bold min-h-[20px] text-center mt-1 text-slate-500 transition-all">
+      <div id="feedbackText" class="text-xs sm:text-sm font-bold min-h-[20px] text-center mt-1 text-slate-500 transition-all" aria-live="polite">
         Tap or drag letters into the boxes!
       </div>
     </section>
 
     <!-- BOTTOM SECTION: 8 LETTER TILES POOL -->
-    <section class="w-full bg-indigo-50/70 border border-indigo-100 rounded-2xl p-3 sm:p-4 shadow-inner flex flex-col items-center">
+    <section class="w-full bg-indigo-50/70 border border-indigo-100 rounded-2xl p-3 sm:p-4 shadow-inner flex flex-col items-center" aria-label="Scrambled Letters Pool">
       <div class="text-xs font-semibold text-indigo-700 tracking-wider uppercase mb-2.5">
         Letter Pool (8 Letters)
       </div>
@@ -198,9 +239,90 @@
 
   </main>
 
+  <!-- SEO-OPTIMIZED DESCRIPTIVE & INSTRUCTIONAL SECTION -->
+  <section class="max-w-2xl mx-auto w-full mt-6 bg-white/90 backdrop-blur-md rounded-2xl p-5 sm:p-7 shadow-md border border-white/80 text-slate-700 text-sm leading-relaxed" aria-label="About the Game and Instructions">
+    
+    <!-- Game Overview -->
+    <article class="mb-6">
+      <h2 class="text-xl sm:text-2xl font-bold text-slate-800 mb-2 flex items-center gap-2">
+        <span>📖</span> About Number Spell Jumble
+      </h2>
+      <p class="text-slate-600">
+        <strong>Number Spell Jumble</strong> is a fun, interactive educational word scramble game designed to help early learners, preschoolers, kindergarteners, and ESL students master the spelling of numbers from <strong>one (1) to ten (10)</strong>. By connecting numerals and quantities with their written English word forms, children reinforce early reading, phonics, and math skills in a rewarding, multi-sensory environment.
+      </p>
+    </article>
+
+    <!-- How to Play Instructions -->
+    <article class="mb-6">
+      <h3 class="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+        <span>🎮</span> How to Play
+      </h3>
+      <ol class="list-decimal list-inside space-y-2 text-slate-600">
+        <li>
+          <strong class="text-slate-700">Identify the Target:</strong> Look at the bright numeral card and count the fun floating icons to see which number needs to be spelled.
+        </li>
+        <li>
+          <strong class="text-slate-700">Pick Your Letters:</strong> Look at the 8-letter jumbled pool below. Tap or drag the correct letters into the open boxes above.
+        </li>
+        <li>
+          <strong class="text-slate-700">Make Corrections:</strong> Placed the wrong letter? Tap the letter in the answer box to send it back to the bottom pool, or hit <span class="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded border text-xs font-semibold">↺ Clear</span> to reset all boxes.
+        </li>
+        <li>
+          <strong class="text-slate-700">Need a Clue?</strong> Click the <span class="bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded border border-amber-300 text-xs font-semibold">💡 Hint</span> button to auto-place the next correct letter in order.
+        </li>
+        <li>
+          <strong class="text-slate-700">Check and Win:</strong> Press <span class="bg-emerald-100 text-emerald-900 px-1.5 py-0.5 rounded border border-emerald-300 text-xs font-semibold">✓ Check</span> to confirm your word, trigger celebratory confetti, increase your score, and keep your winning streak alive!
+        </li>
+      </ol>
+    </article>
+
+    <!-- Key Educational Benefits Grid -->
+    <article class="mb-6">
+      <h3 class="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+        <span>🌱</span> Why Kids and Teachers Love It
+      </h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="p-3 rounded-xl bg-indigo-50/60 border border-indigo-100">
+          <h4 class="font-bold text-indigo-900 text-sm mb-1">🔤 Phonics &amp; Word Recognition</h4>
+          <p class="text-xs text-slate-600">Encourages letter-sound blending and sight word memorization for commonly misspelled irregular words like <em>two</em>, <em>four</em>, and <em>eight</em>.</p>
+        </div>
+        <div class="p-3 rounded-xl bg-amber-50/60 border border-amber-100">
+          <h4 class="font-bold text-amber-900 text-sm mb-1">🔢 One-to-One Number Sense</h4>
+          <p class="text-xs text-slate-600">Pairing numerical digits with visual counters and word representations deepens conceptual understanding of quantities.</p>
+        </div>
+        <div class="p-3 rounded-xl bg-emerald-50/60 border border-emerald-100">
+          <h4 class="font-bold text-emerald-900 text-sm mb-1">👆 Fine Motor Skills</h4>
+          <p class="text-xs text-slate-600">Drag-and-drop tactile gameplay supports fine motor precision and hand-eye coordination across iPads, tablets, touchscreens, and desktop computers.</p>
+        </div>
+        <div class="p-3 rounded-xl bg-purple-50/60 border border-purple-100">
+          <h4 class="font-bold text-purple-900 text-sm mb-1">🔊 Real-Time Audio Feedback</h4>
+          <p class="text-xs text-slate-600">Custom web audio synthesis provides playful acoustic feedback without downloading bulky external files.</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- Frequently Asked Questions (FAQ) -->
+    <article>
+      <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+        <span>❓</span> Frequently Asked Questions
+      </h3>
+      <dl class="space-y-3">
+        <div>
+          <dt class="font-semibold text-slate-800">What ages is this number spelling game for?</dt>
+          <dd class="text-xs text-slate-600 mt-0.5">It is perfect for children ages 4 to 8 (Pre-K, Kindergarten, and 1st to 2nd grade), as well as ESL / ELL learners practicing English number vocabulary.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-slate-800">Does this game require any download or app install?</dt>
+          <dd class="text-xs text-slate-600 mt-0.5">No! It runs instantly directly in any modern web browser on smartphones, tablets, Chromebooks, and PCs.</dd>
+        </div>
+      </dl>
+    </article>
+
+  </section>
+
   <!-- FOOTER -->
-  <footer class="max-w-2xl mx-auto w-full text-center py-2 text-xs text-slate-400 font-medium">
-    Designed for GitHub Pages • Tap or drag to spell • Web Audio powered
+  <footer class="max-w-2xl mx-auto w-full text-center py-4 text-xs text-slate-400 font-medium">
+    Designed for Classroom &amp; Home Learning • Free Online Educational Puzzle • Web Audio Powered
   </footer>
 
   <!-- SCRIPT LOGIC -->
@@ -361,7 +483,6 @@
       const poolChars = [...neededLetters];
 
       for (let i = 0; i < distractorsNeeded; i++) {
-        // Pick a random lowercase letter
         const randLetter = ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
         poolChars.push(randLetter);
       }
@@ -431,7 +552,7 @@
             const tileInner = document.createElement('div');
             tileInner.className = `w-full h-full rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-extrabold text-indigo-700 bg-gradient-to-b from-indigo-100 to-indigo-200 border-2 border-indigo-400 tile-3d cursor-pointer select-none animate-pop`;
             tileInner.innerText = tile.char;
-            tileInner.title = "Click to return to bottom pool";
+            tileInner.title = "Click to return to letter pool";
 
             // Click placed letter to return to bottom pool
             tileInner.addEventListener('click', (e) => {
@@ -453,10 +574,9 @@
         slotEl.addEventListener('dragleave', handleDragLeave);
         slotEl.addEventListener('drop', handleDrop);
 
-        // Click on empty slot could also be a target
+        // Click on empty slot target
         slotEl.addEventListener('click', () => {
           if (state.slots[slotIndex] === null) {
-            // Find first available letter in pool and move here
             const firstAvailable = state.poolTiles.find(t => t.inSlotIndex === null);
             if (firstAvailable) {
               placeTileInSlot(firstAvailable.id, slotIndex);
@@ -497,7 +617,6 @@
 
           tileWrapper.appendChild(btn);
         } else {
-          // Placeholder ghost slot in pool to maintain clean grid alignment
           const emptyPlaceholder = document.createElement('div');
           emptyPlaceholder.className = 'w-12 h-14 sm:w-14 sm:h-16 rounded-2xl border-2 border-dashed border-indigo-200 bg-white/40 flex items-center justify-center';
           tileWrapper.appendChild(emptyPlaceholder);
@@ -513,14 +632,13 @@
 
     /* ==========================================================
        5. GAME INTERACTIONS & SLOT LOGIC
-       ========================================================== */
+       ========================================================= */
     function placeInFirstOpenSlot(tileId) {
       if (state.roundSolved) return;
       const firstOpenIndex = state.slots.findIndex(s => s === null);
       if (firstOpenIndex !== -1) {
         placeTileInSlot(tileId, firstOpenIndex);
       } else {
-        // Feedback if all slots are filled
         setFeedback("All boxes are full! Click 'Check' or tap a letter to remove it.", "text-amber-600");
         soundEffects.error();
       }
@@ -532,14 +650,14 @@
       const tile = state.poolTiles.find(t => t.id === tileId);
       if (!tile) return;
 
-      // If this slot already had a tile, return that one to the pool
+      // If slot already had a tile, return that one to the pool
       if (state.slots[slotIndex] !== null) {
         const oldTileId = state.slots[slotIndex];
         const oldTile = state.poolTiles.find(t => t.id === oldTileId);
         if (oldTile) oldTile.inSlotIndex = null;
       }
 
-      // If the incoming tile was already in another slot, clear that slot
+      // If incoming tile was already in another slot, clear that slot
       if (tile.inSlotIndex !== null) {
         state.slots[tile.inSlotIndex] = null;
       }
@@ -553,7 +671,7 @@
 
       // Automatically check if all slots are filled
       if (!state.slots.includes(null)) {
-        checkCurrentAnswer(false); // passive check
+        checkCurrentAnswer(false);
       }
     }
 
@@ -582,11 +700,9 @@
       renderGame();
     }
 
-    /* Provide a helpful hint: places one correct letter into the correct slot */
     function provideHint() {
       if (state.roundSolved) return;
 
-      // Find indices that are currently wrong or empty
       const targetChars = state.targetWord.split('');
       const incorrectIndices = [];
 
@@ -607,14 +723,11 @@
         return;
       }
 
-      // Pick the first wrong index for a logical left-to-right hint
       const hintSlotIndex = incorrectIndices[0];
       const neededChar = targetChars[hintSlotIndex];
 
-      // Find an available matching tile that isn't already correctly placed
       let candidateTile = state.poolTiles.find(t => {
         if (t.char !== neededChar) return false;
-        // make sure it isn't already sitting in another correct slot
         if (t.inSlotIndex !== null && state.targetWord[t.inSlotIndex] === t.char) {
           return false;
         }
@@ -632,11 +745,9 @@
       }
     }
 
-    /* Check Current Answer */
     function checkCurrentAnswer(isManualCheck = true) {
       if (state.roundSolved) return;
 
-      // Build current spelled word from slots
       let spelledWord = "";
       let hasEmpty = false;
 
@@ -670,14 +781,12 @@
         setFeedback(`🎉 Fantastic! You spelled "${state.targetWord.toUpperCase()}"!`, "text-emerald-600");
         renderGame();
 
-        // Highlight slots in green
         const slots = document.querySelectorAll('.slot');
         slots.forEach(slot => {
           slot.classList.remove('border-indigo-400');
           slot.classList.add('border-emerald-500', 'bg-emerald-50');
         });
 
-        // Auto prompt next round after a pleasant delay
         setTimeout(() => {
           if (state.roundSolved) {
             initRound();
@@ -685,7 +794,6 @@
         }, 2200);
 
       } else {
-        // INCORRECT
         if (state.streak > 0) state.streak = 0;
         soundEffects.error();
         shakeSlots();
@@ -717,7 +825,6 @@
        ========================================================== */
     let draggedTileId = null;
 
-    // Desktop HTML5 drag & drop
     function handleDragStart(e) {
       if (state.roundSolved) return;
       draggedTileId = this.id;
@@ -752,7 +859,6 @@
       }
     }
 
-    // Touch device drag & drop (iOS Safari / Android Chrome)
     function attachTouchDragEvents(element, tileId) {
       let touchClone = null;
       let startX, startY;
@@ -773,7 +879,6 @@
 
         if (dist > 8 && !isDragging) {
           isDragging = true;
-          // Create floating ghost tile for touch
           touchClone = element.cloneNode(true);
           touchClone.id = 'touch-clone-active';
           touchClone.classList.add('touch-dragging');
@@ -784,11 +889,10 @@
         }
 
         if (isDragging && touchClone) {
-          e.preventDefault(); // Prevent scrolling while dragging
+          e.preventDefault();
           touchClone.style.left = `${touch.clientX}px`;
           touchClone.style.top = `${touch.clientY}px`;
 
-          // Check if hovering over any slot
           const elemUnder = document.elementFromPoint(touch.clientX, touch.clientY);
           const slot = elemUnder ? elemUnder.closest('.slot') : null;
           document.querySelectorAll('.slot').forEach(s => s.classList.remove('slot-hover'));
@@ -823,7 +927,6 @@
        7. EVENT LISTENERS SETUP
        ========================================================== */
     window.onload = function () {
-      // Sound Toggle Button
       const soundBtn = document.getElementById('soundToggle');
       soundBtn.addEventListener('click', () => {
         state.soundEnabled = !state.soundEnabled;
@@ -831,31 +934,26 @@
         soundBtn.classList.toggle('opacity-50', !state.soundEnabled);
       });
 
-      // Hint Button
       document.getElementById('hintBtn').addEventListener('click', () => {
-        getAudioContext(); // warm up audio context on user gesture
+        getAudioContext();
         provideHint();
       });
 
-      // Clear/Reset Button
       document.getElementById('resetBtn').addEventListener('click', () => {
         getAudioContext();
         resetAllSlots();
       });
 
-      // Check Button
       document.getElementById('checkBtn').addEventListener('click', () => {
         getAudioContext();
         checkCurrentAnswer(true);
       });
 
-      // Next Number Button
       document.getElementById('nextBtn').addEventListener('click', () => {
         getAudioContext();
         initRound();
       });
 
-      // Keyboard support: Enter to check, Escape to reset
       window.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           checkCurrentAnswer(true);
@@ -864,7 +962,6 @@
         }
       });
 
-      // Start first round
       initRound();
     };
   </script>
