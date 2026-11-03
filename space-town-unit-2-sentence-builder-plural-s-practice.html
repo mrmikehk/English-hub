@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Town Unit 2 - Singular & Plural -s Sentence Builder</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti for celebrations -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Fredoka', 'Inter', cursive, sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #ecfdf5 50%, #fef3c7 100%);
+        }
+
+        .bounce-pop {
+            animation: bouncePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes bouncePop {
+            0% { transform: scale(0.85); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
+        }
+
+        .shake-anim {
+            animation: shake 0.45s ease-in-out;
+        }
+
+        /* Pulse highlight for targeted hints */
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+            50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+        }
+        .highlight-error {
+            animation: pulseGlow 1.2s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-3 sm:p-6 text-slate-800 select-none">
+
+    <!-- Top Navigation & Scoreboard -->
+    <header class="w-full max-w-4xl bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border-2 border-emerald-100 p-4 mb-4 transition-all">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl sm:text-4xl">🚀</span>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-700 bg-clip-text text-transparent">
+                        Plural -s Sentence Builder
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-500 font-sans font-medium">Space Town Unit 2: He / She has ...</p>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
+                <!-- Streak Badge -->
+                <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl">
+                    <span class="text-xl">🔥</span>
+                    <div class="text-left">
+                        <span class="text-[10px] block uppercase tracking-wider text-amber-700 font-sans font-bold leading-none">Streak</span>
+                        <span id="streakDisplay" class="text-lg font-bold text-amber-600 leading-none">0</span>
+                    </div>
+                </div>
+
+                <!-- Score Badge -->
+                <div class="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
+                    <span class="text-xl">⭐</span>
+                    <div class="text-left">
+                        <span class="text-[10px] block uppercase tracking-wider text-emerald-700 font-sans font-bold leading-none">Score</span>
+                        <span id="scoreDisplay" class="text-lg font-bold text-emerald-600 leading-none">0</span>
+                    </div>
+                </div>
+
+                <!-- Timer / Mode Selector -->
+                <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1 rounded-xl">
+                    <span class="text-base" id="timerIcon">⏱️</span>
+                    <select id="timerModeSelect" class="bg-transparent font-sans text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none cursor-pointer">
+                        <option value="none">Untimed Practice</option>
+                        <option value="45">45s Challenge</option>
+                        <option value="60" selected>60s Challenge</option>
+                        <option value="90">90s Challenge</option>
+                    </select>
+                    <span id="timerCountdown" class="text-sm font-bold text-slate-800 ml-1 min-w-[34px] text-right font-sans">60s</span>
+                </div>
+
+                <!-- Sound Toggle -->
+                <button id="audioToggleBtn" title="Toggle Sound FX" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-100 transition text-slate-600 active:scale-95 text-lg">
+                    🔊
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Game Board Container -->
+    <main class="w-full max-w-4xl bg-white rounded-3xl shadow-xl border-2 border-indigo-50 p-4 sm:p-8 flex flex-col gap-6">
+
+        <!-- Grammar Helper Pill -->
+        <div class="flex flex-col sm:flex-row items-center justify-between bg-sky-50 border border-sky-200 rounded-2xl px-4 py-2.5 gap-2 text-xs sm:text-sm">
+            <div class="flex items-center gap-2 font-medium text-sky-900">
+                <span class="text-lg">💡</span>
+                <span><strong>Grammar Secret:</strong> Count matters for the noun ending!</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="bg-white px-2.5 py-1 rounded-lg border border-sky-300 font-bold text-sky-700">
+                    1 = <span class="text-pink-600 underline">no -s</span> (e.g. 1 book)
+                </span>
+                <span class="bg-white px-2.5 py-1 rounded-lg border border-sky-300 font-bold text-emerald-700">
+                    2+ = <span class="text-purple-600 underline">add -s</span> (e.g. 3 books)
+                </span>
+            </div>
+        </div>
+
+        <!-- Visual Prompt Cards (Subject + Amount + Item) -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center bg-gradient-to-b from-slate-50 to-blue-50/40 p-5 rounded-2xl border border-slate-200/80">
+            
+            <!-- Subject Card -->
+            <div class="flex flex-col items-center">
+                <div class="w-full text-center mb-1 text-xs uppercase tracking-wider text-slate-500 font-bold">1. Who?</div>
+                <div class="relative w-32 h-32 sm:w-36 sm:h-36 bg-white rounded-2xl shadow-md border-4 border-amber-200 flex flex-col items-center justify-center p-2 overflow-hidden group">
+                    <img id="subjectImage" src="" alt="Student" class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105" 
+                         onerror="handleImageFallback(this, currentSubject ? currentSubject.icon : '🧑‍🎓')">
+                    <div id="subjectFallbackIcon" class="hidden text-5xl">🧑‍🎓</div>
+                    <span id="subjectNameTag" class="absolute bottom-1 bg-amber-400/90 text-amber-950 text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                        Boy
+                    </span>
+                </div>
+            </div>
+
+            <!-- Quantity Indicator -->
+            <div class="flex flex-col items-center">
+                <div class="w-full text-center mb-1 text-xs uppercase tracking-wider text-slate-500 font-bold">2. How Many?</div>
+                <div class="flex flex-col items-center bg-white rounded-2xl shadow-md border-4 border-indigo-200 p-3 min-w-[170px] min-h-[144px] justify-center">
+                    <div class="flex items-center justify-center gap-2">
+                        <span id="amountDisplay" class="text-4xl font-extrabold text-indigo-600">1</span>
+                    </div>
+                    <!-- Mini visual dots/icons counting -->
+                    <div id="visualCountDots" class="flex flex-wrap gap-1.5 justify-center mt-2 max-w-[140px] p-1">
+                        <!-- Rendered dynamically -->
+                    </div>
+                    <span id="singularPluralBadge" class="mt-1 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700 border border-pink-200">
+                        Singular (1)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Target Stationery Item -->
+            <div class="flex flex-col items-center">
+                <div class="w-full text-center mb-1 text-xs uppercase tracking-wider text-slate-500 font-bold">3. What Stationery?</div>
+                <div class="relative w-32 h-32 sm:w-36 sm:h-36 bg-white rounded-2xl shadow-md border-4 border-emerald-200 flex flex-col items-center justify-center p-2 overflow-hidden group">
+                    <img id="itemImage" src="" alt="Item" class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                         onerror="handleImageFallback(this, currentItem ? currentItem.icon : '✏️')">
+                    <div id="itemFallbackIcon" class="hidden text-5xl">✏️</div>
+                    <span id="itemLabel" class="absolute bottom-1 bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded-full border border-emerald-300 shadow-sm">
+                        pencil
+                    </span>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Sentence Drop/Build Zone -->
+        <section class="flex flex-col gap-2">
+            <div class="flex justify-between items-center px-1">
+                <span class="text-sm font-bold text-slate-600 flex items-center gap-1.5">
+                    <span>✍️</span> Build Your Sentence:
+                </span>
+                <button type="button" onclick="clearSentence()" class="text-xs text-rose-500 hover:text-rose-700 underline font-semibold transition" title="Clear all words">
+                    Clear sentence
+                </button>
+            </div>
+
+            <!-- Slots Area -->
+            <div id="sentenceArea" class="min-h-[86px] sm:min-h-[92px] bg-slate-50/90 border-2 border-dashed border-indigo-300 rounded-2xl p-3 flex flex-wrap items-center gap-2.5 transition-all shadow-inner">
+                <!-- Word pills placed here dynamically -->
+            </div>
+            <div class="flex justify-between items-center text-xs text-slate-400 px-2 font-sans">
+                <span>Tip: Click on a placed word to send it back to the bank.</span>
+                <span>Target: [Who] [has] [Number] [Stationery + .]</span>
+            </div>
+        </section>
+
+        <!-- Word Bank -->
+        <section class="flex flex-col gap-2">
+            <div class="flex justify-between items-center px-1">
+                <span class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+                    <span>🗃️</span> Word Bank:
+                </span>
+                <span class="text-xs text-slate-500 font-sans">Pick carefully: Look for singular vs. plural with <strong>-s</strong> and full stop <strong>.</strong></span>
+            </div>
+
+            <div id="wordBankArea" class="flex flex-wrap gap-2.5 p-3.5 bg-gradient-to-r from-amber-50/50 via-teal-50/30 to-indigo-50/40 rounded-2xl border border-slate-200 min-h-[90px] items-center justify-center">
+                <!-- Word buttons inserted here -->
+            </div>
+        </section>
+
+        <!-- Pedagogical Guidance & Feedback Message Box -->
+        <div id="feedbackContainer" class="hidden rounded-2xl p-4 transition-all duration-300 flex items-start gap-3 border shadow-sm">
+            <span id="feedbackIcon" class="text-3xl leading-none"></span>
+            <div class="flex-1">
+                <h4 id="feedbackTitle" class="font-bold text-base leading-tight"></h4>
+                <p id="feedbackDetail" class="text-sm mt-0.5 leading-snug font-sans"></p>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-center gap-4 pt-2">
+            <button type="button" id="checkBtn" onclick="checkAnswer()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-lg px-8 py-3.5 rounded-2xl shadow-lg shadow-emerald-500/25 active:scale-95 transition flex items-center gap-2 cursor-pointer">
+                <span>✔️</span> Check Answer
+            </button>
+            <button type="button" id="nextBtn" onclick="initRound()" class="hidden bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white font-bold text-lg px-8 py-3.5 rounded-2xl shadow-lg shadow-indigo-500/25 active:scale-95 transition flex items-center gap-2 cursor-pointer">
+                <span>Next Question ➡️</span>
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Footer summary -->
+    <footer class="mt-4 text-center text-xs text-slate-500 font-sans">
+        Space Town English Curriculum • Primary 1-2 Practice: He / She has + Plural Nouns (-s)
+    </footer>
+
+    <!-- Application Script -->
+    <script>
+        /* =========================================================
+           1. DATA REPOSITORY & UNIT 2 VOCABULARY
+           ========================================================= */
+        const subjects = [
+            { id: 'b1', name: 'Boy 1', type: 'boy', pronoun: 'He', file: 'images/students/boy1.jpg', icon: '👦' },
+            { id: 'b2', name: 'Boy 2', type: 'boy', pronoun: 'He', file: 'images/students/boy2.jpg', icon: '👦' },
+            { id: 'b3', name: 'Boy 3', type: 'boy', pronoun: 'He', file: 'images/students/boy3.jpg', icon: '👦' },
+            { id: 'g1', name: 'Girl 1', type: 'girl', pronoun: 'She', file: 'images/students/girl1.jpg', icon: '👧' },
+            { id: 'g2', name: 'Girl 2', type: 'girl', pronoun: 'She', file: 'images/students/girl2.jpg', icon: '👧' },
+            { id: 'g3', name: 'Girl 3', type: 'girl', pronoun: 'She', file: 'images/students/girl3.jpg', icon: '👧' }
+        ];
+
+        const stationeryItems = [
+            { file: 'images/stationery/book.jpg', name: 'book', plural: 'books', icon: '📖' },
+            { file: 'images/stationery/coloured-pencil.jpg', name: 'coloured pencil', plural: 'coloured pencils', icon: '🖍️' },
+            { file: 'images/stationery/eraser.jpg', name: 'eraser', plural: 'erasers', icon: '🧼' },
+            { file: 'images/stationery/glue-stick.jpg', name: 'glue stick', plural: 'glue sticks', icon: '🧴' },
+            { file: 'images/stationery/pen.jpg', name: 'pen', plural: 'pens', icon: '🖊️' },
+            { file: 'images/stationery/pencil-case.jpg', name: 'pencil case', plural: 'pencil cases', icon: '👝' },
+            { file: 'images/stationery/pencil.jpg', name: 'pencil', plural: 'pencils', icon: '✏️' },
+            { file: 'images/stationery/ruler.jpg', name: 'ruler', plural: 'rulers', icon: '📏' },
+            { file: 'images/stationery/school-bag.jpg', name: 'school bag', plural: 'school bags', icon: '🎒' },
+            { file: 'images/stationery/sharpener.jpg', name: 'sharpener', plural: 'sharpeners', icon: '⚙️' }
+        ];
+
+        const numberWords = {
+            1: 'one', 2: 'two', 3: 'three', 4: 'four', 5: 'five',
+            6: 'six', 7: 'seven', 8: 'eight', 9: 'nine', 10: 'ten'
+        };
+
+        /* =========================================================
+           2. AUDIO SYNTHESIZER (Web Audio API - No external files)
+           ========================================================= */
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+                gain.gain.setValueAtTime(gainVal, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            } catch (e) {
+                // Audio silent fallback
+            }
+        }
+
+        function playSuccessSound() {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const now = ctx.currentTime;
+                // High cheerful chord arpeggio
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    setTimeout(() => playTone(freq, 'triangle', 0.25, 0.15), i * 90);
+                });
+            } catch(e) {}
+        }
+
+        function playErrorSound() {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                playTone(220, 'sawtooth', 0.2, 0.12);
+                setTimeout(() => playTone(196, 'sawtooth', 0.25, 0.12), 120);
+            } catch(e) {}
+        }
+
+        function playClickSound() {
+            playTone(600, 'sine', 0.05, 0.04);
+        }
+
+        function playRemoveSound() {
+            playTone(400, 'sine', 0.05, 0.04);
+        }
+
+        /* =========================================================
+           3. APPLICATION STATE
+           ========================================================= */
+        let currentSubject = null;
+        let currentAmount = 1;
+        let currentItem = null;
+        let builtSentence = [];
+        let wordBankData = [];
+        let score = 0;
+        let streak = 0;
+        let timerInterval = null;
+        let timeLeft = 60;
+        let isTimedChallenge = true;
+        let roundActive = true;
+        let questionCounter = 0;
+
+        // Force balanced alternating practice of 1 (singular) vs. >1 (plural)
+        let lastWasSingular = false;
+
+        /* =========================================================
+           4. CORE GAME INITIALIZATION
+           ========================================================= */
+        function initRound() {
+            roundActive = true;
+            builtSentence = [];
+            hideFeedback();
+
+            // Toggle buttons
+            document.getElementById('checkBtn').classList.remove('hidden');
+            document.getElementById('nextBtn').classList.add('hidden');
+
+            questionCounter++;
+
+            // 1. Pick Subject (Boy/Girl with Pronoun)
+            currentSubject = subjects[Math.floor(Math.random() * subjects.length)];
+            setupSubjectDisplay(currentSubject);
+
+            // 2. Pick Amount: Balance 1 (Singular) vs 2-10 (Plural) to focus on the -s rule
+            if (questionCounter % 2 === 1) {
+                // Alternate strongly to make students contrast 1 vs multiple
+                currentAmount = lastWasSingular ? getRandomInt(2, 6) : 1;
+            } else {
+                currentAmount = getRandomInt(1, 7);
+            }
+            lastWasSingular = (currentAmount === 1);
+
+            setupAmountDisplay(currentAmount);
+
+            // 3. Pick Stationery Item
+            currentItem = stationeryItems[Math.floor(Math.random() * stationeryItems.length)];
+            setupItemDisplay(currentItem);
+
+            // 4. Construct Word Bank with explicit Singular vs Plural Distractors
+            generateWordBank();
+
+            // 5. Setup Timer
+            setupTimerForRound();
+
+            // 6. Render Builder
+            renderUI();
+        }
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        /* =========================================================
+           5. VISUAL RENDERING & PROMPTS
+           ========================================================= */
+        function setupSubjectDisplay(subject) {
+            const img = document.getElementById('subjectImage');
+            const fallback = document.getElementById('subjectFallbackIcon');
+            const tag = document.getElementById('subjectNameTag');
+
+            img.classList.remove('hidden');
+            fallback.classList.add('hidden');
+            img.src = subject.file;
+            tag.textContent = `${subject.type === 'boy' ? 'Boy (He)' : 'Girl (She)'}`;
+            tag.className = subject.type === 'boy' 
+                ? 'absolute bottom-1 bg-blue-100 text-blue-900 text-[11px] font-bold px-2 py-0.5 rounded-full border border-blue-300' 
+                : 'absolute bottom-1 bg-pink-100 text-pink-900 text-[11px] font-bold px-2 py-0.5 rounded-full border border-pink-300';
+        }
+
+        function setupAmountDisplay(amount) {
+            const amountEl = document.getElementById('amountDisplay');
+            const dotsContainer = document.getElementById('visualCountDots');
+            const badge = document.getElementById('singularPluralBadge');
+
+            amountEl.textContent = amount;
+            dotsContainer.innerHTML = '';
+
+            for (let i = 0; i < amount; i++) {
+                const dot = document.createElement('span');
+                dot.className = 'w-3 h-3 rounded-full bg-indigo-500 shadow-sm inline-block';
+                dotsContainer.appendChild(dot);
+            }
+
+            if (amount === 1) {
+                badge.textContent = '1 item (Singular)';
+                badge.className = 'mt-1 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700 border border-pink-200';
+            } else {
+                badge.textContent = `${amount} items (Plural: +s)`;
+                badge.className = 'mt-1 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300';
+            }
+        }
+
+        function setupItemDisplay(item) {
+            const img = document.getElementById('itemImage');
+            const fallback = document.getElementById('itemFallbackIcon');
+            const label = document.getElementById('itemLabel');
+
+            img.classList.remove('hidden');
+            fallback.classList.add('hidden');
+            img.src = item.file;
+            label.textContent = item.name;
+        }
+
+        function handleImageFallback(imgEl, emojiFallback) {
+            imgEl.classList.add('hidden');
+            const fallbackEl = imgEl.nextElementSibling;
+            if (fallbackEl) {
+                fallbackEl.textContent = emojiFallback;
+                fallbackEl.classList.remove('hidden');
+            }
+        }
+
+        /* =========================================================
+           6. WORD BANK GENERATION WITH TARGETED DISTRACTORS
+           ========================================================= */
+        function generateWordBank() {
+            wordBankData = [];
+
+            // 1. Pronoun: Subject Pronoun + Distractor
+            wordBankData.push({ id: 'pr_he', text: 'He', type: 'pronoun' });
+            wordBankData.push({ id: 'pr_she', text: 'She', type: 'pronoun' });
+
+            // 2. Verb: 'has' (Unit 2 target) vs 'have' (common distractor)
+            wordBankData.push({ id: 'v_has', text: 'has', type: 'verb' });
+            wordBankData.push({ id: 'v_have', text: 'have', type: 'verb' });
+
+            // 3. Numbers: Target number word + 2 wrong number distractors
+            wordBankData.push({ id: `num_${currentAmount}`, text: numberWords[currentAmount], type: 'number' });
+            
+            const usedNums = new Set([currentAmount]);
+            while (usedNums.size < 3) {
+                let rNum = getRandomInt(1, 10);
+                if (!usedNums.has(rNum)) {
+                    usedNums.add(rNum);
+                    wordBankData.push({ id: `num_${rNum}`, text: numberWords[rNum], type: 'number' });
+                }
+            }
+
+            // 4. Critical Noun Distractors (Singular vs Plural with and without punctuation):
+            // Include both currentItem.name and currentItem.plural so students must choose plural -s
+            wordBankData.push({ id: 'n_sing_dot', text: currentItem.name + '.', type: 'noun' });
+            wordBankData.push({ id: 'n_sing_raw', text: currentItem.name, type: 'noun' });
+            wordBankData.push({ id: 'n_plur_dot', text: currentItem.plural + '.', type: 'noun' });
+            wordBankData.push({ id: 'n_plur_raw', text: currentItem.plural, type: 'noun' });
+
+            // Pick another stationery item as general distractor (both with punctuation)
+            let otherItem;
+            do {
+                otherItem = stationeryItems[Math.floor(Math.random() * stationeryItems.length)];
+            } while (otherItem.name === currentItem.name);
+
+            // Add distractor singular or plural to keep total choices manageable
+            if (currentAmount === 1) {
+                wordBankData.push({ id: 'dist_item', text: otherItem.name + '.', type: 'noun' });
+            } else {
+                wordBankData.push({ id: 'dist_item', text: otherItem.plural + '.', type: 'noun' });
+            }
+
+            shuffle(wordBankData);
+        }
+
+        /* =========================================================
+           7. INTERACTIVE SENTENCE BUILDING LOGIC
+           ========================================================= */
+        function renderUI() {
+            const sentenceContainer = document.getElementById('sentenceArea');
+            const bankContainer = document.getElementById('wordBankArea');
+
+            sentenceContainer.innerHTML = '';
+            bankContainer.innerHTML = '';
+
+            // Render Placed Sentence Words
+            if (builtSentence.length === 0) {
+                sentenceContainer.innerHTML = `
+                    <div class="w-full flex items-center justify-center py-3 text-slate-400 font-sans italic text-sm">
+                        👆 Click words from the bank below to construct: [Who] [has] [number] [stationery.]
+                    </div>
+                `;
+            } else {
+                builtSentence.forEach((item, index) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = `bounce-pop font-bold text-sm sm:text-base px-3.5 py-2 rounded-xl shadow border transition flex items-center gap-1.5 cursor-pointer 
+                        ${item.isError 
+                            ? 'bg-rose-100 text-rose-800 border-rose-300 highlight-error' 
+                            : 'bg-indigo-600 text-white border-indigo-700 hover:bg-indigo-700'
+                        }`;
+                    btn.innerHTML = `<span>${item.text}</span> <span class="text-xs opacity-70">✕</span>`;
+                    btn.title = 'Click to remove';
+                    
+                    if (!roundActive) {
+                        btn.disabled = true;
+                        btn.classList.add('cursor-default');
+                    } else {
+                        btn.onclick = () => removeWord(index);
+                    }
+                    sentenceContainer.appendChild(btn);
+                });
+            }
+
+            // Render Available Word Bank Items
+            const usedIds = new Set(builtSentence.map(w => w.id));
+            wordBankData.forEach(item => {
+                if (!usedIds.has(item.id)) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    
+                    // Style differently based on word type to give subtle visual cues
+                    let colorStyles = 'bg-white text-slate-700 border-slate-300 hover:border-indigo-400 hover:bg-indigo-50/50';
+                    if (item.type === 'noun') {
+                        // Highlighting plural endings slightly
+                        colorStyles = 'bg-white text-slate-800 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50';
+                    } else if (item.type === 'number') {
+                        colorStyles = 'bg-white text-slate-800 border-amber-200 hover:border-amber-400 hover:bg-amber-50';
+                    }
+
+                    btn.className = `word-btn font-bold text-sm sm:text-base px-4 py-2.5 rounded-xl shadow-sm border-2 transition transform active:scale-95 cursor-pointer ${colorStyles}`;
+                    btn.textContent = item.text;
+
+                    if (!roundActive) {
+                        btn.disabled = true;
+                        btn.classList.add('opacity-40', 'cursor-not-allowed');
+                    } else {
+                        btn.onclick = () => addWord(item);
+                    }
+                    bankContainer.appendChild(btn);
+                }
+            });
+        }
+
+        function addWord(wordObj) {
+            if (!roundActive) return;
+            playClickSound();
+            builtSentence.push({ ...wordObj, isError: false });
+            hideFeedback();
+            renderUI();
+        }
+
+        function removeWord(index) {
+            if (!roundActive) return;
+            playRemoveSound();
+            builtSentence.splice(index, 1);
+            hideFeedback();
+            renderUI();
+        }
+
+        function clearSentence() {
+            if (!roundActive || builtSentence.length === 0) return;
+            playRemoveSound();
+            builtSentence = [];
+            hideFeedback();
+            renderUI();
+        }
+
+        /* =========================================================
+           8. INTELLIGENT GRAMMAR & PLURAL -S CHECKER
+           ========================================================= */
+        function checkAnswer() {
+            if (!roundActive) return;
+
+            if (builtSentence.length === 0) {
+                showFeedback('Empty Sentence', 'Please pick words from the word bank to build a full sentence!', 'warning');
+                return;
+            }
+
+            const expectedPronoun = currentSubject.pronoun;
+            const expectedVerb = 'has';
+            const expectedNumber = numberWords[currentAmount];
+            const targetNounWithoutDot = currentAmount === 1 ? currentItem.name : currentItem.plural;
+            const expectedNoun = targetNounWithoutDot + '.';
+
+            // Check if sentence is complete (4 parts)
+            if (builtSentence.length < 4) {
+                showFeedback('Incomplete Sentence', `A complete sentence needs: [Who] [has] [number] [stationery.]. You currently have ${builtSentence.length} word${builtSentence.length > 1 ? 's' : ''}.`, 'error');
+                shakeSentence();
+                playErrorSound();
+                return;
+            }
+
+            if (builtSentence.length > 4) {
+                showFeedback('Too Many Words', 'Your sentence has too many words. Follow the 4-part pattern: [Who] [has] [how many] [what item].', 'error');
+                shakeSentence();
+                playErrorSound();
+                return;
+            }
+
+            // Word-by-word intelligent diagnostic
+            const [w1, w2, w3, w4] = builtSentence.map(w => w.text);
+
+            // 1. Check Pronoun (He vs She)
+            if (w1 !== expectedPronoun) {
+                playErrorSound();
+                shakeSentence();
+                highlightErrorIndex(0);
+                if (currentSubject.type === 'boy' && w1 === 'She') {
+                    showFeedback('Check the Subject', 'Look closely at the student picture: He is a boy, so use "He"!', 'error');
+                } else if (currentSubject.type === 'girl' && w1 === 'He') {
+                    showFeedback('Check the Subject', 'Look closely at the student picture: She is a girl, so use "She"!', 'error');
+                } else {
+                    showFeedback('Pronoun First', `Start your sentence with the pronoun: "${expectedPronoun}".`, 'error');
+                }
+                return;
+            }
+
+            // 2. Check Verb (has vs have)
+            if (w2 !== expectedVerb) {
+                playErrorSound();
+                shakeSentence();
+                highlightErrorIndex(1);
+                if (w2 === 'have') {
+                    showFeedback('Verb Form Error', `Remember: with ${expectedPronoun}, we always use "has" (not "have")!`, 'error');
+                } else {
+                    showFeedback('Missing Verb', `The second word should be "has" ("${expectedPronoun} has ...").`, 'error');
+                }
+                return;
+            }
+
+            // 3. Check Number Word
+            if (w3 !== expectedNumber) {
+                playErrorSound();
+                shakeSentence();
+                highlightErrorIndex(2);
+                showFeedback('Count Mismatch', `Check the number in the middle! It shows ${currentAmount}, which is written as "${expectedNumber}".`, 'error');
+                return;
+            }
+
+            // 4. TARGET PLURAL -S DIAGNOSTICS:
+            // Check noun stem & plural form
+            const isMissingFullStop = !w4.endsWith('.');
+            const cleanNounEntered = w4.replace('.', '');
+
+            // Case A: Missing full stop
+            if (cleanNounEntered === targetNounWithoutDot && isMissingFullStop) {
+                playErrorSound();
+                shakeSentence();
+                highlightErrorIndex(3);
+                showFeedback('Punctuation Missing', 'Super close! Don\'t forget to finish your sentence with a full stop (.) ! Look for the word ending with a dot.', 'warning');
+                return;
+            }
+
+            // Case B: Incorrect pluralization when quantity is 1 (Singular chosen as plural)
+            if (currentAmount === 1 && cleanNounEntered === currentItem.plural) {
+                playErrorSound();
+                shakeSentence();
+                highlightErrorIndex(3);
+                showFeedback(
+                    'Singular Rule (No -s)',
+                    `Watch out! The count is only 1. We only say "${currentItem.name}." — DO NOT add "-s" when there is only one!`,
+                    'error'
+                );
+                return;
+            }
+
+            // Case C: Incorrect singular when quantity is >1 (Forgot the plural -s)
+            if (currentAmount > 1 && cleanNounEntered === currentItem.name) {
+                playErrorSound();
+                shakeSentence();
+                highlightErrorIndex(3);
+                showFeedback(
+                    'Plural Rule (Need -s)',
+                    `Look at the count: there are ${currentAmount} items! When it is more than 1, you MUST add "-s" ➔ "${currentItem.plural}."`,
+                    'error'
+                );
+                return;
+            }
+
+            // Case D: Wrong stationery item completely
+            if (cleanNounEntered !== currentItem.name && cleanNounEntered !== currentItem.plural) {
+                playErrorSound();
+                shakeSentence();
+                highlightErrorIndex(3);
+                showFeedback('Wrong Item', `Check the stationery card on the right! It shows: ${currentItem.name}.`, 'error');
+                return;
+            }
+
+            // 5. PERFECT MATCH!
+            handleSuccess();
+        }
+
+        function highlightErrorIndex(idx) {
+            builtSentence.forEach((w, i) => {
+                w.isError = (i === idx);
+            });
+            renderUI();
+        }
+
+        function shakeSentence() {
+            const container = document.getElementById('sentenceArea');
+            container.classList.remove('shake-anim');
+            void container.offsetWidth; // Reflow
+            container.classList.add('shake-anim');
+        }
+
+        function handleSuccess() {
+            roundActive = false;
+            clearInterval(timerInterval);
+
+            score += 10;
+            streak += 1;
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('streakDisplay').textContent = streak;
+
+            playSuccessSound();
+
+            // Educational explanation of why it was correct
+            let grammarDetail = currentAmount === 1 
+                ? `Excellent! 1 item = singular "${currentItem.name}." (no -s).` 
+                : `Fantastic! ${currentAmount} items = plural "${currentItem.plural}." (added -s).`;
+
+            showFeedback('🎉 Fantastic Job!', `${grammarDetail} Sentence complete with proper capitalization & full stop!`, 'success');
+
+            // Confetti Burst
+            triggerCelebration();
+
+            // Swap Buttons
+            document.getElementById('checkBtn').classList.add('hidden');
+            document.getElementById('nextBtn').classList.remove('hidden');
+
+            renderUI();
+        }
+
+        function triggerCelebration() {
+            try {
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 50,
+                        spread: 60,
+                        origin: { y: 0.7 },
+                        colors: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899']
+                    });
+                }
+            } catch(e) {}
+        }
+
+        /* =========================================================
+           9. FEEDBACK PRESENTATION
+           ========================================================= */
+        function showFeedback(title, detail, type) {
+            const container = document.getElementById('feedbackContainer');
+            const icon = document.getElementById('feedbackIcon');
+            const titleEl = document.getElementById('feedbackTitle');
+            const detailEl = document.getElementById('feedbackDetail');
+
+            container.classList.remove(
+                'hidden', 'bg-emerald-50', 'border-emerald-300', 'text-emerald-900',
+                'bg-rose-50', 'border-rose-300', 'text-rose-900',
+                'bg-amber-50', 'border-amber-300', 'text-amber-900'
+            );
+
+            if (type === 'success') {
+                container.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-950');
+                icon.textContent = '🌟';
+            } else if (type === 'warning') {
+                container.classList.add('bg-amber-50', 'border-amber-300', 'text-amber-950');
+                icon.textContent = '💡';
+            } else {
+                container.classList.add('bg-rose-50', 'border-rose-300', 'text-rose-950');
+                icon.textContent = '🧐';
+            }
+
+            titleEl.textContent = title;
+            detailEl.textContent = detail;
+        }
+
+        function hideFeedback() {
+            const container = document.getElementById('feedbackContainer');
+            container.classList.add('hidden');
+            builtSentence.forEach(w => w.isError = false);
+        }
+
+        /* =========================================================
+           10. TIMER & TIMED CHALLENGE MODES
+           ========================================================= */
+        function setupTimerForRound() {
+            clearInterval(timerInterval);
+            const mode = document.getElementById('timerModeSelect').value;
+            const timerDisplay = document.getElementById('timerCountdown');
+            const timerIcon = document.getElementById('timerIcon');
+
+            if (mode === 'none') {
+                isTimedChallenge = false;
+                timerDisplay.textContent = '∞';
+                timerDisplay.parentElement.classList.remove('text-red-500', 'animate-pulse');
+                timerIcon.textContent = '🧘';
+                return;
+            }
+
+            isTimedChallenge = true;
+            timerIcon.textContent = '⏱️';
+            timeLeft = parseInt(mode, 10);
+            updateTimerDisplay();
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeOut();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const display = document.getElementById('timerCountdown');
+            if (!isTimedChallenge) {
+                display.textContent = '∞';
+                return;
+            }
+            display.textContent = `${timeLeft}s`;
+
+            if (timeLeft <= 10 && timeLeft > 0) {
+                display.parentElement.classList.add('text-red-500', 'animate-pulse');
+            } else {
+                display.parentElement.classList.remove('text-red-500', 'animate-pulse');
+            }
+        }
+
+        function handleTimeOut() {
+            roundActive = false;
+            streak = 0;
+            document.getElementById('streakDisplay').textContent = streak;
+            playErrorSound();
+
+            const expectedTargetNoun = currentAmount === 1 ? currentItem.name : currentItem.plural;
+            const solution = `${currentSubject.pronoun} has ${numberWords[currentAmount]} ${expectedTargetNoun}.`;
+
+            showFeedback(
+                'Time is Up! ⏰',
+                `Keep practicing! The correct sentence was: "${solution}"`,
+                'warning'
+            );
+
+            document.getElementById('checkBtn').classList.add('hidden');
+            document.getElementById('nextBtn').classList.remove('hidden');
+            renderUI();
+        }
+
+        /* =========================================================
+           11. EVENT LISTENERS & SETUP
+           ========================================================= */
+        document.addEventListener('DOMContentLoaded', () => {
+            // Audio toggle button
+            const audioBtn = document.getElementById('audioToggleBtn');
+            audioBtn.addEventListener('click', () => {
+                soundEnabled = !soundEnabled;
+                audioBtn.textContent = soundEnabled ? '🔊' : '🔇';
+                audioBtn.title = soundEnabled ? 'Sound is ON' : 'Sound is OFF';
+            });
+
+            // Timer mode dropdown change
+            document.getElementById('timerModeSelect').addEventListener('change', () => {
+                initRound();
+            });
+
+            // Keyboard shortcut (Enter to check or advance)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const checkBtn = document.getElementById('checkBtn');
+                    const nextBtn = document.getElementById('nextBtn');
+                    if (!checkBtn.classList.contains('hidden')) {
+                        checkAnswer();
+                    } else if (!nextBtn.classList.contains('hidden')) {
+                        initRound();
+                    }
+                }
+            });
+
+            // Start first question
+            initRound();
+        });
+    </script>
+</body>
+</html>
