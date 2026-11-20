@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-QK9TJVW1KW"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QK9TJVW1KW"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
 
-  gtag('config', 'G-QK9TJVW1KW');
-</script>
+    gtag('config', 'G-QK9TJVW1KW');
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>English Learning Games | Mr. Mike</title>
@@ -18,6 +18,7 @@
     :root {
       --primary: #1e3a5f;
       --accent: #2563eb;
+      --accent-hover: #1d4ed8;
       --text: #2d3748;
       --text-muted: #64748b;
       --bg: #f8fafc;
@@ -31,6 +32,10 @@
       padding: 0;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg);
@@ -40,7 +45,7 @@
     }
 
     .container {
-      max-width: 900px;
+      max-width: 1040px;
       margin: 0 auto;
       background: var(--card);
       border: 1px solid var(--border);
@@ -67,7 +72,7 @@
     header {
       border-bottom: 2px solid var(--border);
       padding-bottom: 24px;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
     }
 
     header h1 {
@@ -86,9 +91,42 @@
       border: 1px solid #bfdbfe;
       border-radius: 6px;
       padding: 16px 20px;
-      margin-bottom: 32px;
+      margin-bottom: 24px;
       font-size: 0.95rem;
       color: #1e40af;
+    }
+
+    /* Quick Unit Jump Bar */
+    .unit-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 36px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .unit-pill {
+      display: inline-block;
+      padding: 6px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+
+    .unit-pill:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .unit-section {
+      margin-bottom: 48px;
     }
 
     h2 {
@@ -96,30 +134,81 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--primary);
-      border-bottom: 1px solid var(--border);
+      border-bottom: 2px solid var(--border);
       padding-bottom: 8px;
+      margin-bottom: 8px;
+    }
+
+    .unit-subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
       margin-bottom: 20px;
     }
 
     .game-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 16px;
-      margin-bottom: 32px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
     }
 
     .game-card {
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 20px;
+      border-radius: 8px;
       background: var(--bg);
       display: flex;
       flex-direction: column;
+      overflow: hidden;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .game-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.08);
+    }
+
+    /* 1:1 Square Container for 400x400 Thumbnails */
+    .thumb-wrapper {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #e2e8f0;
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .thumb-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Fallback styling if screenshot isn't uploaded yet */
+    .thumb-wrapper.missing-thumb {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 1.05rem;
+      text-decoration: none;
+    }
+
+    .card-body {
+      padding: 18px 20px 20px;
+      display: flex;
+      flex-direction: column;
       justify-content: space-between;
+      flex-grow: 1;
     }
 
     .game-card h3 {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
+      line-height: 1.35;
       color: var(--primary);
       margin-bottom: 8px;
     }
@@ -135,10 +224,18 @@
       text-decoration: none;
       font-weight: 600;
       font-size: 0.9rem;
+      align-self: flex-start;
     }
 
     .game-link:hover {
+      color: var(--accent-hover);
       text-decoration: underline;
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 24px 20px;
+      }
     }
   </style>
 </head>
@@ -152,7 +249,7 @@
     <header>
       <h1>English Learning Games</h1>
       <p>Interactive web applications designed to support primary English language acquisition.</p>
-      <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 12px; max-width: 750px;">
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 12px; max-width: 780px;">
         Welcome to Mr. Mike's collection of interactive ESL activities. Designed specifically for primary students, teachers, and parents in Hong Kong, these educational games help early learners develop foundational skills—from sight word recognition and phonics to sentence building and core vocabulary.
       </p>
     </header>
@@ -161,237 +258,413 @@
       <strong>Curriculum Alignment:</strong> All activities on this platform are specifically tailored to reinforce the <strong>Read Write Inc. (RWI) Phonics</strong> program and Hong Kong's <strong>Space Town Literacy Curriculum</strong>.
     </div>
 
-    <!-- Active Games Section (Unified Collection) -->
-    <section>
-      <h2>Active Interactive Games</h2>
+    <!-- Quick Unit Navigation -->
+    <div class="unit-nav" aria-label="Jump to section">
+      <a href="#space-town-unit-1" class="unit-pill">Space Town Unit 1 (7)</a>
+      <a href="#space-town-unit-2" class="unit-pill">Space Town Unit 2 (17)</a>
+      <a href="#space-town-unit-14" class="unit-pill">Space Town Unit 14 (2)</a>
+      <a href="#ielts-games" class="unit-pill">IELTS Academic (2)</a>
+    </div>
+
+    <!-- ==================== SPACE TOWN UNIT 1 ==================== -->
+    <section id="space-town-unit-1" class="unit-section">
+      <h2>Space Town Unit 1</h2>
+      <p class="unit-subtitle">Colors, early sentence jumbles, and Unit 1 high-frequency sight words.</p>
+      
       <div class="game-grid">
         <div class="game-card">
-          <div>
-            <h3>Color Matcher</h3>
-            <p>Single-player color vocabulary matching activity for early learners.</p>
+          <a href="space-town-unit-1-color-matcher.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-1-color-matcher.png" alt="Color Matcher screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Color Matcher';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Color Matcher</h3>
+              <p>Single-player color vocabulary matching activity for early learners.</p>
+            </div>
+            <a href="space-town-unit-1-color-matcher.html" class="game-link">Play Game &rarr;</a>
           </div>
-          <a href="space-town-unit-1-color-matcher.html" class="game-link">Play Game &rarr;</a>
         </div>
 
         <div class="game-card">
-          <div>
-            <h3>Color Matcher (Speed Run)</h3>
-            <p>Timed high-speed variation focused on rapid word recognition and recall.</p>
+          <a href="space-town-unit-1-color-matcher-timed.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-1-color-matcher-timed.png" alt="Color Matcher Speed Run screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Color Matcher (Speed Run)';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Color Matcher (Speed Run)</h3>
+              <p>Timed high-speed variation focused on rapid word recognition and recall.</p>
+            </div>
+            <a href="space-town-unit-1-color-matcher-timed.html" class="game-link">Play Game &rarr;</a>
           </div>
-          <a href="space-town-unit-1-color-matcher-timed.html" class="game-link">Play Game &rarr;</a>
         </div>
 
         <div class="game-card">
-          <div>
-            <h3>Color Matcher (Multiplayer)</h3>
-            <p>Turn-based interactive match game designed for collaborative paired play.</p>
+          <a href="space-town-unit-1-color-matcher-multi.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-1-color-matcher-multi.png" alt="Color Matcher Multiplayer screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Color Matcher (Multiplayer)';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Color Matcher (Multiplayer)</h3>
+              <p>Turn-based interactive match game designed for collaborative paired play.</p>
+            </div>
+            <a href="space-town-unit-1-color-matcher-multi.html" class="game-link">Play Game &rarr;</a>
           </div>
-          <a href="space-town-unit-1-color-matcher-multi.html" class="game-link">Play Game &rarr;</a>
-        </div>        
-
-        <div class="game-card">
-          <div>
-            <h3>Space Town Unit 1 Feed the Color Monsters)</h3>
-            <p>Cookies are delicious, but these monsters only eat certain cookies.</p>
-          </div>
-          <a href="space-town-unit-1-feed_the_color_monster.html" class="game-link">Play Game &rarr;</a>
-        </div>        
-
-        <div class="game-card">
-          <div>
-            <h3>Space Town Unit 1 Word Jumbles</h3>
-            <p>Practice making sentences. Don't forget the capitals and full stops.</p>
-          </div>
-          <a href="space-town-unit-1-word-jumble-1.html" class="game-link">Play Game &rarr;</a>
         </div>
 
         <div class="game-card">
-          <div>
-            <h3>Space Town Unit 1 Sight Words Snakes and Ladders</h3>
-            <p>A version of Snakes and Ladders aligned with the Space Town literacy curriculum.</p>
+          <a href="space-town-unit-1-feed_the_color_monster.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-1-feed_the_color_monster.png" alt="Feed the Color Monsters screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Feed the Color Monsters';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Feed the Color Monsters</h3>
+              <p>Cookies are delicious, but these monsters only eat certain cookies.</p>
+            </div>
+            <a href="space-town-unit-1-feed_the_color_monster.html" class="game-link">Play Game &rarr;</a>
           </div>
-          <a href="space-town-unit-1-sight-words-snakes-ladders.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-
-        <div class="game-card">
-          <div>
-            <h3>Space Town Unit 1 Sight Word (HFW) Asteroid Blaster</h3>
-            <p>You are flying through space. Your ability to read quickly is what will save you.</p>
-          </div>
-          <a href="unit-1-hfw-asteroid-battle.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-            
-        <div class="game-card">
-          <div>
-            <h3>Space Town Unit 2 Classroom Items Matcher</h3>
-            <p>A matching activity for young English learners to practice finding classroom items.</p>
-          </div>
-          <a href="space-town-unit-2-classroom.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-        
-        <div class="game-card">
-          <div>
-            <h3>Space Town Unit 2 Classroom Items Matcher (Speed Run)</h3>
-            <p>A timed matching activity for young English learners to practice finding classroom items.</p>
-          </div>
-          <a href="space-town-unit-2-classroom-multi.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-                
-        <div class="game-card">
-          <div>
-            <h3>Space Town Unit 2 Classroom Items Matcher Multiplayer</h3>
-            <p>A multiplayer matching activity for young English learners to practice finding classroom items.</p>
-          </div>
-          <a href="space-town-unit-2-classroom-multi.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-        
-         <div class="game-card">
-          <div>
-            <h3>Space Town Unit 2 1-10 Number Game</h3>
-            <p>A number-to-word matching game for young English language learners.</p>
-          </div>
-          <a href="space-town-unit-2-numbers.html" class="game-link">Play Game &rarr;</a>
-        </div>
-        
-         <div class="game-card">
-          <div>
-            <h3>Space Town Unit 2 Number Word Pair Game Speed Edition</h3>
-            <p>A number-to-word matching game for young English language learners.</p>
-          </div>
-          <a href="number-matching-game-speed-edition.html" class="game-link">Play Game &rarr;</a>
         </div>
 
-         <div class="game-card">
-          <div>
-            <h3>Space Town Unit 2 1-10 Number Game Multiplayer</h3>
-            <p>A multiplayer number-to-word matching game for young English language learners.</p>
+        <div class="game-card">
+          <a href="space-town-unit-1-word-jumble-1.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-1-word-jumble-1.png" alt="Unit 1 Word Jumbles screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Unit 1 Word Jumbles';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Unit 1 Word Jumbles</h3>
+              <p>Practice making sentences. Don't forget the capitals and full stops.</p>
+            </div>
+            <a href="space-town-unit-1-word-jumble-1.html" class="game-link">Play Game &rarr;</a>
           </div>
-          <a href="space-town-unit-2-numbers-multi.html" class="game-link">Play Game &rarr;</a>
         </div>
- 
-         <div class="game-card">
-          <div>
-            <h3>Space Town Unit 2 Numbers 1-10 Spelling Letter Jumble Game</h3>
-            <p>Spell the number words. See if you can get them all.</p>
+
+        <div class="game-card">
+          <a href="space-town-unit-1-sight-words-snakes-ladders.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-1-sight-words-snakes-ladders.png" alt="Unit 1 Sight Words Snakes and Ladders screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Sight Words Snakes & Ladders';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Sight Words Snakes and Ladders</h3>
+              <p>A version of Snakes and Ladders aligned with the Space Town literacy curriculum.</p>
+            </div>
+            <a href="space-town-unit-1-sight-words-snakes-ladders.html" class="game-link">Play Game &rarr;</a>
           </div>
-          <a href="number-spelling-letter-jumble-game.html" class="game-link">Play Game &rarr;</a>
         </div>
-       
-         <div class="game-card">
-          <div>
-            <h3>Space Town Unit 2 Stationery Game</h3>
-            <p>A vocabulary game to identify what stationery goes in the hungry pencil case.</p>
-          </div>
-          <a href="space-town-unit-2-feed-the-pencil-case.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-        
-         <div class="game-card">
-          <div>
-            <h3>Space Town Unit 2 Stationery Memory (Pelmanism) Game</h3>
-            <p>See if you can match the pictures with the words.</p>
-          </div>
-          <a href="space-town-unit-2-stationery-memory-game.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-        
-         <div class="game-card">
-          <div>
-            <h3>Space Town Unit 2 Stationery Matching Game</h3>
-            <p>See if you can match the pictures with the words.</p>
-          </div>
-          <a href="space-town-unit-2-stationery.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-        
-         <div class="game-card">
-          <div>
-            <h3>Space Town Unit 2 Stationery Speed Matching Game</h3>
-            <p>See how fast you can match the pictures with the words.</p>
-          </div>
-          <a href="space-town-unit-2-stationery-speed.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-        
-         <div class="game-card">
-          <div>
-            <h3>Space Town Unit 2 He/She Has Stationery Sentence Builder</h3>
-            <p>Practice using he and she to talk about what people have.</p>
-          </div>
-          <a href="space-town-unit-2-he-she-has-sentence-builder-game.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-        
-         <div class="game-card">
-          <div>
-            <h3>Space Town Unit 2 Sentence Builder Plural "s" practice.html</h3>
-            <p>Practice adding "S" to make words plural. Remember, when there is only one, don't add "S."</p>
-          </div>
-          <a href="space-town-unit-2-sentence-builder-plural-s-practice.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-        
-         <div class="game-card">
-          <div>
-            <h3>Space Town Unit 2 Two Item Sentence Stationery Builder to Practice Using And</h3>
-            <p>Practice using and to talk about what people have.</p>
-          </div>
-          <a href="space-town-unit-2-sentence-builder-two-items.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-        
-         <div class="game-card">
-          <div>
-            <h3>Space Town Unit 2 I You We They Have Sentence Builder</h3>
-            <p>Practice using I/You/We/They to talk about what people have.</p>
-          </div>
-          <a href="space-town-unit-2-i-you-we-they-have-sentence-builder.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-            
+
         <div class="game-card">
-          <div>
-            <h3>Space Town Unit 2 Phonics Conveyor Belt</h3>
-            <p>Match the sounds/letters with the words.</p>
+          <a href="unit-1-hfw-asteroid-battle.html" class="thumb-wrapper">
+            <img src="images/thumbnails/unit-1-hfw-asteroid-battle.png" alt="Sight Word Asteroid Blaster screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='HFW Asteroid Blaster';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Sight Word (HFW) Asteroid Blaster</h3>
+              <p>You are flying through space. Your ability to read quickly is what will save you.</p>
+            </div>
+            <a href="unit-1-hfw-asteroid-battle.html" class="game-link">Play Game &rarr;</a>
           </div>
-          <a href="space-town-unit-2-phonics-conveyor-belt.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-            
-        <div class="game-card">
-          <div>
-            <h3>Space Town Unit 2 Sight Words Snakes and Ladders</h3>
-            <p>A version of Snakes and Ladders aligned with the Space Town literacy curriculum.</p>
-          </div>
-          <a href="space-town-unit-2-sight-words-snakes-ladders.html" class="game-link">Play Game &rarr;</a>
-        </div> 
-        
-        <div class="game-card">
-          <div>
-            <h3>Space Town Unit 14 Countable and Uncountable Foods</h3>
-            <p>Try to sort the different foods.</p>
-          </div>
-          <a href="space-town-unit-14-countable-uncountable-foods.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-            
-        <div class="game-card">
-          <div>
-            <h3>Space Town Unit 14 Countable and Uncountable Food Sentence Jumble</h3>
-            <p>Can you make sentences with countable and uncountable foods?</p>
-          </div>
-          <a href="space-town-unit-14-countable-uncountable-food-jumble.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-            
-        <div class="game-card">
-          <div>
-            <h3>IELTS Academic Vocabulary Word Strike</h3>
-            <p>A fast-paced arcade challenge designed to sharpen Band 7–9 IELTS Academic vocabulary under pressure. Strike the right words, maintain your combo streak, and see what band score you achieve.</p>
-          </div>
-          <a href="ielts-games/word_strike_ielts_academic_edition.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-        
-        <div class="game-card">
-          <div>
-            <h3>IELTS Academic Idiom Island Pirate Adventure Game</h3>
-            <p>Navigate five pirate islands to conquer high-level idioms for the IELTS exam. Master natural speaking expressions, avoid academic writing traps, and claim your Captain's Band Score rank!</p>
-          </div>
-          <a href="ielts-games/ielts-idiom-island-game.html" class="game-link">Play Game &rarr;</a>
-        </div>  
-                                                         
+        </div>
       </div>
     </section>
-<section style="margin-top: 48px; border-top: 2px solid var(--border); padding-top: 32px;">
+
+    <!-- ==================== SPACE TOWN UNIT 2 ==================== -->
+    <section id="space-town-unit-2" class="unit-section">
+      <h2>Space Town Unit 2</h2>
+      <p class="unit-subtitle">Classroom items, numbers 1–10, stationery vocabulary, has/have sentence builders, and phonics.</p>
+      
+      <div class="game-grid">
+        <div class="game-card">
+          <a href="space-town-unit-2-classroom.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-2-classroom.png" alt="Classroom Items Matcher screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Classroom Items Matcher';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Classroom Items Matcher</h3>
+              <p>A matching activity for young English learners to practice finding classroom items.</p>
+            </div>
+            <a href="space-town-unit-2-classroom.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <!-- NOTE: Verify if this href should point to a speed/timed filename instead of -multi.html -->
+          <a href="space-town-unit-2-classroom-multi.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-2-classroom-speed.png" alt="Classroom Items Matcher Speed Run screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Classroom Items (Speed Run)';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Classroom Items Matcher (Speed Run)</h3>
+              <p>A timed matching activity for young English learners to practice finding classroom items.</p>
+            </div>
+            <a href="space-town-unit-2-classroom-multi.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <a href="space-town-unit-2-classroom-multi.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-2-classroom-multi.png" alt="Classroom Items Matcher Multiplayer screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Classroom Items (Multiplayer)';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Classroom Items Matcher Multiplayer</h3>
+              <p>A multiplayer matching activity for young English learners to practice finding classroom items.</p>
+            </div>
+            <a href="space-town-unit-2-classroom-multi.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <a href="space-town-unit-2-numbers.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-2-numbers.png" alt="1-10 Number Game screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='1–10 Number Game';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>1–10 Number Game</h3>
+              <p>A number-to-word matching game for young English language learners.</p>
+            </div>
+            <a href="space-town-unit-2-numbers.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <a href="number-matching-game-speed-edition.html" class="thumb-wrapper">
+            <img src="images/thumbnails/number-matching-game-speed-edition.png" alt="Number Word Pair Game Speed Edition screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Number Pair (Speed Edition)';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Number Word Pair Game (Speed Edition)</h3>
+              <p>A timed number-to-word matching game for young English language learners.</p>
+            </div>
+            <a href="number-matching-game-speed-edition.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <a href="space-town-unit-2-numbers-multi.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-2-numbers-multi.png" alt="1-10 Number Game Multiplayer screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='1–10 Number Game (Multiplayer)';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>1–10 Number Game Multiplayer</h3>
+              <p>A multiplayer number-to-word matching game for young English language learners.</p>
+            </div>
+            <a href="space-town-unit-2-numbers-multi.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <a href="number-spelling-letter-jumble-game.html" class="thumb-wrapper">
+            <img src="images/thumbnails/number-spelling-letter-jumble-game.png" alt="Numbers 1-10 Spelling Letter Jumble screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Numbers 1–10 Spelling Jumble';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Numbers 1–10 Spelling Letter Jumble</h3>
+              <p>Spell the number words. See if you can get them all.</p>
+            </div>
+            <a href="number-spelling-letter-jumble-game.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <a href="space-town-unit-2-feed-the-pencil-case.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-2-feed-the-pencil-case.png" alt="Stationery Game Feed the Pencil Case screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Feed the Pencil Case';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Stationery Game: Feed the Pencil Case</h3>
+              <p>A vocabulary game to identify what stationery goes in the hungry pencil case.</p>
+            </div>
+            <a href="space-town-unit-2-feed-the-pencil-case.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <a href="space-town-unit-2-stationery-memory-game.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-2-stationery-memory-game.png" alt="Stationery Memory Pelmanism Game screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Stationery Memory Game';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Stationery Memory (Pelmanism) Game</h3>
+              <p>See if you can match the pictures with the words.</p>
+            </div>
+            <a href="space-town-unit-2-stationery-memory-game.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <a href="space-town-unit-2-stationery.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-2-stationery.png" alt="Stationery Matching Game screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Stationery Matching Game';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Stationery Matching Game</h3>
+              <p>See if you can match the pictures with the words.</p>
+            </div>
+            <a href="space-town-unit-2-stationery.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <a href="space-town-unit-2-stationery-speed.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-2-stationery-speed.png" alt="Stationery Speed Matching Game screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Stationery Speed Matching';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Stationery Speed Matching Game</h3>
+              <p>See how fast you can match the pictures with the words.</p>
+            </div>
+            <a href="space-town-unit-2-stationery-speed.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <a href="space-town-unit-2-he-she-has-sentence-builder-game.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-2-he-she-has-sentence-builder-game.png" alt="He She Has Stationery Sentence Builder screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='He / She Has Sentence Builder';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>He/She Has Stationery Sentence Builder</h3>
+              <p>Practice using he and she to talk about what people have.</p>
+            </div>
+            <a href="space-town-unit-2-he-she-has-sentence-builder-game.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <a href="space-town-unit-2-sentence-builder-plural-s-practice.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-2-sentence-builder-plural-s-practice.png" alt="Sentence Builder Plural s Practice screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Plural “s” Sentence Builder';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Sentence Builder: Plural "s" Practice</h3>
+              <p>Practice adding "s" to make words plural. Remember, when there is only one, don't add "s."</p>
+            </div>
+            <a href="space-town-unit-2-sentence-builder-plural-s-practice.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <a href="space-town-unit-2-sentence-builder-two-items.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-2-sentence-builder-two-items.png" alt="Two Item Sentence Builder Using And screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Two-Item Sentence Builder (and)';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Two-Item Stationery Sentence Builder ("And")</h3>
+              <p>Practice using "and" to talk about two items that people have.</p>
+            </div>
+            <a href="space-town-unit-2-sentence-builder-two-items.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <a href="space-town-unit-2-i-you-we-they-have-sentence-builder.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-2-i-you-we-they-have-sentence-builder.png" alt="I You We They Have Sentence Builder screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='I / You / We / They Have';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>I / You / We / They Have Sentence Builder</h3>
+              <p>Practice using I, you, we, and they to talk about what people have.</p>
+            </div>
+            <a href="space-town-unit-2-i-you-we-they-have-sentence-builder.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <a href="space-town-unit-2-phonics-conveyor-belt.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-2-phonics-conveyor-belt.png" alt="Phonics Conveyor Belt screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Phonics Conveyor Belt';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Phonics Conveyor Belt</h3>
+              <p>Match the sounds and letters with the words.</p>
+            </div>
+            <a href="space-town-unit-2-phonics-conveyor-belt.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <a href="space-town-unit-2-sight-words-snakes-ladders.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-2-sight-words-snakes-ladders.png" alt="Unit 2 Sight Words Snakes and Ladders screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Unit 2 Snakes & Ladders';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Sight Words Snakes and Ladders</h3>
+              <p>A version of Snakes and Ladders aligned with the Space Town Unit 2 literacy curriculum.</p>
+            </div>
+            <a href="space-town-unit-2-sight-words-snakes-ladders.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SPACE TOWN UNIT 14 ==================== -->
+    <section id="space-town-unit-14" class="unit-section">
+      <h2>Space Town Unit 14</h2>
+      <p class="unit-subtitle">Countable and uncountable food nouns and sentence construction.</p>
+      
+      <div class="game-grid">
+        <div class="game-card">
+          <a href="space-town-unit-14-countable-uncountable-foods.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-14-countable-uncountable-foods.png" alt="Countable and Uncountable Foods screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Countable & Uncountable Foods';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Countable and Uncountable Foods</h3>
+              <p>Try to sort the different foods into countable and uncountable categories.</p>
+            </div>
+            <a href="space-town-unit-14-countable-uncountable-foods.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <a href="space-town-unit-14-countable-uncountable-food-jumble.html" class="thumb-wrapper">
+            <img src="images/thumbnails/space-town-unit-14-countable-uncountable-food-jumble.png" alt="Countable and Uncountable Food Sentence Jumble screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='Food Sentence Jumble';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>Countable and Uncountable Food Sentence Jumble</h3>
+              <p>Can you make sentences with countable and uncountable foods?</p>
+            </div>
+            <a href="space-town-unit-14-countable-uncountable-food-jumble.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== IELTS ACADEMIC GAMES ==================== -->
+    <section id="ielts-games" class="unit-section">
+      <h2>IELTS Academic Games</h2>
+      <p class="unit-subtitle">Advanced vocabulary and idiomatic expressions for secondary and adult learners.</p>
+      
+      <div class="game-grid">
+        <div class="game-card">
+          <a href="ielts-games/word_strike_ielts_academic_edition.html" class="thumb-wrapper">
+            <img src="images/thumbnails/word_strike_ielts_academic_edition.png" alt="IELTS Academic Vocabulary Word Strike screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='IELTS Word Strike';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>IELTS Academic Vocabulary Word Strike</h3>
+              <p>A fast-paced arcade challenge designed to sharpen Band 7–9 IELTS Academic vocabulary under pressure. Strike the right words, maintain your combo streak, and see what band score you achieve.</p>
+            </div>
+            <a href="ielts-games/word_strike_ielts_academic_edition.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <a href="ielts-games/ielts-idiom-island-game.html" class="thumb-wrapper">
+            <img src="images/thumbnails/ielts-idiom-island-game.png" alt="IELTS Academic Idiom Island Pirate Adventure screenshot" width="400" height="400" loading="lazy" onerror="this.parentElement.classList.add('missing-thumb'); this.parentElement.textContent='IELTS Idiom Island';">
+          </a>
+          <div class="card-body">
+            <div>
+              <h3>IELTS Academic Idiom Island Pirate Adventure</h3>
+              <p>Navigate five pirate islands to conquer high-level idioms for the IELTS exam. Master natural speaking expressions, avoid academic writing traps, and claim your Captain's Band Score rank!</p>
+            </div>
+            <a href="ielts-games/ielts-idiom-island-game.html" class="game-link">Play Game &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== CURRICULUM OVERVIEW ==================== -->
+    <section style="margin-top: 48px; border-top: 2px solid var(--border); padding-top: 32px;">
       <h2>About the Curriculum Alignment</h2>
       <p style="color: var(--text-muted); margin-bottom: 16px;">
         As a Native English Teacher (NET) in Hong Kong, I develop these interactive web games to directly support the local primary school English syllabus. Whether you are a teacher looking for classroom activities or a parent helping your child practice at home, these resources are built to reinforce key learning objectives from Primary 1 through Key Stage 2.
@@ -411,110 +684,8 @@
         </div>
       </div>
     </section>
-    <!--
-    =============================================================================
-    FUTURE ARCHITECTURE: RWI & SPACE TOWN CURRICULUM SECTIONS
-    =============================================================================
-    HOW TO ACTIVATE:
-    1. Remove the opening and closing HTML comment tags (<!-- and - ->) surrounding the sections below.
-    2. Add your specific game URLs into the href attributes.
-    3. Update or remove the unified "Active Interactive Games" section above when you are ready to segment your library.
-    =============================================================================
-    -->
-
-    <!--
-    <section id="space-town-games" style="margin-top: 48px;">
-      <h2>Space Town Games</h2>
-      <p style="color: var(--text-muted); margin-bottom: 20px;">Unit-by-unit reading and vocabulary games supporting the Space Town primary curriculum.</p>
-
-      <div style="margin-bottom: 24px;">
-        <h3 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 12px;">Unit 1: Self & School</h3>
-        <div class="game-grid">
-          <div class="game-card">
-            <h4>Unit 1 Vocabulary Hunt</h4>
-            <p>High-frequency word reinforcement.</p>
-            <a href="games/spacetown/u1-vocab.html" class="game-link">Play &rarr;</a>
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-bottom: 24px;">
-        <h3 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 12px;">Unit 2: Family & Friends</h3>
-        <div class="game-grid">
-          <div class="game-card">
-            <h4>Unit 2 Sentence Builder</h4>
-            <p>Simple sentence structure matching.</p>
-            <a href="games/spacetown/u2-sentences.html" class="game-link">Play &rarr;</a>
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-bottom: 24px;">
-        <h3 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 12px;">Unit 3: Community & Nature</h3>
-        <div class="game-grid">
-          <div class="game-card">
-            <h4>Unit 3 Word Sort</h4>
-            <p>Categorization and decoding game.</p>
-            <a href="games/spacetown/u3-wordsort.html" class="game-link">Play &rarr;</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="rwi-games" style="margin-top: 48px;">
-      <h2>Read Write Inc. (RWI) Games</h2>
-      <p style="color: var(--text-muted); margin-bottom: 20px;">Systematic phonics decoding and leveled book games.</p>
-
-      <div style="margin-bottom: 28px;">
-        <h3 style="font-size: 1.15rem; color: var(--primary); margin-bottom: 12px;">Sound Levels</h3>
-        <div class="game-grid">
-          <div class="game-card">
-            <h4>Set 1 Speed Sounds</h4>
-            <p>Letter-sound recognition (m, a, s, d, t...).</p>
-            <a href="games/rwi/set1-sounds.html" class="game-link">Practice &rarr;</a>
-          </div>
-          <div class="game-card">
-            <h4>Set 2 Special Friends</h4>
-            <p>Digraph matching (sh, th, ch, qu, ng, nk).</p>
-            <a href="games/rwi/set2-sounds.html" class="game-link">Practice &rarr;</a>
-          </div>
-          <div class="game-card">
-            <h4>Set 3 Alternative Spellings</h4>
-            <p>Advanced vowel sound patterns (ea, oi, a-e, i-e...).</p>
-            <a href="games/rwi/set3-sounds.html" class="game-link">Practice &rarr;</a>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h3 style="font-size: 1.15rem; color: var(--primary); margin-bottom: 12px;">Book Levels (Ditty to Grey)</h3>
-        <div class="game-grid">
-          <div class="game-card">
-            <h4>Ditty Books</h4>
-            <p>Blending speed and initial ditty reading practice.</p>
-            <a href="games/rwi/ditty.html" class="game-link">Open Games &rarr;</a>
-          </div>
-          <div class="game-card">
-            <h4>Green / Purple Level</h4>
-            <p>Short vowel decodables and red word challenges.</p>
-            <a href="games/rwi/green-purple.html" class="game-link">Open Games &rarr;</a>
-          </div>
-          <div class="game-card">
-            <h4>Pink / Orange Level</h4>
-            <p>Consolidated reading fluency and compound words.</p>
-            <a href="games/rwi/pink-orange.html" class="game-link">Open Games &rarr;</a>
-          </div>
-          <div class="game-card">
-            <h4>Yellow / Blue / Grey Level</h4>
-            <p>Extended decodable stories and multi-syllable vocabulary.</p>
-            <a href="games/rwi/advanced-levels.html" class="game-link">Open Games &rarr;</a>
-          </div>
-        </div>
-      </div>
-    </section>
-    -->
-
   </div>
-<script async src="https://eomail5.com/form/f7efb8d2-c4b1-11f1-bc0f-8de3487a8a77.js" data-form="f7efb8d2-c4b1-11f1-bc0f-8de3487a8a77"></script>
+
+  <script async src="https://eomail5.com/form/f7efb8d2-c4b1-11f1-bc0f-8de3487a8a77.js" data-form="f7efb8d2-c4b1-11f1-bc0f-8de3487a8a77"></script>
 </body>
 </html>
