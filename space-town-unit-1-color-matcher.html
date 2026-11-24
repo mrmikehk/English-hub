@@ -2,18 +2,74 @@
 <html lang="en">
 <head>
   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-QK9TJVW1KW"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QK9TJVW1KW"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
 
-  gtag('config', 'G-QK9TJVW1KW');
-</script>
+    gtag('config', 'G-QK9TJVW1KW');
+  </script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Color Matcher</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>Color Matcher – Interactive Classroom Color Game &amp; Smartboard Activity</title>
+  <meta name="description" content="Play Color Matcher, a free interactive classroom color recognition game for smartboards, tablets, and computers. Ideal for ESL, preschool, and kindergarten learners with text-to-speech audio and customizable color lists.">
+  <meta name="keywords" content="color matcher game, interactive color game, classroom smartboard game, ESL colors activity, preschool color recognition, kindergarten learning games, Space Town Unit 1">
+  <meta name="robots" content="index, follow">
 
+  <!-- Open Graph / Social Sharing Meta Tags -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Color Matcher – Interactive Classroom Color Game">
+  <meta property="og:description" content="A touch-friendly 3x3 color recognition game designed for interactive whiteboards, classrooms, and early learners. Includes voice pronunciation and custom color palettes.">
+
+  <!-- Structured Data (JSON-LD) for Educational WebApplication & FAQ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "name": "Color Matcher",
+        "applicationCategory": "EducationalApplication",
+        "educationalUse": "Interactive Whiteboard Activity, Vocabulary Practice, Color Recognition",
+        "audience": {
+          "@type": "EducationalAudience",
+          "educationalRole": "student"
+        },
+        "operatingSystem": "Web Browser",
+        "description": "An interactive 3x3 color matching game designed for classroom smartboards, tablets, and desktop browsers. Features built-in voice pronunciation, celebratory animations, and a customizable teacher settings panel.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How do you play Color Matcher in the classroom?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Look at or listen to the target color displayed in the 'Touch the:' banner at the top of the screen, then tap the matching glossy color card on the 3x3 grid. Correct matches award points, build a streak, and launch celebratory confetti."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can teachers customize the colors or display text labels?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Click the gear icon in the top-right corner to open the Teacher Settings panel, where you can add custom colors, edit hex codes, toggle color word labels on the cards, or enable automatic voice pronunciation."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -21,22 +77,34 @@
   <!-- Google Fonts: Fredoka & Nunito for high-legibility classroom typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
-    * {
+    /* Lock selection only inside the interactive game stage so SEO guide text below remains selectable */
+    .game-viewport * {
       user-select: none;
       -webkit-user-select: none;
       -webkit-touch-callout: none;
       touch-action: manipulation;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       font-family: 'Fredoka', 'Nunito', sans-serif;
-      background: radial-gradient(circle at 50% 15%, #fefce8 0%, #e0f2fe 50%, #dbeafe 100%);
-      overflow: hidden;
+      background: radial-gradient(circle at 50% 12%, #fefce8 0%, #e0f2fe 45%, #dbeafe 100%);
+      overflow-x: hidden;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    /* Full-viewport above-the-fold game wrapper so classroom gameplay stays identical */
+    .game-viewport {
       height: 100vh;
-      width: 100vw;
+      min-height: 620px;
+      width: 100%;
     }
 
     /* Chunky, touch-friendly 3D card styling for interactive classroom whiteboards */
@@ -101,7 +169,7 @@
 
     /* Floating party burst particles */
     .particle {
-      position: absolute;
+      position: fixed;
       pointer-events: none;
       font-size: 2.5rem;
       animation: flyUpAndFade 0.85s ease-out forwards;
@@ -120,7 +188,7 @@
       grid-template-rows: repeat(3, 1fr);
       gap: 1.1rem;
       aspect-ratio: 1 / 1;
-      max-height: calc(100vh - 215px);
+      max-height: calc(100vh - 225px);
       max-width: calc(100vw - 40px);
       width: 100%;
     }
@@ -128,7 +196,7 @@
     @media (min-height: 800px) {
       .grid-board {
         gap: 1.35rem;
-        max-height: calc(100vh - 240px);
+        max-height: calc(100vh - 250px);
       }
     }
 
@@ -147,81 +215,206 @@
   </style>
 </head>
 
-<body class="flex flex-col items-center justify-between p-3 sm:p-5 select-none">
+<body class="flex flex-col items-center">
 
-  <!-- Header Bar -->
-  <header class="w-full max-w-5xl flex items-center justify-between bg-white/95 backdrop-blur-md px-4 sm:px-6 py-2.5 rounded-3xl shadow-md border-2 border-amber-200">
-    <!-- Score & Streak counters -->
-    <div class="flex items-center gap-4 sm:gap-6">
+  <!-- =====================================================================
+       ABOVE-THE-FOLD INTERACTIVE SMARTBOARD GAME STAGE (100vh)
+       ===================================================================== -->
+  <div class="game-viewport flex flex-col items-center justify-between p-3 sm:p-5 select-none">
+
+    <!-- Header Bar -->
+    <header class="w-full max-w-5xl flex items-center justify-between bg-white/95 backdrop-blur-md px-4 sm:px-6 py-2.5 rounded-3xl shadow-md border-2 border-amber-200">
+      <!-- Score & Streak counters -->
+      <div class="flex items-center gap-4 sm:gap-6">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl sm:text-3xl" aria-hidden="true">⭐</span>
+          <div>
+            <div class="text-[11px] uppercase tracking-wider text-slate-500 font-bold">Score</div>
+            <div id="scoreDisplay" class="text-2xl sm:text-3xl font-black text-amber-500 leading-none">0</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 border-l-2 border-slate-200 pl-4">
+          <span class="text-2xl sm:text-3xl" aria-hidden="true">🔥</span>
+          <div>
+            <div class="text-[11px] uppercase tracking-wider text-slate-500 font-bold">Streak</div>
+            <div id="streakDisplay" class="text-2xl sm:text-3xl font-black text-orange-500 leading-none">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Classroom challenge title -->
+      <div class="hidden md:flex flex-col items-center">
+        <span class="text-xs uppercase tracking-widest text-amber-600 font-extrabold">Smartboard Challenge</span>
+        <span class="text-lg font-bold text-slate-700">Find the Matching Color!</span>
+      </div>
+
+      <!-- Interactive Tools -->
       <div class="flex items-center gap-2">
-        <span class="text-2xl sm:text-3xl">⭐</span>
-        <div>
-          <div class="text-[11px] uppercase tracking-wider text-slate-500 font-bold">Score</div>
-          <div id="scoreDisplay" class="text-2xl sm:text-3xl font-black text-amber-500 leading-none">0</div>
-        </div>
+        <!-- Voice Pronunciation Repeat -->
+        <button id="speakBtn" title="Speak Color Aloud" aria-label="Speak Color Aloud" class="w-12 h-12 rounded-2xl bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-xl font-bold flex items-center justify-center transition border-2 border-indigo-200 active:scale-95 shadow-sm">
+          🔊
+        </button>
+
+        <!-- Web Audio Sound Toggle -->
+        <button id="soundToggleBtn" title="Sound Effects On/Off" aria-label="Toggle Sound Effects" class="w-12 h-12 rounded-2xl bg-sky-100 hover:bg-sky-200 text-sky-700 text-xl font-bold flex items-center justify-center transition border-2 border-sky-200 active:scale-95 shadow-sm">
+          🔔
+        </button>
+
+        <!-- Teacher Settings Modal -->
+        <button id="openSettingsBtn" title="Teacher Customization Panel" aria-label="Open Teacher Settings" class="w-12 h-12 rounded-2xl bg-purple-100 hover:bg-purple-200 text-purple-700 text-xl font-bold flex items-center justify-center transition border-2 border-purple-200 active:scale-95 shadow-sm">
+          ⚙️
+        </button>
+
+        <!-- Fullscreen Toggle -->
+        <button id="fullscreenBtn" title="Fullscreen Mode" aria-label="Toggle Fullscreen Mode" class="w-12 h-12 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-800 text-xl font-bold flex items-center justify-center transition border-2 border-amber-200 active:scale-95 shadow-sm">
+          ⛶
+        </button>
       </div>
-      <div class="flex items-center gap-2 border-l-2 border-slate-200 pl-4">
-        <span class="text-2xl sm:text-3xl">🔥</span>
-        <div>
-          <div class="text-[11px] uppercase tracking-wider text-slate-500 font-bold">Streak</div>
-          <div id="streakDisplay" class="text-2xl sm:text-3xl font-black text-orange-500 leading-none">0</div>
-        </div>
+    </header>
+
+    <!-- Big Target Prompt Callout Banner (Readable anywhere in the room) -->
+    <section aria-label="Target Color Prompt" class="w-full max-w-4xl my-2 flex items-center justify-center">
+      <div class="bg-white px-6 sm:px-10 py-3 sm:py-4 rounded-3xl shadow-lg border-4 border-amber-300 flex items-center gap-3 sm:gap-5">
+        <span class="text-2xl sm:text-4xl animate-bounce" aria-hidden="true">👉</span>
+        <span class="text-xl sm:text-3xl font-extrabold text-slate-600 uppercase tracking-wide">Touch the:</span>
+        <span id="targetNameDisplay" class="text-3xl sm:text-5xl font-black drop-shadow-sm tracking-wide capitalize" style="color: #2563eb;">
+          Loading...
+        </span>
       </div>
+    </section>
+
+    <!-- 3x3 Color Cards Interactive Grid Surface -->
+    <main aria-label="Interactive Color Matching Board" class="flex-1 flex items-center justify-center w-full max-w-4xl">
+      <div id="colorGrid" class="grid-board">
+        <!-- Cards populated dynamically by JavaScript -->
+      </div>
+    </main>
+
+    <!-- Compact Game Bar with Smooth Jump Link to Instructions -->
+    <div class="w-full max-w-4xl py-1 flex items-center justify-between text-slate-600 text-xs sm:text-sm font-semibold px-2">
+      <span>💡 Tip: Tap ⚙️ to customize colors or <a href="#how-to-play" class="text-indigo-600 hover:text-indigo-800 underline font-bold">read instructions ↓</a></span>
+      <button id="resetScoreBtn" class="hover:text-red-600 underline font-bold transition">Reset Score</button>
     </div>
 
-    <!-- Classroom challenge title -->
-    <div class="hidden md:flex flex-col items-center">
-      <span class="text-xs uppercase tracking-widest text-amber-600 font-extrabold">Smartboard Challenge</span>
-      <span class="text-lg font-bold text-slate-700">Find the Matching Color!</span>
+  </div>
+
+  <!-- =====================================================================
+       SEO-OPTIMIZED INSTRUCTIONS, GAME OVERVIEW & CLASSROOM GUIDE
+       ===================================================================== -->
+  <article id="how-to-play" class="w-full max-w-5xl px-4 sm:px-6 pt-8 pb-16 text-slate-700">
+    <div class="bg-white/95 backdrop-blur-md rounded-3xl shadow-xl border-2 border-sky-200 p-6 sm:p-10 space-y-10">
+
+      <!-- Game Description & Educational Overview -->
+      <section aria-labelledby="about-heading" class="space-y-4">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-extrabold uppercase tracking-wider">
+          <span>🎨</span> Space Town Unit 1 • Early Learning &amp; ESL Resource
+        </div>
+        <h1 id="about-heading" class="text-2xl sm:text-4xl font-black text-slate-800 tracking-tight">
+          Color Matcher: Interactive Classroom Color Recognition Game
+        </h1>
+        <p class="text-base sm:text-lg leading-relaxed text-slate-600 font-['Nunito']">
+          <strong>Color Matcher</strong> is a free, browser-based interactive color matching game built specifically for classroom smartboards, interactive whiteboards, tablets, and desktop computers. Designed for preschool, kindergarten, and ESL/EFL young learners, the activity pairs bold, high-contrast color prompts with built-in text-to-speech pronunciation to strengthen listening comprehension, color vocabulary, and visual discrimination.
+        </p>
+        <p class="text-base leading-relaxed text-slate-600 font-['Nunito']">
+          Each round randomly selects 9 vibrant color swatches from an active pool of 11 core classroom colors—<strong>Red, Yellow, Pink, Green, Orange, Purple, Blue, Black, White, Brown, and Gray</strong>—and arranges them on a responsive 3&times;3 touch grid so students can practice from anywhere in the room.
+        </p>
+      </section>
+
+      <hr class="border-slate-200">
+
+      <!-- Step-by-Step How to Play Instructions -->
+      <section aria-labelledby="instructions-heading" class="space-y-5">
+        <h2 id="instructions-heading" class="text-xl sm:text-2xl font-black text-slate-800 flex items-center gap-2.5">
+          <span class="w-9 h-9 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center text-lg">📋</span>
+          How to Play Color Matcher
+        </h2>
+        <ol class="grid grid-cols-1 md:grid-cols-2 gap-4 font-['Nunito']">
+          <li class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex gap-4">
+            <span class="w-8 h-8 shrink-0 rounded-full bg-amber-400 text-white font-black flex items-center justify-center text-base shadow-sm">1</span>
+            <div>
+              <h3 class="font-extrabold text-slate-800 text-base mb-1">Read or Listen to the Target Color</h3>
+              <p class="text-sm text-slate-600 leading-relaxed">Check the large <strong>“Touch the:”</strong> banner above the board or listen to the automatic voice prompt. Tap the <strong>🔊 Speaker</strong> button anytime to hear the color word repeated aloud.</p>
+            </div>
+          </li>
+          <li class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex gap-4">
+            <span class="w-8 h-8 shrink-0 rounded-full bg-sky-500 text-white font-black flex items-center justify-center text-base shadow-sm">2</span>
+            <div>
+              <h3 class="font-extrabold text-slate-800 text-base mb-1">Tap the Matching Color Card</h3>
+              <p class="text-sm text-slate-600 leading-relaxed">Find the corresponding glossy color bubble on the 3&times;3 grid and tap or click it. Each card is sized for quick, accurate tapping on wall-mounted smartboards and touchscreens.</p>
+            </div>
+          </li>
+          <li class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex gap-4">
+            <span class="w-8 h-8 shrink-0 rounded-full bg-emerald-500 text-white font-black flex items-center justify-center text-base shadow-sm">3</span>
+            <div>
+              <h3 class="font-extrabold text-slate-800 text-base mb-1">Build Your Score &amp; Streak</h3>
+              <p class="text-sm text-slate-600 leading-relaxed">Correct answers trigger celebratory confetti, a cheerful musical chime, +1 point, and a streak bonus before shuffling a fresh 3&times;3 board. Incorrect taps give a gentle wiggle without losing points.</p>
+            </div>
+          </li>
+          <li class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex gap-4">
+            <span class="w-8 h-8 shrink-0 rounded-full bg-purple-500 text-white font-black flex items-center justify-center text-base shadow-sm">4</span>
+            <div>
+              <h3 class="font-extrabold text-slate-800 text-base mb-1">Customize for Your Lesson</h3>
+              <p class="text-sm text-slate-600 leading-relaxed">Open the <strong>⚙️ Settings</strong> panel to add new vocabulary colors (such as Turquoise, Gold, or Beige), toggle text labels beneath swatches, or switch to <strong>⛶ Fullscreen</strong> mode.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <!-- Key Classroom Features & Teacher Tips -->
+      <section aria-labelledby="features-heading" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-indigo-50/70 p-6 rounded-2xl border border-indigo-100 space-y-3">
+          <h2 id="features-heading" class="text-lg sm:text-xl font-black text-indigo-950 flex items-center gap-2">
+            <span>✨</span> Key Smartboard &amp; Learning Features
+          </h2>
+          <ul class="space-y-2.5 text-sm text-slate-700 font-['Nunito']">
+            <li class="flex items-start gap-2">
+              <span class="text-indigo-600 font-bold">✓</span>
+              <span><strong>Built-In Voice Pronunciation:</strong> Uses clear, child-paced speech synthesis so pre-readers can match colors by listening alone.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-indigo-600 font-bold">✓</span>
+              <span><strong>Reading Scaffolding Mode:</strong> Turn <em>“Show words on cards”</em> on for early reading support, or turn it off for pure color-to-word recall.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-indigo-600 font-bold">✓</span>
+              <span><strong>Custom Color Pools:</strong> Teachers can add unlimited custom shades and names, saved automatically in local browser storage.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-indigo-600 font-bold">✓</span>
+              <span><strong>Zero Setup Required:</strong> Self-contained HTML activity with synthesized sound effects—no external audio files or logins needed.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-amber-50/70 p-6 rounded-2xl border border-amber-100 space-y-3">
+          <h2 class="text-lg sm:text-xl font-black text-amber-950 flex items-center gap-2">
+            <span>🏫</span> Classroom Activity Ideas
+          </h2>
+          <ul class="space-y-2.5 text-sm text-slate-700 font-['Nunito']">
+            <li class="flex items-start gap-2">
+              <span class="text-amber-600 font-bold">•</span>
+              <span><strong>Team Relay Race:</strong> Divide the class into two teams and have one student at a time sprint to the smartboard to touch the called color.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-amber-600 font-bold">•</span>
+              <span><strong>Listening-Only Challenge:</strong> Cover or look away from the prompt banner, tap <strong>🔊</strong>, and challenge learners to identify the color purely by ear.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-amber-600 font-bold">•</span>
+              <span><strong>Classroom Scavenger Hunt:</strong> After tapping the matching card on screen, ask students to point to an object of the same color in the room.</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 font-['Nunito']">
+        <span>Color Matcher • Interactive Classroom Smartboard Activity (Space Town Unit 1)</span>
+        <a href="#" class="text-indigo-600 hover:text-indigo-800 font-bold underline">Back to Top ↑</a>
+      </footer>
+
     </div>
-
-    <!-- Interactive Tools -->
-    <div class="flex items-center gap-2">
-      <!-- Voice Pronunciation Repeat -->
-      <button id="speakBtn" title="Speak Color Aloud" class="w-12 h-12 rounded-2xl bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-xl font-bold flex items-center justify-center transition border-2 border-indigo-200 active:scale-95 shadow-sm">
-        🔊
-      </button>
-
-      <!-- Web Audio Sound Toggle -->
-      <button id="soundToggleBtn" title="Sound Effects On/Off" class="w-12 h-12 rounded-2xl bg-sky-100 hover:bg-sky-200 text-sky-700 text-xl font-bold flex items-center justify-center transition border-2 border-sky-200 active:scale-95 shadow-sm">
-        🔔
-      </button>
-
-      <!-- Teacher Settings Modal -->
-      <button id="openSettingsBtn" title="Teacher Customization Panel" class="w-12 h-12 rounded-2xl bg-purple-100 hover:bg-purple-200 text-purple-700 text-xl font-bold flex items-center justify-center transition border-2 border-purple-200 active:scale-95 shadow-sm">
-        ⚙️
-      </button>
-
-      <!-- Fullscreen Toggle -->
-      <button id="fullscreenBtn" title="Fullscreen Mode" class="w-12 h-12 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-800 text-xl font-bold flex items-center justify-center transition border-2 border-amber-200 active:scale-95 shadow-sm">
-        ⛶
-      </button>
-    </div>
-  </header>
-
-  <!-- Big Target Prompt Callout Banner (Readable anywhere in the room) -->
-  <section class="w-full max-w-4xl my-2 flex items-center justify-center">
-    <div class="bg-white px-6 sm:px-10 py-3 sm:py-4 rounded-3xl shadow-lg border-4 border-amber-300 flex items-center gap-3 sm:gap-5">
-      <span class="text-2xl sm:text-4xl animate-bounce">👉</span>
-      <span class="text-xl sm:text-3xl font-extrabold text-slate-600 uppercase tracking-wide">Touch the:</span>
-      <span id="targetNameDisplay" class="text-3xl sm:text-5xl font-black drop-shadow-sm tracking-wide capitalize" style="color: #2563eb;">
-        Loading...
-      </span>
-    </div>
-  </section>
-
-  <!-- 3x3 Color Cards Interactive Grid Surface -->
-  <main class="flex-1 flex items-center justify-center w-full max-w-4xl">
-    <div id="colorGrid" class="grid-board">
-      <!-- Cards populated dynamically by JavaScript -->
-    </div>
-  </main>
-
-  <!-- Footer Info Bar -->
-  <footer class="w-full max-w-4xl py-1 flex items-center justify-between text-slate-500 text-xs sm:text-sm font-semibold px-2">
-    <span>💡 Tip: Tap ⚙️ to add colors, toggle card words, or enable auto-pronounce!</span>
-    <button id="resetScoreBtn" class="hover:text-red-600 underline font-bold transition">Reset Score</button>
-  </footer>
+  </article>
 
   <!-- Teacher Settings Modal -->
   <div id="settingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
