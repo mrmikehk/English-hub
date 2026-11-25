@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Space Town Unit 1: Capital Crater Whack | Mr. Mike's ESL Games</title>
+  <meta name="description" content="Free interactive Primary 1 Space Town Unit 1 high-frequency word whack-a-mole game. Tap the space aliens carrying capitalized sight words!" />
+  <link rel="canonical" href="https://mrmike.hk/games/space-town-unit-1-capital-whack.html" />
+
+  <!-- JSON-LD Structured Data for Educational Game -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LearningResource",
+    "name": "Space Town Unit 1: Capital Crater Whack",
+    "description": "An interactive Primary 1 whack-a-mole sight word game practicing capital letter recognition with Space Town Unit 1 high-frequency words.",
+    "educationalLevel": "Primary 1 / Grade 1",
+    "learningResourceType": "Educational Game",
+    "inLanguage": "en",
+    "author": {
+      "@type": "Person",
+      "name": "Mr. Mike",
+      "url": "https://mrmike.hk"
+    },
+    "teaches": [
+      "Capital letter recognition",
+      "High-frequency sight words: my, is, I, am, five, six, old, this, a, red, blue"
+    ]
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg-space: #161b33;
+      --bg-surface: #232b4d;
+      --moon-ground: #3b426b;
+      --crater-rim: #5c6699;
+      --crater-hole: #0d1021;
+      --badge-bg: #ffffff;
+      --text-ink: #111827;
+      --accent-gold: #fbbf24;
+      --accent-green: #22c55e;
+      --accent-red: #ef4444;
+      --font-kids: "Comic Sans MS", "Chalkboard SE", "Comic Neue", cursive, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-space);
+      color: #f8fafc;
+      font-family: var(--font-kids);
+      overflow-x: hidden;
+    }
+
+    /* Full-Viewport Smartboard Game Stage */
+    #game-stage {
+      width: 100%;
+      height: 100dvh;
+      min-height: 540px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px 16px 14px;
+      background:
+        radial-gradient(2px 2px at 12% 18%, #ffffff 60%, transparent),
+        radial-gradient(2px 2px at 28% 8%, #fde68a 60%, transparent),
+        radial-gradient(2px 2px at 47% 22%, #ffffff 60%, transparent),
+        radial-gradient(3px 3px at 68% 12%, #bae6fd 60%, transparent),
+        radial-gradient(2px 2px at 85% 19%, #ffffff 60%, transparent),
+        radial-gradient(2px 2px at 92% 7%, #fde68a 60%, transparent),
+        linear-gradient(180deg, #11152c 0%, #1e264a 65%, #2d3561 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Top HUD Bar */
+    .hud-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.78);
+      border: 2px solid #475569;
+      border-radius: 16px;
+      padding: 8px 14px;
+      z-index: 10;
+    }
+
+    .game-title {
+      font-size: clamp(1.05rem, 2.2vw, 1.45rem);
+      font-weight: bold;
+      color: var(--accent-gold);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rule-pill {
+      background: #1e293b;
+      border: 2px solid var(--accent-green);
+      color: #dcfce7;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: clamp(0.85rem, 1.7vw, 1.05rem);
+      font-weight: bold;
+    }
+
+    .rule-pill span {
+      color: var(--accent-gold);
+      text-decoration: underline;
+    }
+
+    .hud-stats {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stat-box {
+      background: #0f172a;
+      border: 2px solid #64748b;
+      border-radius: 12px;
+      padding: 4px 12px;
+      font-size: clamp(0.95rem, 1.9vw, 1.2rem);
+      font-weight: bold;
+      min-width: 88px;
+      text-align: center;
+    }
+
+    .stat-box.score { border-color: var(--accent-green); color: #86efac; }
+    .stat-box.timer { border-color: var(--accent-gold); color: #fde047; }
+
+    .hud-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    button.btn {
+      font-family: var(--font-kids);
+      font-weight: bold;
+      border: 2px solid #0f172a;
+      border-radius: 12px;
+      padding: 6px 12px;
+      font-size: clamp(0.85rem, 1.6vw, 1rem);
+      cursor: pointer;
+      transition: transform 0.1s ease, background-color 0.15s ease;
+    }
+
+    button.btn:active {
+      transform: scale(0.95);
+    }
+
+    .btn-primary {
+      background: var(--accent-green);
+      color: #052e16;
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    select.duration-select {
+      font-family: var(--font-kids);
+      font-weight: bold;
+      font-size: clamp(0.85rem, 1.6vw, 0.95rem);
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 2px solid #64748b;
+      background: #1e293b;
+      color: #f8fafc;
+      cursor: pointer;
+    }
+
+    /* 3x2 Moon Crater Grid */
+    .crater-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: clamp(10px, 2vw, 22px);
+      max-width: 1120px;
+      width: 100%;
+      margin: 8px auto 0;
+      align-items: end;
+      padding-bottom: 6px;
+    }
+
+    @media (max-width: 640px) {
+      .crater-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+      }
+    }
+
+    .crater-slot {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      overflow: hidden;
+      border-radius: 20px;
+    }
+
+    /* Crater Rim & Dark Pit */
+    .crater-back {
+      position: absolute;
+      bottom: 8px;
+      width: 84%;
+      max-width: 260px;
+      height: 46px;
+      background: var(--crater-hole);
+      border-radius: 50%;
+      border: 4px solid var(--crater-rim);
+      box-shadow: inset 0 8px 14px rgba(0, 0, 0, 0.85);
+      z-index: 1;
+    }
+
+    .crater-front-lip {
+      position: absolute;
+      bottom: 2px;
+      width: 88%;
+      max-width: 272px;
+      height: 26px;
+      background: linear-gradient(180deg, #64748b 0%, #334155 100%);
+      border-radius: 0 0 50% 50% / 0 0 100% 100%;
+      border: 3px solid #1e293b;
+      border-top: none;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    /* Alien Pop-Up Container */
+    .alien-mover {
+      position: relative;
+      z-index: 2;
+      width: 82%;
+      max-width: 235px;
+      height: 86%;
+      max-height: 235px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      transform: translateY(108%);
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      cursor: pointer;
+      padding-bottom: 16px;
+    }
+
+    .crater-slot.up .alien-mover {
+      transform: translateY(0%);
+    }
+
+    .alien-mover.hit-correct {
+      animation: popGood 0.32s ease forwards;
+    }
+
+    .alien-mover.hit-wrong {
+      animation: shakeWrong 0.35s ease;
+    }
+
+    @keyframes popGood {
+      0% { transform: translateY(0%) scale(1); }
+      40% { transform: translateY(-10%) scale(1.12); }
+      100% { transform: translateY(110%) scale(0.85); }
+    }
+
+    @keyframes shakeWrong {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-12px); }
+      40% { transform: translateX(12px); }
+      60% { transform: translateX(-8px); }
+      80% { transform: translateX(8px); }
+    }
+
+    /* Alien SVG + Belly Badge */
+    .alien-body-wrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .alien-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45));
+    }
+
+    /* High-Contrast White Belly Plate for HFW */
+    .belly-badge {
+      position: absolute;
+      bottom: 16%;
+      width: 76%;
+      min-height: 36%;
+      background: var(--badge-bg);
+      border: 4px solid #111827;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 -3px 0 #cbd5e1;
+      padding: 2px 10px;
+      pointer-events: none;
+    }
+
+    .alien-mover.hit-wrong .belly-badge {
+      background: #fee2e2;
+      border-color: var(--accent-red);
+    }
+
+    .alien-mover.hit-correct .belly-badge {
+      background: #dcfce7;
+      border-color: var(--accent-green);
+    }
+
+    .hfw-word {
+      font-family: var(--font-kids);
+      font-size: clamp(1.75rem, 3.6vw, 2.75rem);
+      font-weight: bold;
+      color: var(--text-ink);
+      line-height: 1;
+      letter-spacing: 0.5px;
+    }
+
+    /* Floating +1 / Oops Feedback Popups */
+    .feedback-tag {
+      position: absolute;
+      top: 8%;
+      font-size: clamp(1.2rem, 2.5vw, 1.65rem);
+      font-weight: bold;
+      padding: 4px 12px;
+      border-radius: 999px;
+      z-index: 6;
+      pointer-events: none;
+      animation: floatUp 0.65s ease-out forwards;
+    }
+
+    .feedback-tag.good {
+      background: var(--accent-green);
+      color: #052e16;
+      border: 2px solid #ffffff;
+    }
+
+    .feedback-tag.bad {
+      background: var(--accent-red);
+      color: #ffffff;
+      border: 2px solid #111827;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(10px) scale(0.9); }
+      100% { opacity: 0; transform: translateY(-28px) scale(1.1); }
+    }
+
+    /* Start / End Overlay Modal inside Game Stage */
+    .overlay-screen {
+      position: absolute;
+      inset: 0;
+      background: rgba(13, 16, 33, 0.88);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      padding: 16px;
+    }
+
+    .overlay-screen.hidden {
+      display: none;
+    }
+
+    .modal-card {
+      background: #1e293b;
+      border: 4px solid var(--accent-gold);
+      border-radius: 24px;
+      max-width: 520px;
+      width: 100%;
+      padding: 24px 22px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-card h2 {
+      margin: 0 0 10px;
+      font-size: clamp(1.5rem, 3.2vw, 2.1rem);
+      color: var(--accent-gold);
+    }
+
+    .modal-card p {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      line-height: 1.45;
+      color: #f1f5f9;
+      margin: 0 0 16px;
+    }
+
+    .example-row {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .example-chip {
+      background: #ffffff;
+      color: #111827;
+      border: 3px solid #111827;
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+
+    .example-chip.yes { border-color: var(--accent-green); box-shadow: 0 0 0 3px rgba(34,197,94,0.35); }
+    .example-chip.no { border-color: var(--accent-red); opacity: 0.85; }
+
+    .btn-big-start {
+      font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+      padding: 12px 30px;
+      background: var(--accent-green);
+      color: #052e16;
+      border: 3px solid #ffffff;
+      border-radius: 16px;
+      cursor: pointer;
+      font-family: var(--font-kids);
+      font-weight: bold;
+      box-shadow: 0 6px 0 #15803d;
+    }
+
+    .btn-big-start:active {
+      transform: translateY(3px);
+      box-shadow: 0 3px 0 #15803d;
+    }
+
+    /* Below-the-Fold Teacher Guide & SEO Section */
+    .teacher-guide {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+      color: #e2e8f0;
+      line-height: 1.65;
+    }
+
+    .teacher-guide h2 {
+      color: var(--accent-gold);
+      font-size: 1.55rem;
+      border-bottom: 2px solid #334155;
+      padding-bottom: 6px;
+      margin-top: 28px;
+    }
+
+    .word-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .word-pill {
+      background: #1e293b;
+      border: 1px solid #475569;
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      color: #f8fafc;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SINGLE-SCREEN SMARTBOARD GAME STAGE -->
+  <main id="game-stage" aria-label="Space Town Unit 1 Capital Crater Whack Game">
+    <header class="hud-bar">
+      <h1 class="game-title">👾 Capital Crater Whack</h1>
+      <div class="rule-pill">Whack <span>CAPITAL</span> words!</div>
+      <div class="hud-stats">
+        <div class="stat-box score" id="score-display">Score: 0</div>
+        <div class="stat-box timer" id="timer-display">Time: 60s</div>
+      </div>
+      <div class="hud-controls">
+        <select id="duration-select" class="duration-select" aria-label="Round duration">
+          <option value="45">45s</option>
+          <option value="60" selected>60s</option>
+          <option value="90">90s</option>
+        </select>
+        <button id="mute-btn" class="btn btn-secondary" type="button" aria-label="Toggle sound">🔊 Sound</button>
+        <button id="restart-btn" class="btn btn-primary" type="button">↻ Restart</button>
+      </div>
+    </header>
+
+    <section class="crater-grid" id="crater-grid">
+      <!-- 6 Craters Generated by JS -->
+    </section>
+
+    <!-- START / GAME OVER MODAL -->
+    <div class="overlay-screen" id="overlay-screen">
+      <div class="modal-card" id="modal-card">
+        <h2 id="modal-title">Space Town Unit 1: Capital Whack!</h2>
+        <p id="modal-desc">
+          Space aliens are popping out of moon craters! Tap only the aliens wearing a word that starts with a <strong>CAPITAL</strong> letter (and always tap <strong>I</strong>!).
+        </p>
+        <div class="example-row" id="example-row">
+          <span class="example-chip yes">✅ Five</span>
+          <span class="example-chip yes">✅ I</span>
+          <span class="example-chip no">❌ five</span>
+          <span class="example-chip no">❌ blue</span>
+        </div>
+        <button class="btn-big-start" id="start-btn" type="button">🚀 Start Game</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- BELOW-THE-FOLD TEACHER NOTES & SEO CONTENT -->
+  <article class="teacher-guide">
+    <h2>How to Play Capital Crater Whack</h2>
+    <p>
+      <strong>Space Town Unit 1: Capital Crater Whack</strong> is designed for Primary 1 classroom smartboards, tablets, and desktop browsers. Friendly one-eyed and two-eyed space aliens pop out of six moon craters carrying high-frequency sight words on bright white belly badges.
+    </p>
+    <ul>
+      <li><strong>Tap Capitalized Words (+10 points):</strong> When an alien appears with a word beginning with an uppercase letter (such as <em>My, Is, Am, Five, Six, Old, This, A, Red, Blue</em>) or the pronoun <em>I</em>, tap the alien to score points and hear the word spoken aloud.</li>
+      <li><strong>Leave Lowercase Words Alone (-5 points):</strong> If the word starts with a lowercase letter (such as <em>my, is, am, five, six, old, this, a, red, blue</em>), do not whack the alien!</li>
+    </ul>
+
+    <h2>Space Town Unit 1 High-Frequency Words Included</h2>
+    <div class="word-pills">
+      <span class="word-pill">my / My</span>
+      <span class="word-pill">is / Is</span>
+      <span class="word-pill">I</span>
+      <span class="word-pill">am / Am</span>
+      <span class="word-pill">five / Five</span>
+      <span class="word-pill">six / Six</span>
+      <span class="word-pill">old / Old</span>
+      <span class="word-pill">this / This</span>
+      <span class="word-pill">a / A</span>
+      <span class="word-pill">red / Red</span>
+      <span class="word-pill">blue / Blue</span>
+    </div>
+
+    <h2>Classroom Smartboard Tips</h2>
+    <p>
+      Invite two or three students to the interactive whiteboard at a time, or let the whole class call out &ldquo;Whack!&rdquo; or &ldquo;Wait!&rdquo; before a selected student taps the screen. Use the timer dropdown in the top bar to switch between 45-second, 60-second, and 90-second rounds.
+    </p>
+
+    <a href="https://mrmike.hk/games.html" class="back-link">&larr; Back to Mr. Mike's ESL Games</a>
+  </article>
+
+  <script>
+    // Space Town Unit 1 High-Frequency Words
+    const UNIT_1_WORDS = [
+      { lower: "my",   upper: "My",   alwaysUpper: false },
+      { lower: "is",   upper: "Is",   alwaysUpper: false },
+      { lower: "I",    upper: "I",    alwaysUpper: true  },
+      { lower: "am",   upper: "Am",   alwaysUpper: false },
+      { lower: "five", upper: "Five", alwaysUpper: false },
+      { lower: "six",  upper: "Six",  alwaysUpper: false },
+      { lower: "old",  upper: "Old",  alwaysUpper: false },
+      { lower: "this", upper: "This", alwaysUpper: false },
+      { lower: "a",    upper: "A",    alwaysUpper: false },
+      { lower: "red",  upper: "Red",  alwaysUpper: false },
+      { lower: "blue", upper: "Blue", alwaysUpper: false }
+    ];
+
+    // Muted, ink-outlined alien palettes so the white belly badge stays high-contrast
+    const ALIEN_STYLES = [
+      { body: "#6ee7b7", dark: "#059669", eyes: 1 },
+      { body: "#93c5fd", dark: "#2563eb", eyes: 2 },
+      { body: "#c4b5fd", dark: "#7c3aed", eyes: 1 },
+      { body: "#fcd34d", dark: "#d97706", eyes: 2 },
+      { body: "#f9a8d4", dark: "#db2777", eyes: 1 },
+      { body: "#a5f3fc", dark: "#0891b2", eyes: 2 }
+    ];
+
+    const craterGrid = document.getElementById("crater-grid");
+    const scoreDisplay = document.getElementById("score-display");
+    const timerDisplay = document.getElementById("timer-display");
+    const durationSelect = document.getElementById("duration-select");
+    const muteBtn = document.getElementById("mute-btn");
+    const restartBtn = document.getElementById("restart-btn");
+    const overlayScreen = document.getElementById("overlay-screen");
+    const modalTitle = document.getElementById("modal-title");
+    const modalDesc = document.getElementById("modal-desc");
+    const exampleRow = document.getElementById("example-row");
+    const startBtn = document.getElementById("start-btn");
+
+    let score = 0;
+    let hits = 0;
+    let misses = 0;
+    let timeLeft = 60;
+    let isRunning = false;
+    let isMuted = false;
+    let timerInterval = null;
+    let spawnTimeout = null;
+    let audioCtx = null;
+
+    const craters = [];
+
+    function createAlienSVG(style) {
+      const eyesMarkup = style.eyes === 1
+        ? `
+          <circle cx="100" cy="54" r="21" fill="#ffffff" stroke="#111827" stroke-width="4"/>
+          <circle cx="100" cy="54" r="9" fill="#111827"/>
+          <circle cx="104" cy="50" r="3" fill="#ffffff"/>
+        `
+        : `
+          <circle cx="80" cy="56" r="15" fill="#ffffff" stroke="#111827" stroke-width="4"/>
+          <circle cx="80" cy="56" r="6.5" fill="#111827"/>
+          <circle cx="83" cy="53" r="2.2" fill="#ffffff"/>
+          <circle cx="120" cy="56" r="15" fill="#ffffff" stroke="#111827" stroke-width="4"/>
+          <circle cx="120" cy="56" r="6.5" fill="#111827"/>
+          <circle cx="123" cy="53" r="2.2" fill="#ffffff"/>
+        `;
+
+      return `
+        <svg class="alien-svg" viewBox="0 0 200 190" aria-hidden="true">
+          <!-- Antennae -->
+          <line x1="78" y1="24" x2="66" y2="8" stroke="#111827" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="65" cy="7" r="6" fill="${style.dark}" stroke="#111827" stroke-width="3"/>
+          <line x1="122" y1="24" x2="134" y2="8" stroke="#111827" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="135" cy="7" r="6" fill="${style.dark}" stroke="#111827" stroke-width="3"/>
+          <!-- Bulbous Alien Body -->
+          <path d="M 32 182 C 26 115, 42 22, 100 22 C 158 22, 174 115, 168 182 Z"
+                fill="${style.body}" stroke="#111827" stroke-width="5" stroke-linejoin="round"/>
+          <!-- Little Arms -->
+          <path d="M 33 115 Q 12 102 22 86" fill="none" stroke="#111827" stroke-width="5" stroke-linecap="round"/>
+          <path d="M 167 115 Q 188 102 178 86" fill="none" stroke="#111827" stroke-width="5" stroke-linecap="round"/>
+          <!-- Eyes -->
+          ${eyesMarkup}
+          <!-- Smile -->
+          <path d="M 86 82 Q 100 92 114 82" fill="none" stroke="#111827" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      `;
+    }
+
+    function buildCraters() {
+      craterGrid.innerHTML = "";
+      craters.length = 0;
+
+      for (let i = 0; i < 6; i++) {
+        const slot = document.createElement("div");
+        slot.className = "crater-slot";
+
+        const back = document.createElement("div");
+        back.className = "crater-back";
+
+        const mover = document.createElement("div");
+        mover.className = "alien-mover";
+
+        const wrap = document.createElement("div");
+        wrap.className = "alien-body-wrap";
+        wrap.innerHTML = createAlienSVG(ALIEN_STYLES[i % ALIEN_STYLES.length]);
+
+        const badge = document.createElement("div");
+        badge.className = "belly-badge";
+
+        const wordSpan = document.createElement("span");
+        wordSpan.className = "hfw-word";
+        wordSpan.textContent = "Five";
+
+        badge.appendChild(wordSpan);
+        wrap.appendChild(badge);
+        mover.appendChild(wrap);
+
+        const frontLip = document.createElement("div");
+        frontLip.className = "crater-front-lip";
+
+        slot.appendChild(back);
+        slot.appendChild(mover);
+        slot.appendChild(frontLip);
+        craterGrid.appendChild(slot);
+
+        const state = {
+          index: i,
+          slot,
+          mover,
+          wordSpan,
+          active: false,
+          locked: false,
+          isCapital: false,
+          currentWord: "",
+          hideTimeout: null
+        };
+
+        mover.addEventListener("pointerdown", (e) => {
+          e.preventDefault();
+          handleWhack(state);
+        });
+
+        craters.push(state);
+      }
+    }
+
+    // Web Audio Synthesizer for Classroom Sound Effects
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      }
+      if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+    }
+
+    function playSound(type) {
+      if (isMuted) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === "pop") {
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(240, now);
+        osc.frequency.exponentialRampToValueAtTime(460, now + 0.11);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } else if (type === "good") {
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.08);
+        osc.frequency.setValueAtTime(783.99, now + 0.16);
+        gain.gain.setValueAtTime(0.16, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        osc.start(now);
+        osc.stop(now + 0.28);
+      } else if (type === "bad") {
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(175, now);
+        osc.frequency.linearRampToValueAtTime(120, now + 0.22);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+        osc.start(now);
+        osc.stop(now + 0.24);
+      }
+    }
+
+    function speakWord(word) {
+      if (isMuted || !("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(word);
+      utter.lang = "en-US";
+      utter.rate = 0.92;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function showFeedbackTag(slot, text, isGood) {
+      const tag = document.createElement("div");
+      tag.className = `feedback-tag ${isGood ? "good" : "bad"}`;
+      tag.textContent = text;
+      slot.appendChild(tag);
+      setTimeout(() => tag.remove(), 650);
+    }
+
+    function pickWordForAlien() {
+      const entry = UNIT_1_WORDS[Math.floor(Math.random() * UNIT_1_WORDS.length)];
+      if (entry.alwaysUpper) {
+        return { text: entry.upper, isCapital: true };
+      }
+      // ~55% chance to spawn a capitalized target word so gameplay stays lively
+      const makeCapital = Math.random() < 0.55;
+      return {
+        text: makeCapital ? entry.upper : entry.lower,
+        isCapital: makeCapital
+      };
+    }
+
+    function popUpRandomAlien() {
+      if (!isRunning) return;
+
+      const available = craters.filter((c) => !c.active);
+      const activeCount = craters.length - available.length;
+
+      // Keep at most 3 aliens up at once for clear Primary 1 visual scanning
+      if (available.length > 0 && activeCount < 3) {
+        const chosen = available[Math.floor(Math.random() * available.length)];
+        const wordObj = pickWordForAlien();
+
+        chosen.active = true;
+        chosen.locked = false;
+        chosen.isCapital = wordObj.isCapital;
+        chosen.currentWord = wordObj.text;
+        chosen.wordSpan.textContent = wordObj.text;
+
+        chosen.mover.classList.remove("hit-correct", "hit-wrong");
+        chosen.slot.classList.add("up");
+        playSound("pop");
+
+        // Stay visible for 2.2s - 3.0s so young learners have time to read the word
+        const stayDuration = 2200 + Math.random() * 800;
+        chosen.hideTimeout = setTimeout(() => {
+          hideAlien(chosen);
+        }, stayDuration);
+      }
+
+      const nextDelay = 850 + Math.random() * 550;
+      spawnTimeout = setTimeout(popUpRandomAlien, nextDelay);
+    }
+
+    function hideAlien(crater) {
+      crater.slot.classList.remove("up");
+      setTimeout(() => {
+        crater.active = false;
+        crater.locked = false;
+        crater.mover.classList.remove("hit-correct", "hit-wrong");
+      }, 280);
+    }
+
+    function handleWhack(crater) {
+      if (!isRunning || !crater.active || crater.locked) return;
+
+      if (crater.isCapital) {
+        crater.locked = true;
+        clearTimeout(crater.hideTimeout);
+        score += 10;
+        hits += 1;
+        updateHUD();
+
+        crater.mover.classList.add("hit-correct");
+        playSound("good");
+        speakWord(crater.currentWord);
+        showFeedbackTag(crater.slot, `+10 ${crater.currentWord}!`, true);
+
+        setTimeout(() => hideAlien(crater), 280);
+      } else {
+        crater.locked = true;
+        score = Math.max(0, score - 5);
+        misses += 1;
+        updateHUD();
+
+        crater.mover.classList.remove("hit-wrong");
+        void crater.mover.offsetWidth;
+        crater.mover.classList.add("hit-wrong");
+        playSound("bad");
+        showFeedbackTag(crater.slot, "Lowercase!", false);
+
+        setTimeout(() => {
+          crater.locked = false;
+        }, 360);
+      }
+    }
+
+    function updateHUD() {
+      scoreDisplay.textContent = `Score: ${score}`;
+      timerDisplay.textContent = `Time: ${timeLeft}s`;
+    }
+
+    function startGame() {
+      initAudio();
+      clearInterval(timerInterval);
+      clearTimeout(spawnTimeout);
+
+      craters.forEach((c) => {
+        clearTimeout(c.hideTimeout);
+        c.slot.classList.remove("up");
+        c.active = false;
+        c.locked = false;
+        c.mover.classList.remove("hit-correct", "hit-wrong");
+      });
+
+      score = 0;
+      hits = 0;
+      misses = 0;
+      timeLeft = parseInt(durationSelect.value, 10) || 60;
+      isRunning = true;
+      updateHUD();
+
+      overlayScreen.classList.add("hidden");
+
+      popUpRandomAlien();
+      timerInterval = setInterval(() => {
+        timeLeft -= 1;
+        updateHUD();
+        if (timeLeft <= 0) {
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function endGame() {
+      isRunning = false;
+      clearInterval(timerInterval);
+      clearTimeout(spawnTimeout);
+
+      craters.forEach((c) => {
+        clearTimeout(c.hideTimeout);
+        hideAlien(c);
+      });
+
+      modalTitle.textContent = "🎉 Time's Up! Great Job!";
+      modalDesc.innerHTML = `Final Score: <strong>${score}</strong><br>Capital Words Whacked: <strong>${hits}</strong>`;
+      exampleRow.style.display = "none";
+      startBtn.textContent = "🔄 Play Again";
+      overlayScreen.classList.remove("hidden");
+    }
+
+    startBtn.addEventListener("click", startGame);
+    restartBtn.addEventListener("click", startGame);
+
+    muteBtn.addEventListener("click", () => {
+      isMuted = !isMuted;
+      muteBtn.textContent = isMuted ? "🔇 Muted" : "🔊 Sound";
+      if (isMuted && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    });
+
+    buildCraters();
+  </script>
+</body>
+</html>
