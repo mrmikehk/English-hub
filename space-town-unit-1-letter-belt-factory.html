@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Letter Belt Factory | Interactive Alphabetical Order &amp; Letter Recognition Game</title>
+  <meta name="description" content="Play Letter Belt Factory, a free interactive alphabetical order game for primary students. Practice uppercase and lowercase letters, spot missing letters in sequence, and master tricky letters like b, d, p, and q." />
+  <meta name="keywords" content="alphabetical order game, missing letter game, uppercase and lowercase letters, b d p q reversal game, phonics game for kids, primary literacy activity, letter recognition game, Mr. Mike" />
+  <meta name="author" content="Mr. Mike" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://mrmike.hk/letter-belt-factory/" />
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Letter Belt Factory | Interactive Alphabetical Order Game" />
+  <meta property="og:description" content="Find the missing letter on the moving factory conveyor belt! Practice alphabetical sequence, uppercase vs. lowercase letters, and commonly confused letters (b, d, p, q)." />
+  <meta property="og:url" content="https://mrmike.hk/letter-belt-factory/" />
+
+  <!-- Structured Data (JSON-LD) for GitHub Pages / Google Search Console -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": ["VideoGame", "LearningResource"],
+    "name": "Letter Belt Factory",
+    "url": "https://mrmike.hk/letter-belt-factory/",
+    "description": "Free interactive alphabetical order and letter recognition conveyor-belt game for primary students practicing uppercase and lowercase letters, b/d/p/q discrimination, and alphabetical sequencing.",
+    "genre": ["Educational Game", "Phonics & Literacy Game"],
+    "gamePlatform": "Web Browser",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Any",
+    "inLanguage": "en",
+    "learningResourceType": "Interactive Game",
+    "educationalLevel": "Primary / Elementary School",
+    "teaches": [
+      "Alphabetical Order",
+      "Uppercase and Lowercase Letter Recognition",
+      "Visual Discrimination of Confusable Letters (b, d, p, q)"
+    ],
+    "author": {
+      "@type": "Person",
+      "name": "Mr. Mike",
+      "url": "https://mrmike.hk/"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Mr. Mike",
+      "url": "https://mrmike.hk/"
+    },
+    "isAccessibleForFree": true,
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg-top: #1a2436;
+      --bg-bottom: #26354d;
+      --belt-dark: #2b303a;
+      --belt-mid: #3c4352;
+      --belt-highlight: #566075;
+      --hazard-yellow: #f6b93b;
+      --hazard-black: #1e2229;
+      --crate-wood: #f3c677;
+      --crate-border: #b87a28;
+      --crate-shadow: #8c5816;
+      --crate-text: #23180d;
+      --missing-bg: #1e2b3c;
+      --missing-border: #38bdf8;
+      --accent-green: #22c55e;
+      --accent-red: #ef4444;
+      --accent-amber: #f59e0b;
+      --card-bg: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+
+    /* Full-Screen Game Viewport (Locks gameplay cleanly to 100dvh) */
+    .game-viewport {
+      height: 100vh;
+      height: 100dvh;
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Subtle factory grid backdrop */
+    .game-viewport::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Compact Header & Controls */
+    header {
+      width: 100%;
+      max-width: 960px;
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.72);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 7px 14px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      font-weight: 900;
+      color: #1e1b18;
+      box-shadow: inset 0 -2px 0 rgba(0,0,0,0.25);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      letter-spacing: 0.3px;
+      color: #fbbf24;
+      text-shadow: 0 2px 0 rgba(0,0,0,0.4);
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .mode-switch {
+      display: inline-flex;
+      background: #0f172a;
+      padding: 3px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      gap: 3px;
+    }
+
+    .mode-btn {
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 5px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .mode-btn:hover {
+      color: #f8fafc;
+    }
+
+    .mode-btn.active {
+      background: #38bdf8;
+      color: #0f172a;
+      box-shadow: 0 2px 6px rgba(56, 189, 248, 0.35);
+    }
+
+    .icon-btn {
+      border: 1px solid rgba(255,255,255,0.16);
+      background: #1e293b;
+      color: #e2e8f0;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 5px 10px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.15s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .icon-btn:hover {
+      background: #334155;
+      color: #ffffff;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.95);
+    }
+
+    .stats-bar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .stat-pill {
+      background: #0f172a;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 9px;
+      padding: 4px 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .stat-pill span.val {
+      color: #38bdf8;
+      font-size: 0.92rem;
+    }
+
+    .stat-pill.streak span.val {
+      color: #fbbf24;
+    }
+
+    /* Main Factory Stage */
+    .stage {
+      width: 100%;
+      max-width: 960px;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+      gap: clamp(8px, 1.5vh, 14px);
+    }
+
+    .prompt-banner {
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 6px 18px;
+      border-radius: 999px;
+      font-size: clamp(0.88rem, 1.7vw, 1.05rem);
+      font-weight: 700;
+      color: #e2e8f0;
+      text-align: center;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .prompt-banner.feedback-good {
+      background: rgba(20, 83, 45, 0.9);
+      border-color: #22c55e;
+      color: #bbf7d0;
+    }
+
+    .prompt-banner.feedback-bad {
+      background: rgba(127, 29, 29, 0.9);
+      border-color: #ef4444;
+      color: #fecaca;
+    }
+
+    .prompt-banner.feedback-hint {
+      background: rgba(120, 53, 15, 0.9);
+      border-color: #f59e0b;
+      color: #fde68a;
+    }
+
+    /* Conveyor Belt Machine */
+    .conveyor-wrapper {
+      width: 100%;
+      position: relative;
+      padding: 8px 0 4px;
+    }
+
+    /* Crates Track */
+    .crates-track {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: clamp(8px, 1.8vw, 18px);
+      padding: 0 clamp(12px, 3.5vw, 38px);
+      position: relative;
+      z-index: 3;
+      transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+    }
+
+    .crates-track.slide-out {
+      transform: translateX(115%);
+      opacity: 0;
+    }
+
+    .crates-track.slide-in-start {
+      transform: translateX(-115%);
+      opacity: 0;
+      transition: none;
+    }
+
+    .crate {
+      aspect-ratio: 1 / 1;
+      max-height: clamp(84px, 16vh, 134px);
+      width: 100%;
+      margin: 0 auto;
+      background: linear-gradient(145deg, #fad38c 0%, var(--crate-wood) 55%, #e5b158 100%);
+      border: 4px solid var(--crate-border);
+      border-radius: 16px;
+      box-shadow:
+        0 8px 0 var(--crate-shadow),
+        0 12px 18px rgba(0, 0, 0, 0.4),
+        inset 0 3px 0 rgba(255, 255, 255, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      font-size: clamp(2.1rem, 4.8vw, 3.6rem);
+      font-weight: 700;
+      color: var(--crate-text);
+      transition: transform 0.2s ease, background 0.25s ease, border-color 0.25s ease;
+    }
+
+    /* Corner rivets on crates */
+    .crate::before,
+    .crate::after {
+      content: "";
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #9a631b;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.4);
+    }
+    .crate::before { top: 7px; left: 7px; }
+    .crate::after { bottom: 7px; right: 7px; }
+
+    /* Missing Crate Slot */
+    .crate.missing {
+      background: repeating-linear-gradient(
+        -45deg,
+        #1e293b,
+        #1e293b 10px,
+        #263449 10px,
+        #263449 20px
+      );
+      border: 4px dashed var(--missing-border);
+      box-shadow:
+        0 8px 0 #0f172a,
+        0 12px 18px rgba(0, 0, 0, 0.4),
+        inset 0 0 18px rgba(56, 189, 248, 0.25);
+      color: #38bdf8;
+      animation: pulseSlot 1.7s infinite ease-in-out;
+    }
+
+    .crate.missing::before,
+    .crate.missing::after {
+      background: #38bdf8;
+    }
+
+    @keyframes pulseSlot {
+      0%, 100% { transform: scale(1); border-color: #38bdf8; }
+      50% { transform: scale(1.03); border-color: #7dd3fc; }
+    }
+
+    .crate.solved {
+      background: linear-gradient(145deg, #86efac 0%, #4ade80 60%, #22c55e 100%);
+      border: 4px solid #15803d;
+      box-shadow:
+        0 8px 0 #14532d,
+        0 12px 18px rgba(0, 0, 0, 0.4),
+        inset 0 3px 0 rgba(255, 255, 255, 0.6);
+      color: #052e16;
+      animation: popIn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .crate.solved::before,
+    .crate.solved::after {
+      background: #15803d;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.75); }
+      70% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    /* Belt Structure */
+    .belt-assembly {
+      margin-top: -6px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .belt-surface {
+      height: 16px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--belt-mid) 0px,
+        var(--belt-mid) 26px,
+        var(--belt-highlight) 26px,
+        var(--belt-highlight) 32px
+      );
+      background-size: 64px 100%;
+      border-top: 3px solid #64748b;
+      border-bottom: 3px solid #1e293b;
+      border-radius: 999px;
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.45);
+    }
+
+    .belt-surface.rolling {
+      animation: beltMove 0.35s linear infinite;
+    }
+
+    @keyframes beltMove {
+      from { background-position: 0 0; }
+      to { background-position: 64px 0; }
+    }
+
+    .belt-chassis {
+      margin: 0 18px;
+      height: 34px;
+      background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+      border-left: 4px solid #475569;
+      border-right: 4px solid #475569;
+      border-bottom: 4px solid #0f172a;
+      border-radius: 0 0 18px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .belt-chassis::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: repeating-linear-gradient(
+        -45deg,
+        var(--hazard-yellow),
+        var(--hazard-yellow) 12px,
+        var(--hazard-black) 12px,
+        var(--hazard-black) 24px
+      );
+    }
+
+    .roller {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #94a3b8, #475569 65%, #1e293b 100%);
+      border: 2px solid #0f172a;
+      position: relative;
+      margin-bottom: 4px;
+    }
+
+    .roller::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 2px;
+      right: 2px;
+      height: 2px;
+      background: #0f172a;
+      transform: translateY(-50%);
+    }
+
+    .belt-surface.rolling + .belt-chassis .roller {
+      animation: spinRoller 0.45s linear infinite;
+    }
+
+    @keyframes spinRoller {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Compact Choice Deck at the Bottom */
+    .choices-panel {
+      width: 100%;
+      max-width: 480px;
+      z-index: 2;
+      background: rgba(15, 23, 42, 0.82);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 8px 14px 12px;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
+      backdrop-filter: blur(8px);
+    }
+
+    .choices-label {
+      text-align: center;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #94a3b8;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .choices-grid {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: clamp(10px, 2.2vw, 18px);
+    }
+
+    .choice-btn {
+      width: clamp(54px, 8.8vh, 74px);
+      height: clamp(54px, 8.8vh, 74px);
+      flex: 0 0 auto;
+      background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+      border: 3px solid #cbd5e1;
+      border-radius: 14px;
+      box-shadow: 0 5px 0 #64748b, 0 7px 12px rgba(0,0,0,0.3);
+      font-family: inherit;
+      font-size: clamp(1.7rem, 3.6vh, 2.35rem);
+      font-weight: 700;
+      color: #0f172a;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.15s ease;
+    }
+
+    .choice-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+      border-color: #38bdf8;
+    }
+
+    .choice-btn:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #64748b;
+    }
+
+    .choice-btn:disabled {
+      cursor: default;
+      opacity: 0.72;
+    }
+
+    .choice-btn.wrong {
+      background: linear-gradient(180deg, #fecaca 0%, #f87171 100%);
+      border-color: #dc2626;
+      box-shadow: 0 4px 0 #991b1b;
+      color: #450a0a;
+      animation: shake 0.34s ease;
+    }
+
+    .choice-btn.correct {
+      background: linear-gradient(180deg, #bbf7d0 0%, #4ade80 100%);
+      border-color: #16a34a;
+      box-shadow: 0 4px 0 #166534;
+      color: #052e16;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
+    }
+
+    /* SEO Instructions & Educational Guide Below the Fold */
+    .seo-content {
+      background: #f8fafc;
+      color: #1e293b;
+      border-top: 4px solid #38bdf8;
+      padding: 40px 18px 56px;
+    }
+
+    .seo-container {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .seo-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+
+    .seo-header h2 {
+      margin: 0;
+      font-size: clamp(1.35rem, 2.6vw, 1.85rem);
+      color: #0f172a;
+    }
+
+    .back-to-game-btn {
+      background: #0f172a;
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 8px 16px;
+      border-radius: 10px;
+      border: 2px solid #1e293b;
+      transition: background 0.15s ease;
+    }
+
+    .back-to-game-btn:hover {
+      background: #1e293b;
+      color: #7dd3fc;
+    }
+
+    .seo-lead {
+      font-size: 1.05rem;
+      line-height: 1.65;
+      color: #334155;
+      margin: 0 0 28px;
+    }
+
+    .seo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .seo-card {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 20px 22px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+
+    .seo-card h3 {
+      margin: 0 0 12px;
+      font-size: 1.15rem;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .seo-card p,
+    .seo-card li {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #475569;
+    }
+
+    .seo-card ol,
+    .seo-card ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .seo-card li + li {
+      margin-top: 8px;
+    }
+
+    .letter-badge {
+      display: inline-block;
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      color: #92400e;
+      font-weight: 700;
+      padding: 0 6px;
+      border-radius: 6px;
+    }
+
+    .seo-footer {
+      text-align: center;
+      font-size: 0.88rem;
+      color: #64748b;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 18px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 640px) {
+      header {
+        justify-content: center;
+        padding: 6px 10px;
+      }
+      .crate {
+        border-width: 3px;
+        border-radius: 12px;
+      }
+      .crates-track {
+        padding: 0 6px;
+        gap: 6px;
+      }
+      .belt-chassis {
+        margin: 0 8px;
+        height: 28px;
+      }
+      .roller {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Interactive Game Viewport (100dvh) -->
+  <section class="game-viewport" id="game-top" aria-label="Letter Belt Factory Interactive Game">
+    <header>
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">⚙</div>
+        <h1>Letter Belt Factory</h1>
+      </div>
+
+      <div class="controls-group">
+        <div class="mode-switch" role="group" aria-label="Letter case mode">
+          <button class="mode-btn active" data-mode="upper" title="Practice uppercase letters A-Z">ABC</button>
+          <button class="mode-btn" data-mode="lower" title="Practice lowercase letters a-z">abc</button>
+          <button class="mode-btn" data-mode="mixed" title="Switch between uppercase and lowercase rounds">Aa</button>
+        </div>
+
+        <button class="icon-btn" id="hint-btn" title="Get a helpful hint">💡 Hint</button>
+        <button class="icon-btn" id="sound-btn" title="Toggle sound effects" aria-pressed="true">🔊</button>
+        <a class="icon-btn" href="#how-to-play" title="Jump to instructions and teaching guide">📖 Instructions</a>
+      </div>
+
+      <div class="stats-bar">
+        <div class="stat-pill">Score: <span class="val" id="score-val">0</span></div>
+        <div class="stat-pill streak">Streak: <span class="val" id="streak-val">0</span> 🔥</div>
+      </div>
+    </header>
+
+    <div class="stage">
+      <div class="prompt-banner" id="prompt-banner" role="status" aria-live="polite">
+        Find the missing letter in alphabetical order!
+      </div>
+
+      <div class="conveyor-wrapper">
+        <div class="crates-track" id="crates-track"></div>
+
+        <div class="belt-assembly">
+          <div class="belt-surface" id="belt-surface"></div>
+          <div class="belt-chassis">
+            <div class="roller"></div>
+            <div class="roller"></div>
+            <div class="roller"></div>
+            <div class="roller"></div>
+            <div class="roller"></div>
+            <div class="roller"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="choices-panel">
+        <div class="choices-label" id="choices-label">Pick the missing letter</div>
+        <div class="choices-grid" id="choices-grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEO-Friendly Game Description & Instructions -->
+  <main class="seo-content" id="how-to-play">
+    <article class="seo-container">
+      <div class="seo-header">
+        <h2>About Letter Belt Factory &amp; How to Play</h2>
+        <a class="back-to-game-btn" href="#game-top">↑ Back to Game</a>
+      </div>
+
+      <p class="seo-lead">
+        <strong>Letter Belt Factory</strong> is a free interactive alphabet and letter-recognition game designed for primary school learners, ESL/EAL students, and early readers. Five wooden crates travel down a moving factory conveyor belt in consecutive alphabetical order with one crate missing its label. Students examine the surrounding letters, distinguish between uppercase and lowercase forms, and select the matching letter tile to complete the sequence.
+      </p>
+
+      <div class="seo-grid">
+        <section class="seo-card">
+          <h3>🕹️ How to Play</h3>
+          <ol>
+            <li><strong>Choose a Letter Mode:</strong> Select <strong>ABC</strong> for uppercase letters, <strong>abc</strong> for lowercase letters, or <strong>Aa</strong> for mixed rounds at the top of the screen.</li>
+            <li><strong>Read the Sequence:</strong> Look at the 5 crates on the conveyor belt and find the dashed <strong>?</strong> crate.</li>
+            <li><strong>Pick the Missing Letter:</strong> Click or tap the correct letter from the 4 tiles at the bottom (or press keys <strong>1–4</strong> or type the letter directly on your keyboard).</li>
+            <li><strong>Use Hints When Needed:</strong> Click <strong>💡 Hint</strong> for an immediate clue showing the exact letter that comes before or after the missing crate.</li>
+          </ol>
+        </section>
+
+        <section class="seo-card">
+          <h3>🎯 Literacy Skills Practiced</h3>
+          <ul>
+            <li><strong>Alphabetical Sequencing:</strong> Builds fluency identifying what letter comes immediately before or after any target letter across <strong>A–Z</strong> and <strong>a–z</strong>.</li>
+            <li><strong>Confusable Letter Discrimination:</strong> Targets frequently reversed or mixed-up lowercase letters including <span class="letter-badge">b</span>, <span class="letter-badge">d</span>, <span class="letter-badge">p</span>, and <span class="letter-badge">q</span>, as well as <span class="letter-badge">m / n</span> and <span class="letter-badge">u / v</span>.</li>
+            <li><strong>Case Awareness Traps:</strong> Challenges players with opposite-case look-alikes such as <span class="letter-badge">C / c</span>, <span class="letter-badge">S / s</span>, <span class="letter-badge">W / w</span>, <span class="letter-badge">O / o</span>, and <span class="letter-badge">P / p</span>.</li>
+          </ul>
+        </section>
+
+        <section class="seo-card">
+          <h3>🏫 Classroom &amp; Home Practice Tips</h3>
+          <ul>
+            <li><strong>Smartboard Warm-Ups:</strong> Project the game full-screen for a 3-minute whole-class phonics warm-up, asking students to name both the letter and its sound before tapping.</li>
+            <li><strong>Targeted Case Mastery:</strong> Start beginners on <strong>ABC</strong> mode, progress to <strong>abc</strong> mode to reinforce <span class="letter-badge">b/d/p/q</span> orientation, and finish with <strong>Aa</strong> mixed mode.</li>
+            <li><strong>Tablet &amp; Desktop Ready:</strong> Works smoothly on iPads, Chromebooks, classroom interactive whiteboards, and desktop browsers with no installation or login required.</li>
+          </ul>
+        </section>
+      </div>
+
+      <footer class="seo-footer">
+        Created by Mr. Mike for primary English and phonics practice on <strong>mrmike.hk</strong>.
+      </footer>
+    </article>
+  </main>
+
+  <script>
+    (() => {
+      const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+      // Frequently confused letters (especially b, d, p, q)
+      const CONFUSABLES = {
+        b: ["d", "p", "q"],
+        d: ["b", "p", "q"],
+        p: ["q", "b", "d"],
+        q: ["p", "d", "b"],
+        m: ["n", "w", "u"],
+        n: ["m", "u", "h"],
+        u: ["v", "n", "w"],
+        v: ["u", "w", "y"],
+        w: ["v", "m", "u"],
+        i: ["j", "l", "t"],
+        j: ["i", "l", "g"],
+        l: ["i", "j", "t"],
+        c: ["e", "o", "s"],
+        e: ["c", "a", "o"],
+        g: ["q", "j", "p"],
+        h: ["n", "b", "k"],
+        k: ["h", "x", "y"],
+        s: ["z", "c", "x"],
+        z: ["s", "x", "n"],
+        B: ["D", "P", "R"],
+        D: ["B", "O", "P"],
+        P: ["R", "B", "D"],
+        Q: ["O", "G", "D"],
+        M: ["N", "W", "H"],
+        N: ["M", "W", "Z"],
+        E: ["F", "B", "L"],
+        F: ["E", "P", "T"],
+        C: ["G", "O", "Q"],
+        G: ["C", "Q", "O"],
+        U: ["V", "W", "O"],
+        V: ["U", "W", "Y"],
+        W: ["M", "V", "U"]
+      };
+
+      // Letters whose uppercase and lowercase shapes look very similar
+      const CASE_TRAPS = new Set(["C", "S", "W", "O", "V", "X", "Z", "K", "P", "U"]);
+
+      // High-value target letters to emphasize in rounds
+      const PRIORITY_TARGETS = ["B", "D", "P", "Q", "C", "S", "W", "M", "N", "U", "V", "G", "J", "L"];
+
+      // State
+      let mode = "upper"; // 'upper' | 'lower' | 'mixed'
+      let score = 0;
+      let streak = 0;
+      let soundEnabled = true;
+      let isTransitioning = false;
+      let firstTry = true;
+      let currentRound = null;
+
+      // DOM elements
+      const cratesTrack = document.getElementById("crates-track");
+      const beltSurface = document.getElementById("belt-surface");
+      const choicesGrid = document.getElementById("choices-grid");
+      const choicesLabel = document.getElementById("choices-label");
+      const promptBanner = document.getElementById("prompt-banner");
+      const scoreVal = document.getElementById("score-val");
+      const streakVal = document.getElementById("streak-val");
+      const soundBtn = document.getElementById("sound-btn");
+      const hintBtn = document.getElementById("hint-btn");
+      const modeBtns = document.querySelectorAll(".mode-btn");
+
+      // Web Audio API Synthesizer for crisp classroom sound effects
+      let audioCtx = null;
+      function getAudioCtx() {
+        if (!audioCtx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) audioCtx = new AudioContext();
+        }
+        if (audioCtx && audioCtx.state === "suspended") {
+          audioCtx.resume();
+        }
+        return audioCtx;
+      }
+
+      function playSound(type) {
+        if (!soundEnabled) return;
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (type === "correct") {
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+          osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.36);
+          osc.start(now);
+          osc.stop(now + 0.36);
+        } else if (type === "wrong") {
+          osc.type = "sawtooth";
+          osc.frequency.setValueAtTime(190, now);
+          osc.frequency.linearRampToValueAtTime(135, now + 0.22);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+          osc.start(now);
+          osc.stop(now + 0.24);
+        } else if (type === "belt") {
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(110, now);
+          osc.frequency.linearRampToValueAtTime(145, now + 0.28);
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        }
+      }
+
+      function setBanner(text, type = "neutral") {
+        promptBanner.textContent = text;
+        promptBanner.className = "prompt-banner";
+        if (type === "good") promptBanner.classList.add("feedback-good");
+        if (type === "bad") promptBanner.classList.add("feedback-bad");
+        if (type === "hint") promptBanner.classList.add("feedback-hint");
+      }
+
+      function shuffle(arr) {
+        const copy = [...arr];
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+
+      function formatCase(letter, roundCase) {
+        return roundCase === "upper" ? letter.toUpperCase() : letter.toLowerCase();
+      }
+
+      function generateRound() {
+        const roundCase =
+          mode === "mixed" ? (Math.random() < 0.5 ? "upper" : "lower") : mode;
+
+        // Pick a 5-letter window (startIndex 0..21)
+        // 70% of the time, ensure one of our priority confusable/case-trap letters is the missing target
+        let startIdx = Math.floor(Math.random() * (ALPHABET.length - 4));
+        let missingOffset = Math.floor(Math.random() * 5);
+
+        if (Math.random() < 0.72) {
+          const targetBase =
+            PRIORITY_TARGETS[Math.floor(Math.random() * PRIORITY_TARGETS.length)];
+          const targetIdx = ALPHABET.indexOf(targetBase);
+          const minStart = Math.max(0, targetIdx - 4);
+          const maxStart = Math.min(ALPHABET.length - 5, targetIdx);
+          startIdx = minStart + Math.floor(Math.random() * (maxStart - minStart + 1));
+          missingOffset = targetIdx - startIdx;
+        }
+
+        const rawSequence = ALPHABET.slice(startIdx, startIdx + 5);
+        const sequence = rawSequence.map((ch) => formatCase(ch, roundCase));
+        const correctLetter = sequence[missingOffset];
+        const baseUpper = rawSequence[missingOffset];
+
+        // Build 3 smart distractors
+        const distractors = new Set();
+
+        // 1. Opposite-case trap (especially in UPPERCASE mode for w, s, c, etc., or when available)
+        const oppositeLetter =
+          roundCase === "upper"
+            ? correctLetter.toLowerCase()
+            : correctLetter.toUpperCase();
+
+        if (roundCase === "upper") {
+          // Prioritize classic look-alike lowercase distractors (w, s, c, o, v, x, z, k, p, u) or any lowercase twin
+          if (CASE_TRAPS.has(baseUpper) || Math.random() < 0.7) {
+            distractors.add(oppositeLetter);
+          }
+        } else if (Math.random() < 0.45) {
+          distractors.add(oppositeLetter);
+        }
+
+        // 2. Visually confusable letters in the SAME case (e.g., b, d, p, q)
+        const confusablePool = CONFUSABLES[correctLetter] || [];
+        for (const c of shuffle(confusablePool)) {
+          if (distractors.size >= 3) break;
+          if (c !== correctLetter) distractors.add(c);
+        }
+
+        // 3. Adjacent neighbor in the sequence (e.g., off-by-one trap)
+        const neighborOffsets = shuffle([-1, 1, -2, 2]);
+        for (const off of neighborOffsets) {
+          if (distractors.size >= 3) break;
+          const nIdx = startIdx + missingOffset + off;
+          if (nIdx >= 0 && nIdx < ALPHABET.length) {
+            const candidate = formatCase(ALPHABET[nIdx], roundCase);
+            if (candidate !== correctLetter) distractors.add(candidate);
+          }
+        }
+
+        // 4. Fill any remaining slot with random same-case letters
+        for (const letter of shuffle(ALPHABET)) {
+          if (distractors.size >= 3) break;
+          const candidate = formatCase(letter, roundCase);
+          if (candidate !== correctLetter) distractors.add(candidate);
+        }
+
+        const choices = shuffle([correctLetter, ...Array.from(distractors).slice(0, 3)]);
+
+        return {
+          roundCase,
+          sequence,
+          missingOffset,
+          correctLetter,
+          choices
+        };
+      }
+
+      function renderRound(animateBelt = true) {
+        currentRound = generateRound();
+        firstTry = true;
+        isTransitioning = false;
+
+        const caseLabel =
+          currentRound.roundCase === "upper" ? "UPPERCASE" : "lowercase";
+        setBanner(`Find the missing ${caseLabel} letter!`);
+        choicesLabel.textContent = `Pick the missing ${caseLabel} letter`;
+
+        const buildCrates = () => {
+          cratesTrack.innerHTML = "";
+          currentRound.sequence.forEach((letter, idx) => {
+            const crate = document.createElement("div");
+            crate.className = "crate";
+            if (idx === currentRound.missingOffset) {
+              crate.classList.add("missing");
+              crate.id = "missing-crate";
+              crate.textContent = "?";
+              crate.setAttribute("aria-label", "Missing letter crate");
+            } else {
+              crate.textContent = letter;
+            }
+            cratesTrack.appendChild(crate);
+          });
+        };
+
+        const buildChoices = () => {
+          choicesGrid.innerHTML = "";
+          currentRound.choices.forEach((choice) => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn";
+            btn.textContent = choice;
+            btn.setAttribute("aria-label", `Letter ${choice}`);
+            btn.addEventListener("click", () => handleChoice(btn, choice));
+            choicesGrid.appendChild(btn);
+          });
+        };
+
+        if (animateBelt) {
+          cratesTrack.classList.add("slide-in-start");
+          buildCrates();
+          buildChoices();
+          beltSurface.classList.add("rolling");
+          playSound("belt");
+
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              cratesTrack.classList.remove("slide-in-start");
+              setTimeout(() => {
+                beltSurface.classList.remove("rolling");
+              }, 420);
+            });
+          });
+        } else {
+          buildCrates();
+          buildChoices();
+        }
+      }
+
+      function showHint() {
+        if (isTransitioning || !currentRound) return;
+        const { sequence, missingOffset, roundCase } = currentRound;
+        const caseLabel = roundCase === "upper" ? "UPPERCASE" : "lowercase";
+        if (missingOffset > 0) {
+          const prev = sequence[missingOffset - 1];
+          setBanner(`Hint: Look for the ${caseLabel} letter right after "${prev}".`, "hint");
+        } else {
+          const next = sequence[missingOffset + 1];
+          setBanner(`Hint: Look for the ${caseLabel} letter right before "${next}".`, "hint");
+        }
+      }
+
+      function handleChoice(btn, chosen) {
+        if (isTransitioning || !currentRound) return;
+
+        const { correctLetter, roundCase } = currentRound;
+
+        if (chosen === correctLetter) {
+          isTransitioning = true;
+          btn.classList.add("correct");
+          playSound("correct");
+
+          // Disable all buttons
+          document.querySelectorAll(".choice-btn").forEach((b) => (b.disabled = true));
+
+          // Reveal missing crate
+          const missingCrate = document.getElementById("missing-crate");
+          if (missingCrate) {
+            missingCrate.classList.remove("missing");
+            missingCrate.classList.add("solved");
+            missingCrate.textContent = correctLetter;
+          }
+
+          if (firstTry) {
+            score += 10;
+            streak += 1;
+          } else {
+            score += 5;
+            streak = 1;
+          }
+          scoreVal.textContent = score;
+          streakVal.textContent = streak;
+
+          setBanner(`Great job! "${correctLetter}" completes the line!`, "good");
+
+          // Roll off old crates and bring in next batch
+          setTimeout(() => {
+            beltSurface.classList.add("rolling");
+            cratesTrack.classList.add("slide-out");
+            playSound("belt");
+
+            setTimeout(() => {
+              cratesTrack.classList.remove("slide-out");
+              renderRound(true);
+            }, 430);
+          }, 950);
+        } else {
+          firstTry = false;
+          streak = 0;
+          streakVal.textContent = streak;
+          btn.classList.add("wrong");
+          btn.disabled = true;
+          playSound("wrong");
+
+          // Helpful tailored feedback for case errors vs confusable letters
+          if (chosen.toLowerCase() === correctLetter.toLowerCase()) {
+            const needed = roundCase === "upper" ? "UPPERCASE" : "lowercase";
+            setBanner(`Close! "${chosen}" is the right letter, but we need ${needed}!`, "bad");
+          } else if (
+            ["b", "d", "p", "q"].includes(chosen) &&
+            ["b", "d", "p", "q"].includes(correctLetter)
+          ) {
+            setBanner(`Watch carefully! "${chosen}" and "${correctLetter}" face different ways.`, "bad");
+          } else {
+            setBanner(`Not quite! Check the letters before and after the "?" crate.`, "bad");
+          }
+        }
+      }
+
+      // Mode switching
+      modeBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          modeBtns.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          mode = btn.dataset.mode;
+          renderRound(true);
+        });
+      });
+
+      // Hint button
+      hintBtn.addEventListener("click", showHint);
+
+      // Sound toggle
+      soundBtn.addEventListener("click", () => {
+        soundEnabled = !soundEnabled;
+        soundBtn.textContent = soundEnabled ? "🔊" : "🔇";
+        soundBtn.setAttribute("aria-pressed", String(soundEnabled));
+      });
+
+      // Keyboard accessibility (keys 1-4 or typing the exact case letter)
+      window.addEventListener("keydown", (e) => {
+        if (isTransitioning || !currentRound) return;
+        const buttons = Array.from(document.querySelectorAll(".choice-btn"));
+        if (["1", "2", "3", "4"].includes(e.key)) {
+          const idx = Number(e.key) - 1;
+          if (buttons[idx] && !buttons[idx].disabled) {
+            buttons[idx].click();
+          }
+        } else if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
+          const match = buttons.find((b) => b.textContent === e.key && !b.disabled);
+          if (match) match.click();
+        }
+      });
+
+      // Initial load
+      renderRound(false);
+    })();
+  </script>
+</body>
+</html>
